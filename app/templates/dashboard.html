@@ -6,7 +6,11 @@
 <section class="hero" aria-labelledby="dashboard-title">
   <p class="eyebrow">personal-lms</p>
   <h1 id="dashboard-title">Python backend и AI обучение</h1>
-  <p class="hero-copy">Скелет Phase 1 готов</p>
+  <p class="hero-copy">Скелет Phase 2 готов: авторизация и пользовательская основа подключены.</p>
+  <p class="hero-copy">Вы вошли как <strong>{{ username }}</strong></p>
+  <form method="post" action="/logout" class="logout-form">
+    <button type="submit" class="btn">Выйти</button>
+  </form>
 </section>
 
 <section class="card-grid" aria-label="Сводка панели">
@@ -14,6 +18,9 @@
   <article class="status-card">
     <h2>{{ card.title }}</h2>
     <p>{{ card.body }}</p>
+    {% if card.href %}
+    <a class="card-link" href="{{ card.href }}">{{ card.link_label }}</a>
+    {% endif %}
   </article>
   {% endfor %}
 </section>

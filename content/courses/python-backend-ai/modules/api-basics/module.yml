@@ -1,0 +1,5 @@
+slug: api-basics
+title: "Модуль 2: Базовые API-паттерны"
+description: Навигация по урокам, страницы контента и подготовка к следующим фазам.
+lessons:
+  - lesson-navigation

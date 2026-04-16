@@ -19,6 +19,9 @@ dependencies = [
     "pwdlib[argon2]",
     "pytest",
     "httpx",
+    "itsdangerous",
+    "pyyaml",
+    "markdown",
 ]
 
 [tool.setuptools.packages.find]

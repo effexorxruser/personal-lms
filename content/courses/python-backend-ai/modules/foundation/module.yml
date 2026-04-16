@@ -1,0 +1,6 @@
+slug: foundation
+title: "Модуль 1: Основа backend"
+description: Базовые принципы backend-приложения и архитектурный каркас.
+lessons:
+  - foundation-intro
+  - backend-structure

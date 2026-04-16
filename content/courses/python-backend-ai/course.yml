@@ -1,5 +1,8 @@
 slug: python-backend-ai
 title: Python Backend + AI Learning
-description: A focused learning track for Python backend engineering and AI application foundations.
-version: 0.1.0
+description: Практический трек по Python backend и базовой AI-интеграции.
+version: 0.3.0
 estimated_weeks: 12
+modules:
+  - foundation
+  - api-basics

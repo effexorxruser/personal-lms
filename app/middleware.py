@@ -1,6 +1,14 @@
 from fastapi import FastAPI
+from starlette.middleware.sessions import SessionMiddleware
+
+from app.config import get_settings
 
 
 def configure_middleware(app: FastAPI) -> None:
-    # Phase 1 has no custom middleware yet; keep the hook explicit for later phases.
-    return None
+    settings = get_settings()
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key=settings.session_secret_key,
+        same_site="lax",
+        https_only=False,
+    )

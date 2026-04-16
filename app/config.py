@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     app_name: str = "personal-lms"
     debug: bool = False
     database_url: str = "sqlite:///./instance/personal_lms.db"
+    session_secret_key: str = "change-me-in-env"
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Урок | {{ lesson.title }}{% endblock %}
+
+{% block content %}
+<section class="hero" aria-labelledby="lesson-title">
+  <p class="eyebrow">Урок</p>
+  <h1 id="lesson-title">{{ lesson.title }}</h1>
+  <p class="hero-copy">{{ lesson.summary }}</p>
+  <p class="meta-line">Модуль: {{ lesson.module_slug }}</p>
+  {% if lesson.task_slug %}
+  <p class="hero-copy">Связанная задача: <code>{{ lesson.task_slug }}</code></p>
+  {% endif %}
+</section>
+
+<section class="lesson-layout" aria-label="Детали урока">
+  <article class="lesson-card">
+    <h2>Цели</h2>
+    <ul>
+      {% for objective in lesson.objectives %}
+      <li>{{ objective }}</li>
+      {% endfor %}
+    </ul>
+  </article>
+
+  <article class="lesson-card">
+    <h2>Чеклист</h2>
+    <ul>
+      {% for item in lesson.checklist %}
+      <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+
+<article class="markdown-body">
+  {{ lesson.body_html | safe }}
+</article>
+
+<nav class="lesson-nav" aria-label="Навигация по урокам">
+  {% if prev_lesson_key %}
+  <a class="btn" href="/lessons/{{ prev_lesson_key }}">← Предыдущий урок</a>
+  {% endif %}
+  {% if next_lesson_key %}
+  <a class="btn" href="/lessons/{{ next_lesson_key }}">Следующий урок →</a>
+  {% endif %}
+</nav>
+{% endblock %}

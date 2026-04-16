@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Курс | {{ course.title }}{% endblock %}
+
+{% block content %}
+<section class="hero" aria-labelledby="course-title">
+  <p class="eyebrow">Карта курса</p>
+  <h1 id="course-title">{{ course.title }}</h1>
+  <p class="hero-copy">{{ course.description }}</p>
+  <p class="meta-line">Версия: {{ course.version }} · Оценка: {{ course.estimated_weeks }} нед.</p>
+  {% if next_step_key %}
+  <p class="hero-copy">Текущий следующий шаг: <a class="inline-link" href="/lessons/{{ next_step_key }}">открыть урок</a></p>
+  {% else %}
+  <p class="hero-copy">Текущий следующий шаг: будет доступен после добавления уроков.</p>
+  {% endif %}
+</section>
+
+<section class="module-list" aria-label="Список модулей">
+  {% for module in course.modules %}
+  <article class="module-card">
+    <h2>{{ loop.index }}. {{ module.title }}</h2>
+    <p>{{ module.description }}</p>
+    <ol class="lesson-list">
+      {% for lesson in module.lessons %}
+      <li>
+        <a class="inline-link" href="/lessons/{{ lesson.key }}">{{ lesson.title }}</a>
+        <span class="status-chip">Доступность: скоро unlock-логика</span>
+      </li>
+      {% endfor %}
+    </ol>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

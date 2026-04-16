@@ -2,7 +2,7 @@
 
 Self-hosted LMS-платформа для обучения Python backend и AI application foundations.
 
-Phase 1 фиксирует только основу приложения: FastAPI bootstrap, Jinja2 templates, SQLite/SQLModel wiring, static assets, placeholder dashboard и smoke tests.
+Phase 3 добавляет file-based загрузку контента: карта курса и страницы уроков из `content/`.
 
 ## Стек
 
@@ -29,14 +29,13 @@ python3 -m pip install -U pip
 python3 -m pip install -e .
 ```
 
-## Запуск приложения
+## Конфигурация
+
+Скопируйте `.env.example` в `.env` и задайте `PERSONAL_LMS_SESSION_SECRET_KEY`.
 
 ```bash
-source .venv/bin/activate
-uvicorn app.main:app --reload
+cp .env.example .env
 ```
-
-Откройте http://127.0.0.1:8000/dashboard.
 
 ## Инициализация базы данных
 
@@ -45,19 +44,36 @@ source .venv/bin/activate
 python3 scripts/init_db.py
 ```
 
-Команда создает SQLite database в `instance/` через текущую SQLModel metadata. В Phase 1 модели базы данных не добавляются.
+## Создание администратора
+
+```bash
+source .venv/bin/activate
+python3 scripts/create_user.py
+```
+
+## Сброс пароля
+
+```bash
+source .venv/bin/activate
+python3 scripts/reset_password.py
+```
+
+## Запуск приложения
+
+```bash
+source .venv/bin/activate
+uvicorn app.main:app --reload
+```
+
+Основные страницы:
+- `GET /login` — форма входа
+- `GET /dashboard` — защищенная панель
+- `GET /courses/python-backend-ai` — карта курса
+- `GET /lessons/{lesson_key}` — страница урока
 
 ## Запуск тестов
 
 ```bash
 source .venv/bin/activate
 pytest
-```
-
-## Конфигурация
-
-Скопируйте `.env.example` в `.env`, если нужны локальные переопределения.
-
-```bash
-cp .env.example .env
 ```
