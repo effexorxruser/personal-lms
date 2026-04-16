@@ -3,8 +3,8 @@
   var root = document.documentElement;
 
   function applyTheme(themeName) {
-    var allowed = ["default", "wired"];
-    var normalized = allowed.indexOf(themeName) >= 0 ? themeName : "default";
+    var allowed = ["dark", "light"];
+    var normalized = allowed.indexOf(themeName) >= 0 ? themeName : "dark";
     root.setAttribute("data-theme", normalized);
     localStorage.setItem(storageKey, normalized);
 
@@ -16,7 +16,7 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     var switcher = document.getElementById("theme-switcher");
-    var savedTheme = localStorage.getItem(storageKey) || root.getAttribute("data-theme") || "default";
+    var savedTheme = localStorage.getItem(storageKey) || root.getAttribute("data-theme") || "dark";
     applyTheme(savedTheme);
 
     if (switcher) {

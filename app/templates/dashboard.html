@@ -3,23 +3,51 @@
 {% block title %}Панель | personal-lms{% endblock %}
 
 {% block content %}
-<section class="hero hero--compact" aria-labelledby="dashboard-title">
-  <div class="hero__visual" aria-hidden="true"></div>
-  <div class="hero__content">
-    <p class="eyebrow">Панель обучения</p>
-    <h1 id="dashboard-title">Python backend и AI обучение</h1>
-    <p class="hero-copy">Скелет Phase 2 готов: авторизация и пользовательская основа подключены.</p>
-    <p class="hero-copy">Вы вошли как <strong>{{ username }}</strong></p>
-    <div class="hero-actions">
-      <a href="{{ continue_href }}" class="btn btn--primary">Продолжить обучение</a>
+{% set ns = namespace(course=None, next=None, progress=None) %}
+{% for card in cards %}
+  {% if card.title == 'Текущий курс' %}{% set ns.course = card %}{% endif %}
+  {% if card.title == 'Следующий шаг' %}{% set ns.next = card %}{% endif %}
+  {% if card.title == 'Прогресс недели' %}{% set ns.progress = card %}{% endif %}
+{% endfor %}
+
+<section class="hero hero--compact hero--node bg-dashboard" data-hero-bg="dashboard" aria-labelledby="dashboard-title">
+  <div class="hero__visual overlay-dark" aria-hidden="true"></div>
+  <div class="hero__ghost hero__ghost--lain" aria-hidden="true"></div>
+  <div class="hero__content hero__content--node">
+    <div class="node-main">
+      <p class="eyebrow">Узел обучения</p>
+      <h1 id="dashboard-title">Личный центр обучения</h1>
+      <p class="hero-copy">Рабочий режим активен. Следующий шаг, состояние курса и прогресс доступны сразу.</p>
+      <p class="hero-copy">Вы вошли как <strong>{{ username }}</strong>.</p>
+      <div class="hero-actions">
+        <a href="{{ continue_href }}" class="btn btn--primary">Продолжить обучение</a>
+      </div>
     </div>
+
+    <aside class="ui-card node-panel" aria-label="Текущее состояние">
+      <p class="node-panel__title">Текущее состояние</p>
+      <dl class="node-grid">
+        <div>
+          <dt>Курс</dt>
+          <dd>{{ ns.course.body if ns.course else 'Не задано' }}</dd>
+        </div>
+        <div>
+          <dt>Следующий шаг</dt>
+          <dd>{{ ns.next.body if ns.next else 'Не задано' }}</dd>
+        </div>
+        <div>
+          <dt>Прогресс</dt>
+          <dd>{{ ns.progress.body if ns.progress else '0%' }}</dd>
+        </div>
+      </dl>
+    </aside>
   </div>
 </section>
 
-<section class="card-grid" aria-label="Сводка панели">
+<section class="card-grid card-grid--ops" aria-label="Сводка панели">
   {% for card in cards %}
-  <article class="ui-card status-card {% if card.title == 'Следующий шаг' %}status-card--focus{% endif %}">
-    <h2>{{ card.title }}</h2>
+  <article class="ui-card status-card {% if card.title == 'Следующий шаг' %}status-card--focus{% elif card.title == 'Текущий курс' %}status-card--course{% else %}status-card--progress{% endif %}">
+    <p class="status-kicker">{{ card.title }}</p>
     <p>{{ card.body }}</p>
     {% if card.href %}
     <a class="card-link" href="{{ card.href }}">{{ card.link_label }}</a>

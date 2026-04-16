@@ -6,35 +6,39 @@
 <nav class="breadcrumbs" aria-label="Навигация по разделу">
   <a href="/dashboard">Главная</a>
   <span>/</span>
-  <span aria-current="page">Курс</span>
+  <span aria-current="page">Карта курса</span>
 </nav>
 
-<section class="hero hero--compact" aria-labelledby="course-title">
-  <div class="hero__visual" aria-hidden="true"></div>
+<section class="hero hero--compact hero--course bg-course" data-hero-bg="course" aria-labelledby="course-title">
+  <div class="hero__visual overlay-dark" aria-hidden="true"></div>
   <div class="hero__content">
     <p class="eyebrow">Карта курса</p>
     <h1 id="course-title">{{ course.title }}</h1>
     <p class="hero-copy">{{ course.description }}</p>
-    <p class="meta-line">Версия: {{ course.version }} · Оценка: {{ course.estimated_weeks }} нед.</p>
-    <p class="meta-line">Прогресс курса: {{ progress_pct }}%</p>
-    {% if next_step_key %}
-    <p class="hero-copy">Текущий следующий шаг: <a class="inline-link" href="/lessons/{{ next_step_key }}">открыть урок</a></p>
-    {% else %}
-    <p class="hero-copy">Текущий следующий шаг: будет доступен после добавления уроков.</p>
-    {% endif %}
+    <div class="meta-row">
+      <span class="meta-pill">Версия: {{ course.version }}</span>
+      <span class="meta-pill">Оценка: {{ course.estimated_weeks }} нед.</span>
+      <span class="meta-pill">Прогресс: {{ progress_pct }}%</span>
+      {% if next_step_key %}
+      <span class="meta-pill">Следующий шаг: <a class="inline-link" href="/lessons/{{ next_step_key }}">урок</a></span>
+      {% endif %}
+    </div>
   </div>
 </section>
 
 <section class="module-list" aria-label="Список модулей">
   {% for module in course.modules %}
   <article class="ui-card module-card">
-    <h2>{{ loop.index }}. {{ module.title }}</h2>
-    <p>{{ module.description }}</p>
-    <ol class="lesson-list">
+    <header class="module-head">
+      <h2>{{ loop.index }}. {{ module.title }}</h2>
+      <p>{{ module.description }}</p>
+    </header>
+    <ol class="lesson-list lesson-list--structured">
       {% for lesson in module.lessons %}
-      <li>
+      {% set status = lesson_statuses.get(lesson.key, 'доступен') %}
+      <li class="lesson-row">
         <a class="inline-link" href="/lessons/{{ lesson.key }}">{{ lesson.title }}</a>
-        <span class="status-chip">Статус: {{ lesson_statuses.get(lesson.key, 'доступен') }}</span>
+        <span class="status-chip {% if status == 'завершён' %}status-chip--success{% elif status == 'в процессе' %}status-chip--active{% endif %}">Статус: {{ status }}</span>
       </li>
       {% endfor %}
     </ol>

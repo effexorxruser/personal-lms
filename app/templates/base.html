@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru" data-theme="default">
+<html lang="ru" data-theme="dark">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,6 +16,13 @@
     <script src="{{ url_for('static', path='/js/app.js') }}" defer></script>
   </head>
   <body>
+    <div class="page-bg bg-shell" aria-hidden="true">
+      <div class="page-bg__base"></div>
+      <div class="page-bg__image"></div>
+      <div class="page-bg__glow overlay-soft"></div>
+      <div class="page-bg__noise overlay-grid"></div>
+    </div>
+
     {% if not disable_topbar %}
     <header class="topbar">
       <div class="topbar__inner">
@@ -28,8 +35,8 @@
         <div class="topbar__actions">
           <label for="theme-switcher" class="theme-label">Тема</label>
           <select id="theme-switcher" class="theme-switcher" aria-label="Выбор темы">
-            <option value="default">Базовая</option>
-            <option value="wired">Wired</option>
+            <option value="dark">Тёмная</option>
+            <option value="light">Светлая</option>
           </select>
           {% if request.session.get('user_id') %}
           <form method="post" action="/logout">
@@ -42,8 +49,11 @@
       </div>
     </header>
     {% endif %}
+
     <main class="page-shell {% if disable_topbar %}page-shell--auth{% endif %}">
-      {% block content %}{% endblock %}
+      <div class="page-stack">
+        {% block content %}{% endblock %}
+      </div>
     </main>
   </body>
 </html>

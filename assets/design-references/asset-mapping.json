@@ -1,0 +1,157 @@
+{
+  "version": "ui-asset-system-v1",
+  "themes": ["dark", "light"],
+  "groups": {
+    "shell_backgrounds": [
+      {
+        "source": "SHELL BACKGROUND-1.png",
+        "role": "bg-shell dark primary",
+        "target": "app/static/img/backgrounds/shell/shell-dark-primary.png",
+        "usage": ["global background layer", "dark theme base image"]
+      },
+      {
+        "source": "SHELL BACKGROUND-2.png",
+        "role": "bg-shell dark alternate",
+        "target": "app/static/img/backgrounds/shell/shell-dark-secondary.png",
+        "usage": ["global background fallback", "dark theme variation"]
+      },
+      {
+        "source": "SHELL BACKGROUND (ALT — linux workspace)-1.png",
+        "role": "bg-shell light primary",
+        "target": "app/static/img/backgrounds/shell/shell-light-primary.png",
+        "usage": ["global background layer", "light theme base image"]
+      },
+      {
+        "source": "SHELL BACKGROUND (ALT — linux workspace)-2.png",
+        "role": "bg-shell light alternate",
+        "target": "app/static/img/backgrounds/shell/shell-light-secondary.png",
+        "usage": ["global background fallback", "light theme variation"]
+      }
+    ],
+    "hero_dashboard": [
+      {
+        "source": "DASHBOARD HERO (AI control node)-1.png",
+        "role": "bg-dashboard primary",
+        "target": "app/static/img/backgrounds/dashboard/dashboard-ai-node-1.png",
+        "usage": ["dashboard hero background", "ai overview mood"]
+      },
+      {
+        "source": "DASHBOARD HERO (terminal  linux hybrid)-1.png",
+        "role": "bg-dashboard alternate",
+        "target": "app/static/img/backgrounds/dashboard/dashboard-terminal-1.png",
+        "usage": ["dashboard hero alternate", "terminal mood"]
+      },
+      {
+        "source": "DASHBOARD HERO (AI control node)-2.png",
+        "role": "bg-dashboard reserve",
+        "target": "app/static/img/backgrounds/dashboard/dashboard-ai-node-2.png",
+        "usage": ["future hero rotation"]
+      },
+      {
+        "source": "DASHBOARD HERO (terminal  linux hybrid)-2.png",
+        "role": "bg-dashboard reserve 2",
+        "target": "app/static/img/backgrounds/dashboard/dashboard-terminal-2.png",
+        "usage": ["future hero rotation"]
+      }
+    ],
+    "hero_course": [
+      {
+        "source": "COURSE HERO (industrial topology)-1.png",
+        "role": "bg-course primary",
+        "target": "app/static/img/backgrounds/course/course-topology-1.png",
+        "usage": ["course map hero", "industrial topology mood"]
+      },
+      {
+        "source": "COURSE HERO (system map  backend structure)-1.png",
+        "role": "bg-course alternate",
+        "target": "app/static/img/backgrounds/course/course-system-map-1.png",
+        "usage": ["course map hero alternate", "backend architecture mood"]
+      },
+      {
+        "source": "COURSE HERO (industrial topology)-2.png",
+        "role": "bg-course reserve",
+        "target": "app/static/img/backgrounds/course/course-topology-2.png",
+        "usage": ["future hero variation"]
+      },
+      {
+        "source": "COURSE HERO (system map  backend structure)-2.png",
+        "role": "bg-course reserve 2",
+        "target": "app/static/img/backgrounds/course/course-system-map-2.png",
+        "usage": ["future hero variation"]
+      }
+    ],
+    "lesson_backgrounds": [
+      {
+        "source": "COURSE HERO (system map  backend structure)-2.png",
+        "role": "bg-lesson primary",
+        "target": "app/static/img/backgrounds/lesson/lesson-minimal-1.png",
+        "usage": ["lesson hero background", "low contrast with heavy overlay"]
+      },
+      {
+        "source": "COURSE HERO (industrial topology)-2.png",
+        "role": "bg-lesson alternate",
+        "target": "app/static/img/backgrounds/lesson/lesson-minimal-2.png",
+        "usage": ["lesson hero fallback"]
+      }
+    ],
+    "lain_references": [
+      {
+        "source": "lain-image-1.jpg",
+        "role": "illustration only",
+        "target": "app/static/img/illustrations/lain/lain-ref-1.jpg",
+        "usage": ["onboarding", "splash", "easter egg"],
+        "forbidden_usage": ["global background", "reading area background"]
+      },
+      {
+        "source": "lain-image-2.jpg",
+        "role": "illustration only",
+        "target": "app/static/img/illustrations/lain/lain-ref-2.jpg",
+        "usage": ["onboarding", "splash", "easter egg"],
+        "forbidden_usage": ["global background", "reading area background"]
+      },
+      {
+        "source": "lain-image-3.webp",
+        "role": "illustration only",
+        "target": "app/static/img/illustrations/lain/lain-ref-3.webp",
+        "usage": ["onboarding", "splash", "easter egg"],
+        "forbidden_usage": ["global background", "reading area background"]
+      },
+      {
+        "source": "lain-image-4.jpg",
+        "role": "illustration only",
+        "target": "app/static/img/illustrations/lain/lain-ref-4.jpg",
+        "usage": ["onboarding", "splash", "easter egg"],
+        "forbidden_usage": ["global background", "reading area background"]
+      },
+      {
+        "source": "lain-image-5.jpg",
+        "role": "illustration only",
+        "target": "app/static/img/illustrations/lain/lain-ref-5.jpg",
+        "usage": ["onboarding", "splash", "easter egg"],
+        "forbidden_usage": ["global background", "reading area background"]
+      }
+    ]
+  },
+  "problematic_images": [
+    {
+      "file": "lain-image-1.jpg",
+      "reason": "сильный персонажный фокус, высокий риск перегруза UX"
+    },
+    {
+      "file": "lain-image-2.jpg",
+      "reason": "сильный персонажный фокус, высокий риск перегруза UX"
+    },
+    {
+      "file": "lain-image-3.webp",
+      "reason": "сильный сюжетный/персонажный центр, слабая зона читаемости"
+    },
+    {
+      "file": "lain-image-4.jpg",
+      "reason": "высокая эмоциональная доминанта, не подходит как рабочий фон"
+    },
+    {
+      "file": "lain-image-5.jpg",
+      "reason": "персонаж и композиция конфликтуют с практичным учебным UI"
+    }
+  ]
+}
