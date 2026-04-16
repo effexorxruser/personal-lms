@@ -6,9 +6,13 @@
     <title>{% block title %}personal-lms{% endblock %}</title>
     <script>
       (function () {
+        var allowedThemes = ["dark", "light"];
         var savedTheme = localStorage.getItem("personal-lms-theme");
-        if (savedTheme) {
+        if (allowedThemes.indexOf(savedTheme) >= 0) {
           document.documentElement.setAttribute("data-theme", savedTheme);
+        } else {
+          localStorage.setItem("personal-lms-theme", "dark");
+          document.documentElement.setAttribute("data-theme", "dark");
         }
       })();
     </script>
@@ -29,8 +33,8 @@
         <a href="/dashboard" class="brand">personal-lms</a>
         <nav class="topbar__nav" aria-label="Основная навигация">
           <a href="/dashboard" class="nav-link {% if request.url.path == '/dashboard' %}is-active{% endif %}">Главная</a>
-          <a href="{{ nav_course_href | default('/courses/python-backend-ai') }}" class="nav-link {% if request.url.path.startswith('/courses/') %}is-active{% endif %}">Курс</a>
-          <a href="{{ nav_lessons_href | default('/lessons/foundation-intro') }}" class="nav-link {% if request.url.path.startswith('/lessons/') %}is-active{% endif %}">Уроки</a>
+          <a href="{{ nav_course_href if nav_course_href is defined else '/courses/python-backend-ai' }}" class="nav-link {% if request.url.path.startswith('/courses/') %}is-active{% endif %}">Курс</a>
+          <a href="{{ nav_lessons_href if nav_lessons_href is defined else '/lessons/foundation-intro' }}" class="nav-link {% if request.url.path.startswith('/lessons/') %}is-active{% endif %}">Уроки</a>
         </nav>
         <div class="topbar__actions">
           <label for="theme-switcher" class="theme-label">Тема</label>
