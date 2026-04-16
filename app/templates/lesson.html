@@ -18,10 +18,21 @@
     <h1 id="lesson-title">{{ lesson.title }}</h1>
     <p class="hero-copy">{{ lesson.summary }}</p>
     <div class="meta-row">
+      <span class="meta-pill">Статус: {{ lesson_status_label }}</span>
       <span class="meta-pill">Раздел: {{ module_title }}</span>
       <span class="meta-pill">Курс: {{ course_title }}</span>
+      <span class="meta-pill">Прогресс курса: {{ progress_pct }}%</span>
       {% if lesson.task_slug %}
       <span class="meta-pill">Связанная задача: {{ lesson.task_slug }}</span>
+      {% endif %}
+    </div>
+    <div class="hero-actions">
+      {% if not is_lesson_completed %}
+      <form method="post" action="/lessons/{{ lesson.key }}/complete">
+        <button type="submit" class="btn btn--primary">Отметить урок завершённым</button>
+      </form>
+      {% else %}
+      <span class="status-chip status-chip--success">Урок завершён</span>
       {% endif %}
     </div>
   </div>

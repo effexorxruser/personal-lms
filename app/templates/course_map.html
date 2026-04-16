@@ -16,6 +16,7 @@
     <h1 id="course-title">{{ course.title }}</h1>
     <p class="hero-copy">{{ course.description }}</p>
     <p class="meta-line">Версия: {{ course.version }} · Оценка: {{ course.estimated_weeks }} нед.</p>
+    <p class="meta-line">Прогресс курса: {{ progress_pct }}%</p>
     {% if next_step_key %}
     <p class="hero-copy">Текущий следующий шаг: <a class="inline-link" href="/lessons/{{ next_step_key }}">открыть урок</a></p>
     {% else %}
@@ -33,7 +34,7 @@
       {% for lesson in module.lessons %}
       <li>
         <a class="inline-link" href="/lessons/{{ lesson.key }}">{{ lesson.title }}</a>
-        <span class="status-chip">Доступность: скоро unlock-логика</span>
+        <span class="status-chip">Статус: {{ lesson_statuses.get(lesson.key, 'доступен') }}</span>
       </li>
       {% endfor %}
     </ol>

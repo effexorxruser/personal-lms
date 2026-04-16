@@ -3,8 +3,11 @@ from pathlib import Path
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlmodel import Session
 
 from app.content_registry import get_content_registry
+from app.db import get_engine
+from app.services.progress_service import ensure_progress_initialized
 
 TEMPLATES_DIR = Path(__file__).resolve().parents[1] / "templates"
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
@@ -21,9 +24,19 @@ def dashboard(request: Request):
 
     registry = get_content_registry()
     course = registry.courses.get("python-backend-ai")
-    first_lesson_key = registry.lesson_order[0] if registry.lesson_order else None
+    if not course:
+        return RedirectResponse(url="/login", status_code=303)
+
+    with Session(get_engine()) as session:
+        snapshot = ensure_progress_initialized(session, int(user_id), course.slug)
+        session.commit()
+
+    next_lesson_key = snapshot.next_lesson_key
     course_href = f"/courses/{course.slug}" if course else "/courses/python-backend-ai"
-    lesson_href = f"/lessons/{first_lesson_key}" if first_lesson_key else "/lessons/foundation-intro"
+    lesson_href = f"/lessons/{next_lesson_key}" if next_lesson_key else "/lessons/foundation-intro"
+    next_step_body = (
+        f"{snapshot.next_lesson_title}" if snapshot.next_lesson_title else "Курс завершён, можно повторить материалы"
+    )
 
     cards = [
         {
@@ -34,17 +47,13 @@ def dashboard(request: Request):
         },
         {
             "title": "Следующий шаг",
-            "body": (
-                "Перейти к первому уроку контент-карты"
-                if first_lesson_key
-                else "Подготовить первый урок в content/"
-            ),
-            "href": (lesson_href if first_lesson_key else None),
-            "link_label": "Открыть следующий урок",
+            "body": next_step_body,
+            "href": (lesson_href if next_lesson_key else None),
+            "link_label": ("Открыть следующий урок" if next_lesson_key else "Открыть карту курса"),
         },
         {
             "title": "Прогресс недели",
-            "body": "0% до появления учебных данных",
+            "body": f"{snapshot.progress_pct}% завершено ({snapshot.completed_lessons}/{snapshot.total_lessons} уроков)",
             "href": None,
             "link_label": None,
         },
