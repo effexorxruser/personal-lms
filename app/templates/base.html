@@ -1,21 +1,9 @@
 <!doctype html>
-<html lang="ru" data-theme="dark">
+<html lang="ru">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}personal-lms{% endblock %}</title>
-    <script>
-      (function () {
-        var allowedThemes = ["dark", "light"];
-        var savedTheme = localStorage.getItem("personal-lms-theme");
-        if (allowedThemes.indexOf(savedTheme) >= 0) {
-          document.documentElement.setAttribute("data-theme", savedTheme);
-        } else {
-          localStorage.setItem("personal-lms-theme", "dark");
-          document.documentElement.setAttribute("data-theme", "dark");
-        }
-      })();
-    </script>
     <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}">
     <script src="{{ url_for('static', path='/js/app.js') }}" defer></script>
   </head>
@@ -37,11 +25,6 @@
           <a href="{{ nav_lessons_href if nav_lessons_href is defined else '/lessons/foundation-intro' }}" class="nav-link {% if request.url.path.startswith('/lessons/') %}is-active{% endif %}">Уроки</a>
         </nav>
         <div class="topbar__actions">
-          <label for="theme-switcher" class="theme-label">Тема</label>
-          <select id="theme-switcher" class="theme-switcher" aria-label="Выбор темы">
-            <option value="dark">Тёмная</option>
-            <option value="light">Светлая</option>
-          </select>
           {% if request.session.get('user_id') %}
           <form method="post" action="/logout">
             <button type="submit" class="btn btn--ghost btn--sm">Выход</button>
