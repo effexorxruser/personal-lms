@@ -1,14 +1,48 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-theme="default">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}personal-lms{% endblock %}</title>
+    <script>
+      (function () {
+        var savedTheme = localStorage.getItem("personal-lms-theme");
+        if (savedTheme) {
+          document.documentElement.setAttribute("data-theme", savedTheme);
+        }
+      })();
+    </script>
     <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}">
     <script src="{{ url_for('static', path='/js/app.js') }}" defer></script>
   </head>
   <body>
-    <main class="page-shell">
+    {% if not disable_topbar %}
+    <header class="topbar">
+      <div class="topbar__inner">
+        <a href="/dashboard" class="brand">personal-lms</a>
+        <nav class="topbar__nav" aria-label="Основная навигация">
+          <a href="/dashboard" class="nav-link {% if request.url.path == '/dashboard' %}is-active{% endif %}">Главная</a>
+          <a href="{{ nav_course_href | default('/courses/python-backend-ai') }}" class="nav-link {% if request.url.path.startswith('/courses/') %}is-active{% endif %}">Курс</a>
+          <a href="{{ nav_lessons_href | default('/lessons/foundation-intro') }}" class="nav-link {% if request.url.path.startswith('/lessons/') %}is-active{% endif %}">Уроки</a>
+        </nav>
+        <div class="topbar__actions">
+          <label for="theme-switcher" class="theme-label">Тема</label>
+          <select id="theme-switcher" class="theme-switcher" aria-label="Выбор темы">
+            <option value="default">Базовая</option>
+            <option value="wired">Wired</option>
+          </select>
+          {% if request.session.get('user_id') %}
+          <form method="post" action="/logout">
+            <button type="submit" class="btn btn--ghost btn--sm">Выход</button>
+          </form>
+          {% else %}
+          <a href="/login" class="btn btn--ghost btn--sm">Выход</a>
+          {% endif %}
+        </div>
+      </div>
+    </header>
+    {% endif %}
+    <main class="page-shell {% if disable_topbar %}page-shell--auth{% endif %}">
       {% block content %}{% endblock %}
     </main>
   </body>

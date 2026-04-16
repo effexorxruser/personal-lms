@@ -22,7 +22,7 @@ def login_page(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="login.html",
-        context={"error_message": None},
+        context={"error_message": None, "disable_topbar": True},
     )
 
 
@@ -36,7 +36,7 @@ def login(request: Request, username: str = Form(...), password: str = Form(...)
         return templates.TemplateResponse(
             request=request,
             name="login.html",
-            context={"error_message": "Неверный логин или пароль"},
+            context={"error_message": "Неверный логин или пароль", "disable_topbar": True},
             status_code=401,
         )
 

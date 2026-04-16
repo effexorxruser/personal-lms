@@ -22,12 +22,14 @@ def dashboard(request: Request):
     registry = get_content_registry()
     course = registry.courses.get("python-backend-ai")
     first_lesson_key = registry.lesson_order[0] if registry.lesson_order else None
+    course_href = f"/courses/{course.slug}" if course else "/courses/python-backend-ai"
+    lesson_href = f"/lessons/{first_lesson_key}" if first_lesson_key else "/lessons/foundation-intro"
 
     cards = [
         {
             "title": "Текущий курс",
             "body": (f"{course.title}" if course else "Курс пока не загружен"),
-            "href": (f"/courses/{course.slug}" if course else None),
+            "href": (course_href if course else None),
             "link_label": "Открыть карту курса",
         },
         {
@@ -37,7 +39,7 @@ def dashboard(request: Request):
                 if first_lesson_key
                 else "Подготовить первый урок в content/"
             ),
-            "href": (f"/lessons/{first_lesson_key}" if first_lesson_key else None),
+            "href": (lesson_href if first_lesson_key else None),
             "link_label": "Открыть следующий урок",
         },
         {
@@ -50,5 +52,11 @@ def dashboard(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="dashboard.html",
-        context={"cards": cards, "username": username},
+        context={
+            "cards": cards,
+            "username": username,
+            "continue_href": lesson_href,
+            "nav_course_href": course_href,
+            "nav_lessons_href": lesson_href,
+        },
     )

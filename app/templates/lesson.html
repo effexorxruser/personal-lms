@@ -3,18 +3,32 @@
 {% block title %}Урок | {{ lesson.title }}{% endblock %}
 
 {% block content %}
-<section class="hero" aria-labelledby="lesson-title">
-  <p class="eyebrow">Урок</p>
-  <h1 id="lesson-title">{{ lesson.title }}</h1>
-  <p class="hero-copy">{{ lesson.summary }}</p>
-  <p class="meta-line">Модуль: {{ lesson.module_slug }}</p>
-  {% if lesson.task_slug %}
-  <p class="hero-copy">Связанная задача: <code>{{ lesson.task_slug }}</code></p>
-  {% endif %}
+<nav class="breadcrumbs" aria-label="Навигация по разделу">
+  <a href="/dashboard">Главная</a>
+  <span>/</span>
+  <a href="{{ nav_course_href }}">Курс</a>
+  <span>/</span>
+  <span aria-current="page">Урок</span>
+</nav>
+
+<section class="hero hero--compact hero--lesson" aria-labelledby="lesson-title">
+  <div class="hero__visual" aria-hidden="true"></div>
+  <div class="hero__content">
+    <p class="eyebrow">Урок</p>
+    <h1 id="lesson-title">{{ lesson.title }}</h1>
+    <p class="hero-copy">{{ lesson.summary }}</p>
+    <div class="meta-row">
+      <span class="meta-pill">Раздел: {{ module_title }}</span>
+      <span class="meta-pill">Курс: {{ course_title }}</span>
+      {% if lesson.task_slug %}
+      <span class="meta-pill">Связанная задача: {{ lesson.task_slug }}</span>
+      {% endif %}
+    </div>
+  </div>
 </section>
 
 <section class="lesson-layout" aria-label="Детали урока">
-  <article class="lesson-card">
+  <article class="ui-card lesson-card">
     <h2>Цели</h2>
     <ul>
       {% for objective in lesson.objectives %}
@@ -23,7 +37,7 @@
     </ul>
   </article>
 
-  <article class="lesson-card">
+  <article class="ui-card lesson-card">
     <h2>Чеклист</h2>
     <ul>
       {% for item in lesson.checklist %}
@@ -33,16 +47,19 @@
   </article>
 </section>
 
-<article class="markdown-body">
+<article class="ui-card markdown-body">
   {{ lesson.body_html | safe }}
 </article>
 
-<nav class="lesson-nav" aria-label="Навигация по урокам">
-  {% if prev_lesson_key %}
-  <a class="btn" href="/lessons/{{ prev_lesson_key }}">← Предыдущий урок</a>
-  {% endif %}
-  {% if next_lesson_key %}
-  <a class="btn" href="/lessons/{{ next_lesson_key }}">Следующий урок →</a>
-  {% endif %}
+<nav class="ui-card lesson-nav-panel" aria-label="Навигация по урокам">
+  <p class="lesson-nav-title">Переход между уроками</p>
+  <div class="lesson-nav">
+    {% if prev_lesson_key %}
+    <a class="btn btn--ghost" href="/lessons/{{ prev_lesson_key }}">← Предыдущий урок</a>
+    {% endif %}
+    {% if next_lesson_key %}
+    <a class="btn btn--primary" href="/lessons/{{ next_lesson_key }}">Следующий урок →</a>
+    {% endif %}
+  </div>
 </nav>
 {% endblock %}

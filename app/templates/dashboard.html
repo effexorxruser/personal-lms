@@ -3,19 +3,22 @@
 {% block title %}Панель | personal-lms{% endblock %}
 
 {% block content %}
-<section class="hero" aria-labelledby="dashboard-title">
-  <p class="eyebrow">personal-lms</p>
-  <h1 id="dashboard-title">Python backend и AI обучение</h1>
-  <p class="hero-copy">Скелет Phase 2 готов: авторизация и пользовательская основа подключены.</p>
-  <p class="hero-copy">Вы вошли как <strong>{{ username }}</strong></p>
-  <form method="post" action="/logout" class="logout-form">
-    <button type="submit" class="btn">Выйти</button>
-  </form>
+<section class="hero hero--compact" aria-labelledby="dashboard-title">
+  <div class="hero__visual" aria-hidden="true"></div>
+  <div class="hero__content">
+    <p class="eyebrow">Панель обучения</p>
+    <h1 id="dashboard-title">Python backend и AI обучение</h1>
+    <p class="hero-copy">Скелет Phase 2 готов: авторизация и пользовательская основа подключены.</p>
+    <p class="hero-copy">Вы вошли как <strong>{{ username }}</strong></p>
+    <div class="hero-actions">
+      <a href="{{ continue_href }}" class="btn btn--primary">Продолжить обучение</a>
+    </div>
+  </div>
 </section>
 
 <section class="card-grid" aria-label="Сводка панели">
   {% for card in cards %}
-  <article class="status-card">
+  <article class="ui-card status-card {% if card.title == 'Следующий шаг' %}status-card--focus{% endif %}">
     <h2>{{ card.title }}</h2>
     <p>{{ card.body }}</p>
     {% if card.href %}
