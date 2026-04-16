@@ -1,0 +1,37 @@
+from pathlib import Path
+
+from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
+
+from app.config import get_settings
+from app.middleware import configure_middleware
+from app.routers.dashboard import router as dashboard_router
+
+BASE_DIR = Path(__file__).resolve().parent
+
+
+def create_app() -> FastAPI:
+    settings = get_settings()
+    application = FastAPI(title=settings.app_name, debug=settings.debug)
+
+    application.mount(
+        "/static",
+        StaticFiles(directory=BASE_DIR / "static"),
+        name="static",
+    )
+    configure_middleware(application)
+    application.include_router(dashboard_router)
+
+    @application.get("/health")
+    def health() -> dict[str, str]:
+        return {"status": "ok"}
+
+    @application.get("/", include_in_schema=False)
+    def index() -> RedirectResponse:
+        return RedirectResponse(url="/dashboard")
+
+    return application
+
+
+app = create_app()

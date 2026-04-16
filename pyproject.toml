@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "personal-lms"
+version = "0.1.0"
+description = "Self-hosted LMS-like platform skeleton for Python backend and AI learning."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "jinja2",
+    "python-multipart",
+    "sqlmodel",
+    "alembic",
+    "pydantic-settings",
+    "pwdlib[argon2]",
+    "pytest",
+    "httpx",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+exclude = ["content*", "instance*", "scripts*", "tests*"]
+
+[tool.setuptools.package-data]
+app = ["templates/*.html", "static/css/*.css", "static/js/*.js"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
