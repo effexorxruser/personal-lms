@@ -4,63 +4,49 @@ Personal learning OS для Python backend + AI.
 
 ## Что это
 
-`personal-lms` — это не обычный LMS и не курс.
+`personal-lms` — personal learning system, а не каталог ссылок и не "видеокурс".
 
-Это personal learning system, которая:
+Система:
 - строит маршрут обучения;
-- связывает источники с практикой;
-- заставляет выполнять задачи, а не просто читать;
+- связывает внешние источники с практикой;
+- требует execution, а не только consumption;
 - фиксирует progress, submissions и review.
 
-## Почему это существует
+## Куда проект развивается сейчас
 
-Проблема:
-- слишком много материалов;
-- нет понятного next step;
-- легко попасть в tutorial hell.
+Текущий product direction:
 
-Решение:
-- фиксированный маршрут;
-- execution-first подход;
-- система progress + review.
+- execution-driven, source-backed LMS;
+- целевая траектория: **Python backend + AI practical builder path**;
+- прикладная ветка текущего этапа: Telegram / automation / AI utility tools;
+- приоритет: platform hardening и authoring/runtime readiness до массового curriculum onboarding.
 
-Self-hosted LMS-платформа для обучения Python backend и AI application foundations.
+## Что уже реализовано (текущее состояние)
 
-Phase 3 добавляет file-based загрузку контента: карта курса и страницы уроков из `content/`.
-
-## Текущее продуктовое направление
-
-Проект развивается как execution-driven, source-backed LMS с целевой траекторией:
-
-**Python backend + AI practical builder path**
-
-Приоритет текущего этапа — довести платформу до устойчивого authoring/runtime состояния перед массовым curriculum onboarding.
+- web-first MVP на FastAPI + Jinja2;
+- аутентификация и защищенный dashboard;
+- file-based карта курса и страницы уроков из `content/`;
+- базовый learning flow (курс/уроки/progress/task/submission/review) в развитии.
 
 ## Канонический продуктовый контекст
 
-Базовые source-of-truth документы проекта находятся в `docs/product/`:
+Source-of-truth документы находятся в `docs/product/`.
 
-- [`PRODUCT_VISION.md`](docs/product/PRODUCT_VISION.md) — продуктовый смысл и проблема, которую решает `personal-lms`.
-- [`MVP_SCOPE.md`](docs/product/MVP_SCOPE.md) — границы MVP, стек и anti-scope правила.
-- [`CONTENT_STRATEGY.md`](docs/product/CONTENT_STRATEGY.md) — source-backed curriculum и curation внешних источников.
-- [`LEARNING_MODEL.md`](docs/product/LEARNING_MODEL.md) — маршрут, progress, tasks, submissions, review и stuck flow.
-- [`ARCHITECTURE_OVERVIEW.md`](docs/product/ARCHITECTURE_OVERVIEW.md) — web-first архитектура MVP.
-- [`CURRICULUM_ARCHITECTURE.md`](docs/product/CURRICULUM_ARCHITECTURE.md) — целевая архитектура 6-месячного курса.
-- [`SOURCE_STACK.md`](docs/product/SOURCE_STACK.md) — канонический source-backed стек.
-- [`MONETIZATION_PATH.md`](docs/product/MONETIZATION_PATH.md) — ранние monetizable outcomes и прикладной путь.
-- [`PLATFORM_FIRST_ROADMAP.md`](docs/product/PLATFORM_FIRST_ROADMAP.md) — порядок docs freeze → hardening → onboarding.
-- [`AUTHORING_MODEL.md`](docs/product/AUTHORING_MODEL.md) — модель authoring и lifecycle учебного контента.
-- [`UI_DIRECTION.md`](docs/product/UI_DIRECTION.md) — linux-like / anime Lain / hacker-workstation UX-направление.
-- [`UI_BASELINE.md`](docs/product/UI_BASELINE.md) — принятый dark matte glass UI baseline для будущих UI-изменений.
-- [`PROJECT_GUARDRAILS.md`](docs/product/PROJECT_GUARDRAILS.md) — ограничения, которые защищают проект от scope creep.
+Нейминг-канон для product docs в текущем репозитории: `UPPER_SNAKE_CASE.md`.
 
-## Статус проекта
-
-MVP в активной разработке.
-
-Текущая цель — проверить:
-- может ли personal LMS вести обучение лучше, чем хаотичный self-study;
-- может ли execution-first модель снижать tutorial hell.
+- [`PRODUCT_VISION.md`](docs/product/PRODUCT_VISION.md)
+- [`MVP_SCOPE.md`](docs/product/MVP_SCOPE.md)
+- [`CONTENT_STRATEGY.md`](docs/product/CONTENT_STRATEGY.md)
+- [`LEARNING_MODEL.md`](docs/product/LEARNING_MODEL.md)
+- [`ARCHITECTURE_OVERVIEW.md`](docs/product/ARCHITECTURE_OVERVIEW.md)
+- [`CURRICULUM_ARCHITECTURE.md`](docs/product/CURRICULUM_ARCHITECTURE.md)
+- [`SOURCE_STACK.md`](docs/product/SOURCE_STACK.md)
+- [`MONETIZATION_PATH.md`](docs/product/MONETIZATION_PATH.md)
+- [`PLATFORM_FIRST_ROADMAP.md`](docs/product/PLATFORM_FIRST_ROADMAP.md)
+- [`AUTHORING_MODEL.md`](docs/product/AUTHORING_MODEL.md)
+- [`UI_DIRECTION.md`](docs/product/UI_DIRECTION.md)
+- [`UI_BASELINE.md`](docs/product/UI_BASELINE.md)
+- [`PROJECT_GUARDRAILS.md`](docs/product/PROJECT_GUARDRAILS.md)
 
 ## Стек
 
