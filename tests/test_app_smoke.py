@@ -10,7 +10,8 @@ os.environ["PERSONAL_LMS_SESSION_SECRET_KEY"] = "test-session-secret"
 from app.config import get_settings
 from app.db import get_engine, init_db
 from app.main import create_app
-from app.models import CourseProgress, LessonProgress, User
+from app.content_registry import get_content_registry
+from app.models import CourseProgress, LessonProgress, ReviewResult, TaskSubmission, User
 from app.security import hash_password
 
 DB_PATH = Path("instance/test_auth.db")
@@ -26,6 +27,10 @@ def _prepare_db() -> None:
 
     init_db()
     with Session(get_engine()) as session:
+        session.exec(delete(ReviewResult))
+        session.exec(delete(TaskSubmission))
+        session.exec(delete(LessonProgress))
+        session.exec(delete(CourseProgress))
         session.exec(delete(User))
         session.add(
             User(
@@ -141,6 +146,18 @@ def test_lesson_markdown_is_rendered() -> None:
     assert "<strong>FastAPI</strong>" in response.text
 
 
+def test_task_content_is_loaded_from_file_registry() -> None:
+    registry = get_content_registry()
+    lesson = registry.lessons["backend-structure"]
+    task = registry.tasks.get("inspect-app-layout")
+
+    assert lesson.task_slug == "inspect-app-layout"
+    assert task is not None
+    assert task.title == "Проверить структуру приложения"
+    assert task.submission_type == "text"
+    assert "router" in " ".join(task.definition_of_done).lower()
+
+
 def test_completing_lesson_updates_progress_and_next_step() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
@@ -179,3 +196,216 @@ def test_completing_lesson_updates_progress_and_next_step() -> None:
     assert course_progress is not None
     assert course_progress.progress_pct == 33
     assert course_progress.current_lesson_slug == "backend-structure"
+
+
+def test_task_lesson_requires_approved_submission_before_completion() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+
+        lesson_response = client.get("/lessons/backend-structure")
+        assert lesson_response.status_code == 200
+        assert "Связанная задача" in lesson_response.text
+        assert "Проверить структуру приложения" in lesson_response.text
+
+        blocked_response = client.post("/lessons/backend-structure/complete", follow_redirects=False)
+        assert blocked_response.status_code == 303
+        assert "completion_blocked=review_required" in blocked_response.headers["location"]
+
+    with Session(get_engine()) as session:
+        user = session.exec(select(User).where(User.username == "admin")).first()
+        assert user is not None
+        progress = session.exec(
+            select(LessonProgress).where(
+                LessonProgress.user_id == user.id,
+                LessonProgress.lesson_key == "backend-structure",
+            )
+        ).first()
+
+    assert progress is not None
+    assert progress.status == "in_progress"
+
+
+def test_submission_creates_review_and_needs_revision_state() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+        response = client.post(
+            "/lessons/backend-structure/submissions",
+            data={"submission_type": "text", "content_text": "ok"},
+            follow_redirects=False,
+        )
+        assert response.status_code == 303
+
+        lesson_response = client.get("/lessons/backend-structure")
+        course_response = client.get("/courses/python-backend-ai")
+
+    assert "Submission слишком короткий" in lesson_response.text
+    assert "требует доработки" in lesson_response.text
+    assert "Статус: требует доработки" in lesson_response.text
+    assert "Статус: требует доработки" in course_response.text
+
+    with Session(get_engine()) as session:
+        submission = session.exec(select(TaskSubmission)).first()
+        review = session.exec(select(ReviewResult)).first()
+
+    assert submission is not None
+    assert submission.status == "needs_revision"
+    assert review is not None
+    assert review.verdict == "needs_revision"
+
+
+def test_approved_submission_allows_task_lesson_completion() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+        response = client.post(
+            "/lessons/backend-structure/submissions",
+            data={
+                "submission_type": "text",
+                "content_text": (
+                    "Router: app/routers/content.py. Loader: app/content_loader.py. "
+                    "Runtime progress: app/services/progress_service.py."
+                ),
+            },
+            follow_redirects=False,
+        )
+        assert response.status_code == 303
+
+        lesson_response = client.get("/lessons/backend-structure")
+        assert "Базовая проверка пройдена" in lesson_response.text
+        assert "review пройден" in lesson_response.text
+        assert "Отметить урок завершённым" in lesson_response.text
+
+        complete_response = client.post("/lessons/backend-structure/complete", follow_redirects=False)
+        assert complete_response.status_code == 303
+
+    with Session(get_engine()) as session:
+        user = session.exec(select(User).where(User.username == "admin")).first()
+        assert user is not None
+        progress = session.exec(
+            select(LessonProgress).where(
+                LessonProgress.user_id == user.id,
+                LessonProgress.lesson_key == "backend-structure",
+            )
+        ).first()
+        submission = session.exec(select(TaskSubmission)).first()
+        review = session.exec(select(ReviewResult)).first()
+
+    assert submission is not None
+    assert submission.status == "approved"
+    assert review is not None
+    assert review.verdict == "approved"
+    assert progress is not None
+    assert progress.status == "completed"
+
+
+def test_dashboard_shows_current_task_execution_state() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+        client.post("/lessons/foundation-intro/complete", follow_redirects=False)
+        dashboard_response = client.get("/dashboard")
+
+    assert dashboard_response.status_code == 200
+    assert "Execution" in dashboard_response.text
+    assert "Проверить структуру приложения" in dashboard_response.text
+    assert "ожидает submission" in dashboard_response.text
+
+
+def test_course_map_displays_supported_execution_states() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+
+        initial_course = client.get("/courses/python-backend-ai")
+        assert "Статус: доступен" in initial_course.text
+
+        client.post("/lessons/foundation-intro/complete", follow_redirects=False)
+        client.get("/lessons/backend-structure")
+        in_progress_course = client.get("/courses/python-backend-ai")
+        assert "Урок 1: Введение в трек" in in_progress_course.text
+        assert "Статус: завершён" in in_progress_course.text
+        assert "Урок 2: Структура backend" in in_progress_course.text
+        assert "Статус: в процессе" in in_progress_course.text
+
+        client.post(
+            "/lessons/backend-structure/submissions",
+            data={"submission_type": "text", "content_text": "ok"},
+            follow_redirects=False,
+        )
+        revision_course = client.get("/courses/python-backend-ai")
+        assert "Статус: требует доработки" in revision_course.text
+
+        client.post(
+            "/lessons/backend-structure/submissions",
+            data={
+                "submission_type": "text",
+                "content_text": (
+                    "Router: app/routers/content.py. Loader: app/content_loader.py. "
+                    "Runtime progress: app/services/progress_service.py."
+                ),
+            },
+            follow_redirects=False,
+        )
+        approved_course = client.get("/courses/python-backend-ai")
+        assert "Статус: review пройден" in approved_course.text
+
+        client.post("/lessons/backend-structure/complete", follow_redirects=False)
+        completed_course = client.get("/courses/python-backend-ai")
+        assert "Статус: завершён" in completed_course.text
+
+
+def test_clean_flow_keeps_dashboard_course_and_lesson_progress_consistent() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+
+        client.get("/lessons/foundation-intro")
+        client.post("/lessons/foundation-intro/complete", follow_redirects=False)
+        client.get("/lessons/backend-structure")
+        client.post(
+            "/lessons/backend-structure/submissions",
+            data={"submission_type": "text", "content_text": "bad"},
+            follow_redirects=False,
+        )
+
+        dashboard_revision = client.get("/dashboard")
+        course_revision = client.get("/courses/python-backend-ai")
+        lesson_revision = client.get("/lessons/backend-structure")
+
+        assert "требует доработки" in dashboard_revision.text
+        assert "Статус: требует доработки" in course_revision.text
+        assert "Статус: требует доработки" in lesson_revision.text
+
+        client.post(
+            "/lessons/backend-structure/submissions",
+            data={
+                "submission_type": "text",
+                "content_text": (
+                    "Router: app/routers/content.py. Loader: app/content_loader.py. "
+                    "Runtime progress: app/services/progress_service.py."
+                ),
+            },
+            follow_redirects=False,
+        )
+
+        dashboard_approved = client.get("/dashboard")
+        course_approved = client.get("/courses/python-backend-ai")
+        lesson_approved = client.get("/lessons/backend-structure")
+
+        assert "review пройден" in dashboard_approved.text
+        assert "Статус: review пройден" in course_approved.text
+        assert "Статус: review пройден" in lesson_approved.text
+
+        client.post("/lessons/backend-structure/complete", follow_redirects=False)
+        client.get("/lessons/lesson-navigation")
+        client.post("/lessons/lesson-navigation/complete", follow_redirects=False)
+
+        final_dashboard = client.get("/dashboard")
+        final_course = client.get("/courses/python-backend-ai")
+        final_lesson = client.get("/lessons/backend-structure")
+
+    assert "100% завершено (3/3 уроков)" in final_dashboard.text
+    assert "Прогресс: 100%" in final_course.text
+    assert "Статус: завершён" in final_lesson.text

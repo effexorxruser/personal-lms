@@ -7,6 +7,7 @@ from sqlmodel import Session
 
 from app.content_registry import get_content_registry
 from app.db import get_engine
+from app.services.execution_service import dashboard_execution_summary
 from app.services.progress_service import ensure_progress_initialized
 
 TEMPLATES_DIR = Path(__file__).resolve().parents[1] / "templates"
@@ -29,6 +30,8 @@ def dashboard(request: Request):
 
     with Session(get_engine()) as session:
         snapshot = ensure_progress_initialized(session, int(user_id), course.slug)
+        next_lesson = registry.lessons.get(snapshot.next_lesson_key) if snapshot.next_lesson_key else None
+        execution_summary = dashboard_execution_summary(session, int(user_id), next_lesson)
         session.commit()
 
     next_lesson_key = snapshot.next_lesson_key
@@ -65,6 +68,7 @@ def dashboard(request: Request):
             "cards": cards,
             "username": username,
             "continue_href": lesson_href,
+            "execution_summary": execution_summary,
             "nav_course_href": course_href,
             "nav_lessons_href": lesson_href,
         },

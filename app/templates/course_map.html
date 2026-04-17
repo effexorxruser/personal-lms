@@ -38,7 +38,7 @@
       {% set status = lesson_statuses.get(lesson.key, 'доступен') %}
       <li class="lesson-row">
         <a class="inline-link" href="/lessons/{{ lesson.key }}">{{ lesson.title }}</a>
-        <span class="status-chip {% if status == 'завершён' %}status-chip--success{% elif status == 'в процессе' %}status-chip--active{% endif %}">Статус: {{ status }}</span>
+        <span class="status-chip {% if status == 'завершён' %}status-chip--success{% elif status == 'требует доработки' %}status-chip--revision{% elif status == 'review пройден' or status == 'в процессе' or status == 'отправлено' %}status-chip--active{% endif %}">Статус: {{ status }}</span>
       </li>
       {% endfor %}
     </ol>

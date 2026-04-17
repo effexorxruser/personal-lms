@@ -59,25 +59,37 @@
     </section>
   </main>
 
-  <aside class="dashboard-rail ui-card world-clock" aria-label="Мировое время">
-    <p class="status-kicker">Системное время</p>
-    <div class="world-clock__grid">
-      <div class="world-clock__node" data-clock-zone="Europe/Moscow">
-        <span class="world-clock__label">MOW</span>
-        <time class="world-clock__time" data-clock-time>--:--</time>
-        <span class="world-clock__date" data-clock-date>--.--</span>
+  <aside class="dashboard-rail" aria-label="Системные модули">
+    <section class="ui-card rail-card world-clock" aria-label="Мировое время">
+      <p class="status-kicker">Системное время</p>
+      <div class="world-clock__grid">
+        <div class="world-clock__node" data-clock-zone="Europe/Moscow">
+          <span class="world-clock__label">MOW</span>
+          <time class="world-clock__time" data-clock-time>--:--</time>
+          <span class="world-clock__date" data-clock-date>--.--</span>
+        </div>
+        <div class="world-clock__node" data-clock-zone="Asia/Tokyo">
+          <span class="world-clock__label">TYO</span>
+          <time class="world-clock__time" data-clock-time>--:--</time>
+          <span class="world-clock__date" data-clock-date>--.--</span>
+        </div>
+        <div class="world-clock__node" data-clock-zone="America/New_York">
+          <span class="world-clock__label">NYC</span>
+          <time class="world-clock__time" data-clock-time>--:--</time>
+          <span class="world-clock__date" data-clock-date>--.--</span>
+        </div>
       </div>
-      <div class="world-clock__node" data-clock-zone="Asia/Tokyo">
-        <span class="world-clock__label">TYO</span>
-        <time class="world-clock__time" data-clock-time>--:--</time>
-        <span class="world-clock__date" data-clock-date>--.--</span>
-      </div>
-      <div class="world-clock__node" data-clock-zone="America/New_York">
-        <span class="world-clock__label">NYC</span>
-        <time class="world-clock__time" data-clock-time>--:--</time>
-        <span class="world-clock__date" data-clock-date>--.--</span>
-      </div>
-    </div>
+    </section>
+
+    <section class="ui-card rail-card execution-rail" aria-label="Текущая задача">
+      <p class="status-kicker">Execution</p>
+      <h2>{{ execution_summary.task.title if execution_summary.task else 'Текущая задача' }}</h2>
+      <p>{{ execution_summary.state_label }}</p>
+      <p class="rail-card__muted">{{ execution_summary.review_label }}</p>
+      {% if execution_summary.href %}
+      <a class="card-link" href="{{ execution_summary.href }}">Открыть task flow</a>
+      {% endif %}
+    </section>
   </aside>
 </div>
 {% endblock %}

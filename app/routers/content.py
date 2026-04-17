@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Form, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
@@ -11,12 +11,15 @@ from app.services.content_service import (
     get_lesson_or_404,
     lesson_neighbors,
 )
+from app.services.execution_service import can_complete_lesson, get_lesson_execution_context
 from app.services.progress_service import (
     ensure_progress_initialized,
     get_lesson_status,
     mark_lesson_completed,
     mark_lesson_opened,
 )
+from app.services.submission_service import create_submission, submission_type_label
+from app.services.task_service import resolve_lesson_task
 
 TEMPLATES_DIR = Path(__file__).resolve().parents[1] / "templates"
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
@@ -88,8 +91,16 @@ def lesson_page(request: Request, lesson_key: str):
         ensure_progress_initialized(session, user_id, lesson.course_slug)
         mark_lesson_opened(session, user_id, lesson.key)
         snapshot = ensure_progress_initialized(session, user_id, lesson.course_slug)
-        lesson_status_label = get_lesson_status(session, user_id, lesson.key)
+        lesson_status_label = snapshot.lesson_statuses.get(lesson.key, get_lesson_status(session, user_id, lesson.key))
         session.commit()
+
+    with Session(get_engine()) as session:
+        execution = get_lesson_execution_context(
+            session,
+            user_id,
+            lesson,
+            completion_blocked_reason=request.query_params.get("completion_blocked"),
+        )
 
     return templates.TemplateResponse(
         request=request,
@@ -100,6 +111,10 @@ def lesson_page(request: Request, lesson_key: str):
             "module_title": module_title,
             "lesson_status_label": lesson_status_label,
             "is_lesson_completed": lesson_status_label == "завершён",
+            "execution": execution,
+            "submission_type_label": submission_type_label(
+                execution.task.submission_type if execution.task else None
+            ),
             "progress_pct": snapshot.progress_pct,
             "prev_lesson_key": prev_lesson_key,
             "next_lesson_key": next_lesson_key,
@@ -119,6 +134,12 @@ def complete_lesson(request: Request, lesson_key: str):
     lesson = get_lesson_or_404(lesson_key)
     with Session(get_engine()) as session:
         ensure_progress_initialized(session, user_id, lesson.course_slug)
+        if not can_complete_lesson(session, user_id, lesson):
+            session.commit()
+            return RedirectResponse(
+                url=f"/lessons/{lesson.key}?completion_blocked=review_required#task",
+                status_code=303,
+            )
         mark_lesson_completed(session, user_id, lesson.key)
         snapshot = ensure_progress_initialized(session, user_id, lesson.course_slug)
         session.commit()
@@ -126,3 +147,45 @@ def complete_lesson(request: Request, lesson_key: str):
     if snapshot.next_lesson_key and snapshot.next_lesson_key != lesson.key:
         return RedirectResponse(url=f"/lessons/{snapshot.next_lesson_key}", status_code=303)
     return RedirectResponse(url=f"/lessons/{lesson.key}", status_code=303)
+
+
+@router.post("/lessons/{lesson_key}/submissions")
+def submit_lesson_task(
+    request: Request,
+    lesson_key: str,
+    submission_type: str = Form(...),
+    content_text: str = Form(default=""),
+    content_link: str = Form(default=""),
+):
+    auth_result = _require_auth(request)
+    if isinstance(auth_result, RedirectResponse):
+        return auth_result
+    user_id = auth_result
+
+    lesson = get_lesson_or_404(lesson_key)
+    task_resolution = resolve_lesson_task(lesson)
+    if task_resolution.task is None:
+        return RedirectResponse(url=f"/lessons/{lesson.key}?submission_error=task_missing#task", status_code=303)
+
+    with Session(get_engine()) as session:
+        ensure_progress_initialized(session, user_id, lesson.course_slug)
+        try:
+            create_submission(
+                session=session,
+                user_id=user_id,
+                lesson=lesson,
+                task=task_resolution.task,
+                submission_type=submission_type,
+                content_text=content_text,
+                content_link=content_link,
+            )
+        except ValueError:
+            session.rollback()
+            return RedirectResponse(
+                url=f"/lessons/{lesson.key}?submission_error=invalid_submission#task",
+                status_code=303,
+            )
+        ensure_progress_initialized(session, user_id, lesson.course_slug)
+        session.commit()
+
+    return RedirectResponse(url=f"/lessons/{lesson.key}#task", status_code=303)

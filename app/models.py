@@ -40,3 +40,26 @@ class LessonProgress(SQLModel, table=True):
     started_at: datetime | None = None
     last_opened_at: datetime | None = None
     completed_at: datetime | None = None
+
+
+class TaskSubmission(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(index=True, foreign_key="user.id")
+    lesson_key: str = Field(index=True)
+    task_slug: str = Field(index=True)
+    submission_type: str
+    content_text: str | None = None
+    content_link: str | None = None
+    status: str = Field(default="submitted", index=True)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class ReviewResult(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    submission_id: int = Field(index=True, foreign_key="tasksubmission.id")
+    task_slug: str = Field(index=True)
+    verdict: str = Field(index=True)
+    feedback: str
+    blocking_reason: str | None = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

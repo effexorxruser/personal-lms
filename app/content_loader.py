@@ -6,7 +6,9 @@ from pathlib import Path
 import markdown
 import yaml
 
-CONTENT_ROOT = Path(__file__).resolve().parents[1] / "content" / "courses"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+CONTENT_ROOT = PROJECT_ROOT / "content" / "courses"
+TASK_ROOT = PROJECT_ROOT / "content" / "tasks"
 
 
 @dataclass
@@ -21,6 +23,18 @@ class LessonContent:
     task_slug: str | None
     module_slug: str
     course_slug: str
+
+
+@dataclass
+class TaskContent:
+    slug: str
+    title: str
+    summary: str
+    instructions: str
+    submission_type: str
+    definition_of_done: list[str]
+    review_mode: str
+    hints: list[str]
 
 
 @dataclass
@@ -48,6 +62,7 @@ class ContentIndex:
     courses: dict[str, CourseContent]
     lessons: dict[str, LessonContent]
     lesson_order: list[str]
+    tasks: dict[str, TaskContent]
 
 
 def _parse_yaml(path: Path) -> dict:
@@ -94,6 +109,20 @@ def _load_lesson(path: Path, module_slug: str, course_slug: str) -> LessonConten
     )
 
 
+def _load_task(path: Path) -> TaskContent:
+    task_data = _parse_yaml(path)
+    return TaskContent(
+        slug=str(task_data["slug"]),
+        title=str(task_data["title"]),
+        summary=str(task_data["summary"]),
+        instructions=str(task_data["instructions"]).strip(),
+        submission_type=str(task_data["submission_type"]),
+        definition_of_done=[str(item) for item in task_data.get("definition_of_done", [])],
+        review_mode=str(task_data.get("review_mode", "deterministic")),
+        hints=[str(item) for item in task_data.get("hints", [])],
+    )
+
+
 def _load_module(course_path: Path, course_slug: str, module_slug: str) -> ModuleContent:
     module_path = course_path / "modules" / module_slug
     module_data = _parse_yaml(module_path / "module.yml")
@@ -118,6 +147,11 @@ def load_content_index() -> ContentIndex:
     courses: dict[str, CourseContent] = {}
     lessons: dict[str, LessonContent] = {}
     lesson_order: list[str] = []
+    tasks: dict[str, TaskContent] = {}
+
+    for task_path in sorted(TASK_ROOT.glob("*.yml")):
+        task = _load_task(task_path)
+        tasks[task.slug] = task
 
     for course_path in sorted(CONTENT_ROOT.glob("*/course.yml")):
         manifest_path = course_path
@@ -145,4 +179,4 @@ def load_content_index() -> ContentIndex:
             modules=modules,
         )
 
-    return ContentIndex(courses=courses, lessons=lessons, lesson_order=lesson_order)
+    return ContentIndex(courses=courses, lessons=lessons, lesson_order=lesson_order, tasks=tasks)

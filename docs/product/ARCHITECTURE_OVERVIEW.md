@@ -49,6 +49,18 @@ SQLite подходит MVP, потому что:
 
 PostgreSQL / Supabase могут быть рассмотрены позже, но не являются базой MVP.
 
+## Миграции БД
+
+В зависимостях проекта есть Alembic, но Alembic scaffold пока не создан: в репозитории нет `alembic.ini`, `env.py` и каталога версионированных migrations.
+
+Текущий MVP-режим инициализации БД:
+
+- модели описаны через SQLModel;
+- `scripts/init_db.py` вызывает `SQLModel.metadata.create_all()`;
+- новые таблицы для локальной SQLite базы создаются через повторный запуск `scripts/init_db.py`.
+
+Это сознательно допустимо для текущего локального MVP, но является tech debt. Перед production-like deploy или перед сложными schema changes нужно добавить полноценный Alembic scaffold и перевести изменения схемы в версионированные migrations.
+
 ## Tailwind CSS и Alpine.js
 
 Tailwind CSS и Alpine.js используются как легкий frontend layer.

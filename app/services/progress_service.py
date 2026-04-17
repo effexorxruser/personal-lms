@@ -7,6 +7,7 @@ from sqlmodel import Session, select
 
 from app.content_registry import get_content_registry
 from app.models import CourseProgress, LessonProgress
+from app.services.submission_service import get_submission_snapshot
 
 STATUS_NOT_STARTED = "not_started"
 STATUS_IN_PROGRESS = "in_progress"
@@ -95,6 +96,27 @@ def _status_label(status: str) -> str:
     return "доступен"
 
 
+def _lesson_state_label(session: Session, user_id: int, lesson_key: str, status: str) -> str:
+    if status == STATUS_COMPLETED:
+        return "завершён"
+
+    registry = get_content_registry()
+    lesson = registry.lessons[lesson_key]
+    if not lesson.task_slug:
+        return _status_label(status)
+
+    submission_snapshot = get_submission_snapshot(session, user_id, lesson)
+    if submission_snapshot.state == "needs_revision":
+        return "требует доработки"
+    if submission_snapshot.state == "approved":
+        return "review пройден"
+    if submission_snapshot.submission is not None:
+        return "отправлено"
+    if status == STATUS_IN_PROGRESS:
+        return "в процессе"
+    return "доступен"
+
+
 def _compute_snapshot(session: Session, user_id: int, course_slug: str) -> ProgressSnapshot:
     registry = get_content_registry()
     course = registry.courses[course_slug]
@@ -114,7 +136,7 @@ def _compute_snapshot(session: Session, user_id: int, course_slug: str) -> Progr
     for lesson_key in lesson_keys:
         lesson_progress = by_key.get(lesson_key)
         status = lesson_progress.status if lesson_progress else STATUS_NOT_STARTED
-        lesson_statuses[lesson_key] = _status_label(status)
+        lesson_statuses[lesson_key] = _lesson_state_label(session, user_id, lesson_key, status)
 
         if status == STATUS_COMPLETED:
             completed_count += 1

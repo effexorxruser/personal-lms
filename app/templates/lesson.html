@@ -23,17 +23,21 @@
       <span class="meta-pill">Раздел: {{ module_title }}</span>
       <span class="meta-pill">Курс: {{ course_title }}</span>
       <span class="meta-pill">Прогресс: {{ progress_pct }}%</span>
-      {% if lesson.task_slug %}
-      <span class="meta-pill">Связанная задача: {{ lesson.task_slug }}</span>
+      {% if execution.task %}
+      <span class="meta-pill">Задача: {{ execution.task.title }}</span>
+      {% elif execution.missing_task_slug %}
+      <span class="meta-pill">Задача не найдена: {{ execution.missing_task_slug }}</span>
       {% endif %}
     </div>
     <div class="hero-actions">
-      {% if not is_lesson_completed %}
+      {% if is_lesson_completed %}
+      <span class="status-chip status-chip--success">Урок завершён</span>
+      {% elif lesson.task_slug and not execution.submission_snapshot.is_approved %}
+      <a class="btn btn--ghost" href="#task">Сначала выполнить задачу</a>
+      {% else %}
       <form method="post" action="/lessons/{{ lesson.key }}/complete">
         <button type="submit" class="btn btn--primary">Отметить урок завершённым</button>
       </form>
-      {% else %}
-      <span class="status-chip status-chip--success">Урок завершён</span>
       {% endif %}
     </div>
   </div>
@@ -45,6 +49,75 @@
   </article>
 
   <aside class="lesson-side">
+    {% if lesson.task_slug %}
+    <article class="ui-card lesson-card task-panel" id="task">
+      <p class="lesson-nav-title">Связанная задача</p>
+      {% if execution.task %}
+      <h2>{{ execution.task.title }}</h2>
+      <p>{{ execution.task.summary }}</p>
+      <dl class="task-meta">
+        <div>
+          <dt>Формат</dt>
+          <dd>{{ submission_type_label }}</dd>
+        </div>
+        <div>
+          <dt>Review</dt>
+          <dd>{{ execution.submission_snapshot.state_label }}</dd>
+        </div>
+      </dl>
+
+      <h3>Инструкция</h3>
+      <p>{{ execution.task.instructions }}</p>
+
+      <h3>Definition of done</h3>
+      <ul>
+        {% for item in execution.task.definition_of_done %}
+        <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+
+      {% if execution.task.hints %}
+      <details class="task-hints">
+        <summary>Подсказки</summary>
+        <ul>
+          {% for hint in execution.task.hints %}
+          <li>{{ hint }}</li>
+          {% endfor %}
+        </ul>
+      </details>
+      {% endif %}
+
+      {% if execution.completion_blocked_reason %}
+      <p class="task-alert">Урок нельзя завершить, пока review не пройден.</p>
+      {% endif %}
+
+      {% if execution.submission_snapshot.review %}
+      <div class="task-review {% if execution.submission_snapshot.state == 'needs_revision' %}task-review--revision{% else %}task-review--approved{% endif %}">
+        <p class="status-kicker">Review result</p>
+        <p>{{ execution.submission_snapshot.review.feedback }}</p>
+      </div>
+      {% endif %}
+
+      {% if not is_lesson_completed %}
+      <form class="task-form" method="post" action="/lessons/{{ lesson.key }}/submissions">
+        <input type="hidden" name="submission_type" value="{{ execution.task.submission_type }}">
+        {% if execution.task.submission_type == 'link' %}
+        <label for="content_link">Ссылка на результат</label>
+        <input id="content_link" name="content_link" type="url" placeholder="https://..." value="{{ execution.submission_snapshot.submission.content_link if execution.submission_snapshot.submission and execution.submission_snapshot.submission.content_link else '' }}">
+        {% else %}
+        <label for="content_text">Результат выполнения</label>
+        <textarea id="content_text" name="content_text" rows="7" placeholder="Опиши результат или вставь вывод команды">{{ execution.submission_snapshot.submission.content_text if execution.submission_snapshot.submission and execution.submission_snapshot.submission.content_text else '' }}</textarea>
+        {% endif %}
+        <button type="submit" class="btn btn--primary">Отправить submission</button>
+      </form>
+      {% endif %}
+      {% else %}
+      <h2>Задача не найдена</h2>
+      <p>В уроке указан task slug `{{ execution.missing_task_slug }}`, но task definition отсутствует в file-based registry.</p>
+      {% endif %}
+    </article>
+    {% endif %}
+
     <article class="ui-card lesson-card lesson-card--ops">
       <h2>Цели</h2>
       <ul>
