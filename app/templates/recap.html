@@ -12,7 +12,8 @@
     </nav>
 
     <nav class="workspace-tabs" data-tabs aria-label="Навигация по итогам">
-      <button type="button" class="is-active" data-tab-target="recap-lessons">Уроки</button>
+      <button type="button" class="is-active" data-tab-target="recap-overview-panel">Обзор</button>
+      <button type="button" data-tab-target="recap-lessons">Уроки</button>
       <button type="button" data-tab-target="recap-execution">Практика</button>
       <button type="button" data-tab-target="recap-blockers">Блокеры</button>
       <button type="button" data-tab-target="recap-focus">Фокус</button>
@@ -20,23 +21,28 @@
   </div>
 
   <main class="workspace-pane recap-pane">
-    <section id="recap-overview" class="hero hero--compact bg-dashboard section-block" data-page="dashboard" data-hero-bg="dashboard" aria-labelledby="recap-title">
+    <section id="recap-overview" class="ui-card recap-summary-strip bg-dashboard section-block" data-page="dashboard" data-hero-bg="dashboard" aria-labelledby="recap-title">
       <div class="hero__visual overlay-dark" aria-hidden="true"></div>
-      <div class="hero__content">
+      <div class="recap-summary-strip__body">
         <p class="eyebrow">Итоги недели</p>
         <h1 id="recap-title">Итоги последних 7 дней</h1>
-        <p class="hero-copy">Итоги собираются из реальных учебных событий: завершённые уроки, отправки, проверки и моменты, где ты застрял.</p>
-        <div class="meta-row">
-          <span class="meta-pill">Уроки: {{ weekly_recap.completed_count }}</span>
-          <span class="meta-pill">Отправки: {{ weekly_recap.submission_count }}</span>
-          <span class="meta-pill">Проверки: {{ weekly_recap.review_count }}</span>
-          <span class="meta-pill">Блокеры: {{ weekly_recap.stuck_count }}</span>
-        </div>
+        <p class="hero-copy">Короткий review mode по реальным учебным событиям.</p>
       </div>
     </section>
 
     <section class="recap-tab-panels" aria-label="Детали итогов недели">
-      <article id="recap-lessons" class="ui-card recap-card" data-tab-panel>
+      <article id="recap-overview-panel" class="ui-card recap-card" data-tab-panel>
+        <p class="status-kicker">Обзор</p>
+        <div class="recap-counter-grid">
+          <span>Уроки: {{ weekly_recap.completed_count }}</span>
+          <span>Отправки: {{ weekly_recap.submission_count }}</span>
+          <span>Проверки: {{ weekly_recap.review_count }}</span>
+          <span>Блокеры: {{ weekly_recap.stuck_count }}</span>
+        </div>
+        <p class="rail-card__muted">Следующий фокус: {{ weekly_recap.next_focus_title }}</p>
+      </article>
+
+      <article id="recap-lessons" class="ui-card recap-card" data-tab-panel hidden>
         <p class="status-kicker">Завершённые уроки</p>
         {% if weekly_recap.completed_lessons %}
         <ul>

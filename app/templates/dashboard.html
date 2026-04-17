@@ -10,114 +10,73 @@
   {% if card.title == 'Прогресс недели' %}{% set ns.progress = card %}{% endif %}
 {% endfor %}
 
-<section class="workspace-shell dashboard-workspace">
-  <div class="workspace-toolbar">
-    <nav class="section-nav" aria-label="Навигация по секциям">
-      <a href="#dashboard-main">Центр</a>
-      <a href="#dashboard-summary">Сводка</a>
-      <a href="#dashboard-rail">Модули</a>
-    </nav>
-  </div>
-
-  <div class="workspace-grid dashboard-layout section-flow">
-    <main class="workspace-pane dashboard-main">
-    <section id="dashboard-main" class="hero hero--compact hero--node bg-dashboard section-block" data-page="dashboard" data-hero-bg="dashboard" aria-labelledby="dashboard-title">
-      <div class="hero__visual overlay-dark" aria-hidden="true"></div>
-      <div class="hero__ghost hero__ghost--lain" aria-hidden="true"></div>
-      <div class="hero__content hero__content--node">
-        <div class="node-main">
-          <p class="eyebrow">Узел обучения</p>
-          <h1 id="dashboard-title">Личный центр обучения</h1>
-          <p class="hero-copy">Рабочий режим активен. Следующий шаг, состояние курса и прогресс доступны сразу.</p>
-          <p class="hero-copy">Вы вошли как <strong>{{ username }}</strong>.</p>
-          <div class="hero-actions">
-            <a href="{{ continue_href }}" class="btn btn--primary">Продолжить обучение</a>
-          </div>
+<section class="workspace-shell dashboard-workspace dashboard-workspace--resume">
+  <div class="workspace-grid dashboard-resume-layout">
+    <main class="workspace-pane dashboard-main dashboard-main--resume">
+      <section class="dashboard-context-strip" aria-label="Текущий контекст обучения" style="--progress-value: {{ dashboard_progress_pct }}%;">
+        <div class="dashboard-context-strip__lain" aria-hidden="true"></div>
+        <div class="dashboard-context-strip__identity">
+          <span class="dashboard-context-strip__user">Вы вошли как <strong>{{ username }}</strong></span>
+          <span>{{ dashboard_course_title }}</span>
         </div>
+        <div class="dashboard-context-strip__state">
+          <span>Модуль: {{ dashboard_module_title }}</span>
+          <span>Checkpoint: {% if dashboard_checkpoint_title %}{{ dashboard_checkpoint_title }} · {% endif %}{{ dashboard_checkpoint_label }}</span>
+        </div>
+        <div class="dashboard-context-strip__progress" aria-label="Прогресс курса {{ dashboard_progress_pct }}%">
+          <span class="progress-line" aria-hidden="true"><span></span></span>
+          <strong>{{ dashboard_progress_pct }}%</strong>
+        </div>
+      </section>
 
-        <aside class="ui-card node-panel" aria-label="Текущее состояние">
-          <p class="node-panel__title">Текущее состояние</p>
-          <dl class="node-grid">
+
+      <section class="dashboard-lms-grid" aria-label="Краткая учебная сводка">
+        <article class="ui-card lms-summary-card" aria-label="Прогресс">
+          <p class="status-kicker">Прогресс</p>
+          <dl class="lms-lines">
             <div>
               <dt>Курс</dt>
-              <dd>{{ ns.course.body if ns.course else 'Не задано' }}</dd>
-            </div>
-            <div>
-              <dt>Следующий шаг</dt>
-              <dd>{{ ns.next.body if ns.next else 'Не задано' }}</dd>
-            </div>
-            <div>
-              <dt>Прогресс</dt>
-              <dd>{{ ns.progress.body if ns.progress else '0%' }}</dd>
+              <dd>{{ ns.progress.body if ns.progress else '0% завершено' }}</dd>
             </div>
           </dl>
-        </aside>
-      </div>
-    </section>
+        </article>
 
-    <section id="dashboard-summary" class="card-grid card-grid--ops section-block" aria-label="Сводка панели">
-      {% for card in cards %}
-      <article class="ui-card status-card {% if card.title == 'Следующий шаг' %}status-card--focus{% elif card.title == 'Текущий курс' %}status-card--course{% else %}status-card--progress{% endif %}">
-        <p class="status-kicker">{{ card.title }}</p>
-        <p>{{ card.body }}</p>
-        {% if card.href %}
-        <a class="card-link" href="{{ card.href }}">{{ card.link_label }}</a>
-        {% endif %}
-      </article>
-      {% endfor %}
-    </section>
+        <article class="ui-card lms-summary-card lms-summary-card--actions" aria-label="Следующие действия">
+          <p class="status-kicker">Следующие действия</p>
+          <p class="dashboard-action-state">Выполнение: {{ execution_summary.task.title if execution_summary.task else execution_summary.state_label }} · {{ execution_summary.state_label }}</p>
+          <h2>{{ ns.next.body if ns.next else 'Следующий шаг' }}</h2>
+          <p class="rail-card__muted">{{ execution_summary.review_label }}</p>
+          <div class="dashboard-action-row">
+            <a class="btn btn--primary" href="{{ continue_href }}">Продолжить обучение</a>
+            <a class="btn btn--ghost" href="{{ nav_course_href }}">Карта курса</a>
+          </div>
+          {% if execution_summary.href %}
+          <a class="card-link" href="{{ execution_summary.href }}">Открыть задачу</a>
+          {% endif %}
+          {% if checkpoint_snapshot and checkpoint_snapshot.checkpoint %}
+          <p class="rail-card__muted">Checkpoint: {{ checkpoint_snapshot.state_label }}</p>
+          {% endif %}
+        </article>
+
+        <article class="ui-card lms-summary-card" aria-label="Ритм и блокеры">
+          <p class="status-kicker">Итоги недели</p>
+          <p>{{ weekly_recap.completed_count }} уроков / {{ weekly_recap.review_count }} проверки</p>
+          <p class="rail-card__muted">Отправки: {{ weekly_recap.submission_count }} · блокеры: {{ weekly_recap.stuck_count }}</p>
+          {% if weekly_recap.active_stuck %}
+          <div class="dashboard-blocker-line">
+            <p><strong>Блокер:</strong> {{ reason_label(weekly_recap.active_stuck.reason_code) }}</p>
+            {% if weekly_recap.active_stuck.note %}
+            <p class="rail-card__muted">{{ weekly_recap.active_stuck.note }}</p>
+            {% endif %}
+            <a class="card-link" href="/lessons/{{ weekly_recap.active_stuck.lesson_key }}#stuck">Открыть план возврата</a>
+          </div>
+          {% else %}
+          <p class="rail-card__muted"><strong>Блокер:</strong> не активен</p>
+          {% endif %}
+          <a class="card-link" href="/recap">Открыть итоги</a>
+        </article>
+      </section>
     </main>
-
-    <aside id="dashboard-rail" class="workspace-pane workspace-rail dashboard-rail section-block" aria-label="Системные модули">
-    <section class="ui-card rail-card execution-rail" aria-label="Текущая задача">
-      <p class="status-kicker">Выполнение</p>
-      <h2>{{ execution_summary.task.title if execution_summary.task else 'Текущая задача' }}</h2>
-      <p>{{ execution_summary.state_label }}</p>
-      <p class="rail-card__muted">{{ execution_summary.review_label }}</p>
-      {% if execution_summary.href %}
-      <a class="card-link" href="{{ execution_summary.href }}">Открыть задачу</a>
-      {% endif %}
-    </section>
-
-    <section class="ui-card rail-card checkpoint-rail" aria-label="Checkpoint artifact">
-      <p class="status-kicker">Checkpoint</p>
-      {% if checkpoint_snapshot and checkpoint_snapshot.checkpoint %}
-      <h2>{{ checkpoint_snapshot.checkpoint.title }}</h2>
-      <p>{{ checkpoint_snapshot.state_label }}</p>
-      <p class="rail-card__muted">{{ checkpoint_snapshot.checkpoint.summary }}</p>
-      <a class="card-link" href="{{ checkpoint_href }}">Открыть checkpoint</a>
-      {% else %}
-      <h2>Checkpoint не активен</h2>
-      <p class="rail-card__muted">Следующий block artifact появится после уроков модуля.</p>
-      {% endif %}
-    </section>
-
-    <section class="ui-card rail-card friction-rail" aria-label="Активное застревание">
-      <p class="status-kicker">Блокер</p>
-      {% if weekly_recap.active_stuck %}
-      <h2>{{ reason_label(weekly_recap.active_stuck.reason_code) }}</h2>
-      <p>Урок: {{ weekly_recap.active_stuck.lesson_key }}</p>
-      {% if weekly_recap.active_stuck.note %}
-      <p class="rail-card__muted">{{ weekly_recap.active_stuck.note }}</p>
-      {% endif %}
-      <a class="card-link" href="/lessons/{{ weekly_recap.active_stuck.lesson_key }}#stuck">Открыть план возврата</a>
-      <form method="post" action="/stuck/{{ weekly_recap.active_stuck.id }}/resolve">
-        <button type="submit" class="btn btn--ghost btn--sm">Снять блокер</button>
-      </form>
-      {% else %}
-      <h2>Блокер не активен</h2>
-      <p class="rail-card__muted">Если застрянешь, отметь это на странице урока.</p>
-      {% endif %}
-    </section>
-
-    <section class="ui-card rail-card recap-rail" aria-label="Итоги недели">
-      <p class="status-kicker">Итоги недели</p>
-      <h2>{{ weekly_recap.completed_count }} уроков / {{ weekly_recap.review_count }} проверки</h2>
-      <p>Отправки: {{ weekly_recap.submission_count }} · блокеры: {{ weekly_recap.stuck_count }}</p>
-      <p class="rail-card__muted">Фокус: {{ weekly_recap.next_focus_title }}</p>
-      <a class="card-link" href="/recap">Открыть итоги</a>
-    </section>
-    </aside>
   </div>
 </section>
 {% endblock %}

@@ -62,9 +62,34 @@ def dashboard(request: Request):
         if next_lesson_key
         else checkpoint_href
     )
+    current_module_slug = None
+    if snapshot.next_checkpoint_module_slug:
+        current_module_slug = snapshot.next_checkpoint_module_slug
+    elif next_lesson_key and next_lesson_key in registry.lessons:
+        current_module_slug = registry.lessons[next_lesson_key].module_slug
+    elif course.modules:
+        current_module_slug = course.modules[0].slug
+
+    current_module_title = "Модуль не определён"
+    if current_module_slug:
+        current_module_title = next(
+            (module.title for module in course.modules if module.slug == current_module_slug),
+            "Модуль не определён",
+        )
+
     current_checkpoint_snapshot = (
-        snapshot.module_checkpoint_snapshots.get(snapshot.next_checkpoint_module_slug)
-        if snapshot.next_checkpoint_module_slug
+        snapshot.module_checkpoint_snapshots.get(current_module_slug)
+        if current_module_slug
+        else None
+    )
+    checkpoint_state_label = (
+        current_checkpoint_snapshot.state_label
+        if current_checkpoint_snapshot and current_checkpoint_snapshot.checkpoint
+        else "checkpoint не активен"
+    )
+    checkpoint_title = (
+        current_checkpoint_snapshot.checkpoint.title
+        if current_checkpoint_snapshot and current_checkpoint_snapshot.checkpoint
         else None
     )
 
@@ -98,6 +123,11 @@ def dashboard(request: Request):
         context={
             "cards": cards,
             "username": username,
+            "dashboard_course_title": course.title,
+            "dashboard_module_title": current_module_title,
+            "dashboard_progress_pct": snapshot.progress_pct,
+            "dashboard_checkpoint_label": checkpoint_state_label,
+            "dashboard_checkpoint_title": checkpoint_title,
             "continue_href": continue_href,
             "execution_summary": execution_summary,
             "checkpoint_snapshot": current_checkpoint_snapshot,

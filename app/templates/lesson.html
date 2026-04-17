@@ -16,25 +16,25 @@
 
   <section class="workspace-grid lesson-workspace" aria-label="Рабочая область урока">
     <main class="workspace-pane lesson-reading-pane">
-<section class="hero hero--compact hero--lesson bg-lesson" data-page="lesson" data-hero-bg="lesson" aria-labelledby="lesson-title">
+<section class="ui-card lesson-context-strip bg-lesson" data-page="lesson" data-hero-bg="lesson" aria-labelledby="lesson-title">
   <div class="hero__visual overlay-dark" aria-hidden="true"></div>
   <div class="hero__ghost hero__ghost--lain-soft" aria-hidden="true"></div>
-  <div class="hero__content">
-    <p class="eyebrow">Режим урока</p>
-    <h1 id="lesson-title">{{ lesson.title }}</h1>
-    <p class="hero-copy">{{ lesson.summary }}</p>
-    <div class="meta-row">
-      <span class="meta-pill">Статус: {{ lesson_status_label }}</span>
-      <span class="meta-pill">Раздел: {{ module_title }}</span>
-      <span class="meta-pill">Курс: {{ course_title }}</span>
-      <span class="meta-pill">Прогресс: {{ progress_pct }}%</span>
-      {% if execution.task %}
-      <span class="meta-pill">Задача: {{ execution.task.title }}</span>
-      {% elif execution.missing_task_slug %}
-      <span class="meta-pill">Задача не найдена: {{ execution.missing_task_slug }}</span>
-      {% endif %}
+  <div class="lesson-context-strip__body">
+    <div>
+      <p class="eyebrow">Режим урока</p>
+      <h1 id="lesson-title">{{ lesson.title }}</h1>
+      <p class="hero-copy">{{ lesson.summary }}</p>
+      <div class="meta-row">
+        <span class="meta-pill">Статус: {{ lesson_status_label }}</span>
+        <span class="meta-pill">Раздел: {{ module_title }}</span>
+        {% if execution.task %}
+        <span class="meta-pill">Задача: {{ execution.task.title }}</span>
+        {% elif execution.missing_task_slug %}
+        <span class="meta-pill">Задача не найдена: {{ execution.missing_task_slug }}</span>
+        {% endif %}
+      </div>
     </div>
-    <div class="hero-actions">
+    <div class="lesson-context-actions">
       {% if is_lesson_completed %}
       <span class="status-chip status-chip--success">Урок завершён</span>
       {% elif lesson.task_slug and not execution.submission_snapshot.is_approved %}
