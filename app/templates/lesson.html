@@ -119,7 +119,7 @@
     {% endif %}
 
     <article class="ui-card lesson-card stuck-panel" id="stuck">
-      <p class="lesson-nav-title">Stuck flow</p>
+      <p class="lesson-nav-title">Блокер</p>
       <h2>Я застрял</h2>
       {% if stuck_context.active_event %}
       <p>Активный blocker: {{ stuck_context.reason_options.get(stuck_context.active_event.reason_code, stuck_context.active_event.reason_code) }}</p>
@@ -143,7 +143,7 @@
       </form>
       {% endif %}
 
-      <h3>Recovery path</h3>
+      <h3>План возврата</h3>
       <ul>
         {% for step in stuck_context.recovery_steps %}
         <li><strong>{{ step.title }}:</strong> {{ step.body }}</li>

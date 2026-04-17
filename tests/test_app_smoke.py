@@ -309,7 +309,7 @@ def test_dashboard_shows_current_task_execution_state() -> None:
         dashboard_response = client.get("/dashboard")
 
     assert dashboard_response.status_code == 200
-    assert "Execution" in dashboard_response.text
+    assert "Выполнение" in dashboard_response.text
     assert "Проверить структуру приложения" in dashboard_response.text
     assert "ожидает submission" in dashboard_response.text
 
@@ -428,7 +428,7 @@ def test_stuck_event_creation_and_recovery_path_rendering() -> None:
 
     assert "Активный blocker: Не понимаю задачу" in lesson_response.text
     assert "Не понимаю, где искать loader" in lesson_response.text
-    assert "Recovery path" in lesson_response.text
+    assert "План возврата" in lesson_response.text
 
     with Session(get_engine()) as session:
         event = session.exec(select(StuckEvent)).first()
@@ -481,12 +481,12 @@ def test_dashboard_active_friction_and_weekly_recap_rendering() -> None:
         dashboard_response = client.get("/dashboard")
 
     assert dashboard_response.status_code == 200
-    assert "Friction" in dashboard_response.text
+    assert "Блокер" in dashboard_response.text
     assert "Не понимаю review" in dashboard_response.text
     assert "Не понимаю feedback" in dashboard_response.text
-    assert "Weekly recap" in dashboard_response.text
+    assert "Итоги недели" in dashboard_response.text
     assert "1 уроков" in dashboard_response.text
-    assert "stuck: 1" in dashboard_response.text
+    assert "блокеры: 1" in dashboard_response.text
 
 
 def test_weekly_recap_page_aggregates_clean_flow_artifacts() -> None:

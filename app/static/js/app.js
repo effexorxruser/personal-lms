@@ -7,7 +7,7 @@
       var time = node.querySelector("[data-clock-time]");
       var date = node.querySelector("[data-clock-date]");
 
-      if (!zone || !time || !date) return;
+      if (!zone || !time) return;
 
       var now = new Date();
       time.textContent = new Intl.DateTimeFormat("ru-RU", {
@@ -16,11 +16,13 @@
         hour12: false,
         timeZone: zone,
       }).format(now);
-      date.textContent = new Intl.DateTimeFormat("ru-RU", {
-        day: "2-digit",
-        month: "2-digit",
-        timeZone: zone,
-      }).format(now);
+      if (date) {
+        date.textContent = new Intl.DateTimeFormat("ru-RU", {
+          day: "2-digit",
+          month: "2-digit",
+          timeZone: zone,
+        }).format(now);
+      }
     });
   }
 
