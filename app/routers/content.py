@@ -19,6 +19,7 @@ from app.services.progress_service import (
     mark_lesson_opened,
 )
 from app.services.submission_service import create_submission, submission_type_label
+from app.services.stuck_service import create_stuck_event, resolve_stuck_event, stuck_context_for_lesson
 from app.services.task_service import resolve_lesson_task
 
 TEMPLATES_DIR = Path(__file__).resolve().parents[1] / "templates"
@@ -101,6 +102,14 @@ def lesson_page(request: Request, lesson_key: str):
             lesson,
             completion_blocked_reason=request.query_params.get("completion_blocked"),
         )
+        stuck_context = stuck_context_for_lesson(
+            session,
+            user_id,
+            lesson,
+            execution.task,
+            prev_lesson_key,
+            next_lesson_key,
+        )
 
     return templates.TemplateResponse(
         request=request,
@@ -115,6 +124,7 @@ def lesson_page(request: Request, lesson_key: str):
             "submission_type_label": submission_type_label(
                 execution.task.submission_type if execution.task else None
             ),
+            "stuck_context": stuck_context,
             "progress_pct": snapshot.progress_pct,
             "prev_lesson_key": prev_lesson_key,
             "next_lesson_key": next_lesson_key,
@@ -189,3 +199,43 @@ def submit_lesson_task(
         session.commit()
 
     return RedirectResponse(url=f"/lessons/{lesson.key}#task", status_code=303)
+
+
+@router.post("/lessons/{lesson_key}/stuck")
+def mark_lesson_stuck(
+    request: Request,
+    lesson_key: str,
+    reason_code: str = Form(...),
+    note: str = Form(default=""),
+):
+    auth_result = _require_auth(request)
+    if isinstance(auth_result, RedirectResponse):
+        return auth_result
+    user_id = auth_result
+
+    lesson = get_lesson_or_404(lesson_key)
+    with Session(get_engine()) as session:
+        ensure_progress_initialized(session, user_id, lesson.course_slug)
+        try:
+            create_stuck_event(session, user_id, lesson, reason_code, note)
+        except ValueError:
+            session.rollback()
+            return RedirectResponse(url=f"/lessons/{lesson.key}?stuck_error=invalid_reason#stuck", status_code=303)
+        session.commit()
+
+    return RedirectResponse(url=f"/lessons/{lesson.key}#stuck", status_code=303)
+
+
+@router.post("/stuck/{event_id}/resolve")
+def resolve_stuck(request: Request, event_id: int):
+    auth_result = _require_auth(request)
+    if isinstance(auth_result, RedirectResponse):
+        return auth_result
+    user_id = auth_result
+
+    redirect_to = request.headers.get("referer") or "/dashboard"
+    with Session(get_engine()) as session:
+        resolve_stuck_event(session, user_id, event_id)
+        session.commit()
+
+    return RedirectResponse(url=redirect_to, status_code=303)

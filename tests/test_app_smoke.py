@@ -11,7 +11,7 @@ from app.config import get_settings
 from app.db import get_engine, init_db
 from app.main import create_app
 from app.content_registry import get_content_registry
-from app.models import CourseProgress, LessonProgress, ReviewResult, TaskSubmission, User
+from app.models import CourseProgress, LessonProgress, ReviewResult, StuckEvent, TaskSubmission, User
 from app.security import hash_password
 
 DB_PATH = Path("instance/test_auth.db")
@@ -27,6 +27,7 @@ def _prepare_db() -> None:
 
     init_db()
     with Session(get_engine()) as session:
+        session.exec(delete(StuckEvent))
         session.exec(delete(ReviewResult))
         session.exec(delete(TaskSubmission))
         session.exec(delete(LessonProgress))
@@ -409,3 +410,112 @@ def test_clean_flow_keeps_dashboard_course_and_lesson_progress_consistent() -> N
     assert "100% завершено (3/3 уроков)" in final_dashboard.text
     assert "Прогресс: 100%" in final_course.text
     assert "Статус: завершён" in final_lesson.text
+
+
+def test_stuck_event_creation_and_recovery_path_rendering() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+        response = client.post(
+            "/lessons/backend-structure/stuck",
+            data={"reason_code": "unclear_task", "note": "Не понимаю, где искать loader"},
+            follow_redirects=False,
+        )
+        assert response.status_code == 303
+        assert response.headers["location"] == "/lessons/backend-structure#stuck"
+
+        lesson_response = client.get("/lessons/backend-structure")
+
+    assert "Активный blocker: Не понимаю задачу" in lesson_response.text
+    assert "Не понимаю, где искать loader" in lesson_response.text
+    assert "Recovery path" in lesson_response.text
+
+    with Session(get_engine()) as session:
+        event = session.exec(select(StuckEvent)).first()
+
+    assert event is not None
+    assert event.status == "open"
+    assert event.lesson_key == "backend-structure"
+    assert event.task_slug == "inspect-app-layout"
+
+
+def test_stuck_event_resolution() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+        client.post(
+            "/lessons/backend-structure/stuck",
+            data={"reason_code": "blocked_by_error", "note": "Ошибка в локальном запуске"},
+            follow_redirects=False,
+        )
+
+    with Session(get_engine()) as session:
+        event = session.exec(select(StuckEvent)).first()
+        assert event is not None
+        event_id = event.id
+
+    assert event_id is not None
+    with TestClient(create_app()) as client:
+        _login(client)
+        response = client.post(f"/stuck/{event_id}/resolve", follow_redirects=False)
+        assert response.status_code == 303
+
+    with Session(get_engine()) as session:
+        resolved = session.get(StuckEvent, event_id)
+
+    assert resolved is not None
+    assert resolved.status == "resolved"
+    assert resolved.resolved_at is not None
+
+
+def test_dashboard_active_friction_and_weekly_recap_rendering() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+        client.post("/lessons/foundation-intro/complete", follow_redirects=False)
+        client.post(
+            "/lessons/backend-structure/stuck",
+            data={"reason_code": "review_confusion", "note": "Не понимаю feedback"},
+            follow_redirects=False,
+        )
+        dashboard_response = client.get("/dashboard")
+
+    assert dashboard_response.status_code == 200
+    assert "Friction" in dashboard_response.text
+    assert "Не понимаю review" in dashboard_response.text
+    assert "Не понимаю feedback" in dashboard_response.text
+    assert "Weekly recap" in dashboard_response.text
+    assert "1 уроков" in dashboard_response.text
+    assert "stuck: 1" in dashboard_response.text
+
+
+def test_weekly_recap_page_aggregates_clean_flow_artifacts() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+        client.post("/lessons/foundation-intro/complete", follow_redirects=False)
+        client.post(
+            "/lessons/backend-structure/stuck",
+            data={"reason_code": "missing_context", "note": "Нужно вернуться к структуре проекта"},
+            follow_redirects=False,
+        )
+        client.post(
+            "/lessons/backend-structure/submissions",
+            data={
+                "submission_type": "text",
+                "content_text": (
+                    "Router: app/routers/content.py. Loader: app/content_loader.py. "
+                    "Runtime progress: app/services/progress_service.py."
+                ),
+            },
+            follow_redirects=False,
+        )
+        recap_response = client.get("/recap")
+
+    assert recap_response.status_code == 200
+    assert "Итоги последних 7 дней" in recap_response.text
+    assert "Урок 1: Введение в трек" in recap_response.text
+    assert "Проверить структуру приложения" in recap_response.text
+    assert "review пройден" in recap_response.text
+    assert "Не хватает контекста" in recap_response.text
+    assert "Урок 2: Структура backend" in recap_response.text

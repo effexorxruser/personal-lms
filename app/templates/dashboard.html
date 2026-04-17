@@ -90,6 +90,32 @@
       <a class="card-link" href="{{ execution_summary.href }}">Открыть task flow</a>
       {% endif %}
     </section>
+
+    <section class="ui-card rail-card friction-rail" aria-label="Активное застревание">
+      <p class="status-kicker">Friction</p>
+      {% if weekly_recap.active_stuck %}
+      <h2>{{ reason_label(weekly_recap.active_stuck.reason_code) }}</h2>
+      <p>Урок: {{ weekly_recap.active_stuck.lesson_key }}</p>
+      {% if weekly_recap.active_stuck.note %}
+      <p class="rail-card__muted">{{ weekly_recap.active_stuck.note }}</p>
+      {% endif %}
+      <a class="card-link" href="/lessons/{{ weekly_recap.active_stuck.lesson_key }}#stuck">Открыть recovery path</a>
+      <form method="post" action="/stuck/{{ weekly_recap.active_stuck.id }}/resolve">
+        <button type="submit" class="btn btn--ghost btn--sm">Снять blocker</button>
+      </form>
+      {% else %}
+      <h2>Blocker не активен</h2>
+      <p class="rail-card__muted">Если застрянешь, отметь это на странице урока.</p>
+      {% endif %}
+    </section>
+
+    <section class="ui-card rail-card recap-rail" aria-label="Weekly recap">
+      <p class="status-kicker">Weekly recap</p>
+      <h2>{{ weekly_recap.completed_count }} уроков / {{ weekly_recap.review_count }} review</h2>
+      <p>Submissions: {{ weekly_recap.submission_count }} · stuck: {{ weekly_recap.stuck_count }}</p>
+      <p class="rail-card__muted">Next focus: {{ weekly_recap.next_focus_title }}</p>
+      <a class="card-link" href="/recap">Открыть recap</a>
+    </section>
   </aside>
 </div>
 {% endblock %}

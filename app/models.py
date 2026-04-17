@@ -63,3 +63,16 @@ class ReviewResult(SQLModel, table=True):
     feedback: str
     blocking_reason: str | None = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class StuckEvent(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(index=True, foreign_key="user.id")
+    course_slug: str = Field(index=True)
+    lesson_key: str = Field(index=True)
+    task_slug: str | None = Field(default=None, index=True)
+    reason_code: str = Field(index=True)
+    note: str | None = None
+    status: str = Field(default="open", index=True)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    resolved_at: datetime | None = None

@@ -118,6 +118,39 @@
     </article>
     {% endif %}
 
+    <article class="ui-card lesson-card stuck-panel" id="stuck">
+      <p class="lesson-nav-title">Stuck flow</p>
+      <h2>Я застрял</h2>
+      {% if stuck_context.active_event %}
+      <p>Активный blocker: {{ stuck_context.reason_options.get(stuck_context.active_event.reason_code, stuck_context.active_event.reason_code) }}</p>
+      {% if stuck_context.active_event.note %}
+      <p class="rail-card__muted">{{ stuck_context.active_event.note }}</p>
+      {% endif %}
+      <form method="post" action="/stuck/{{ stuck_context.active_event.id }}/resolve">
+        <button type="submit" class="btn btn--ghost">Снять blocker</button>
+      </form>
+      {% else %}
+      <form class="task-form" method="post" action="/lessons/{{ lesson.key }}/stuck">
+        <label for="reason_code">Что мешает двигаться?</label>
+        <select id="reason_code" name="reason_code">
+          {% for code, label in stuck_context.reason_options.items() %}
+          <option value="{{ code }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+        <label for="stuck_note">Заметка</label>
+        <textarea id="stuck_note" name="note" rows="4" placeholder="Коротко опиши, где застрял"></textarea>
+        <button type="submit" class="btn btn--ghost">Зафиксировать stuck</button>
+      </form>
+      {% endif %}
+
+      <h3>Recovery path</h3>
+      <ul>
+        {% for step in stuck_context.recovery_steps %}
+        <li><strong>{{ step.title }}:</strong> {{ step.body }}</li>
+        {% endfor %}
+      </ul>
+    </article>
+
     <article class="ui-card lesson-card lesson-card--ops">
       <h2>Цели</h2>
       <ul>

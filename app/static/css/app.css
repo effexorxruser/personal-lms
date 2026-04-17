@@ -830,6 +830,44 @@ dl { margin-top: 0; }
   box-shadow: var(--glass-inner);
 }
 
+.recap-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.recap-card {
+  padding: 16px;
+  background: var(--compact-card-surface);
+}
+
+.recap-card ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recap-card li {
+  display: grid;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-panel);
+  background: var(--clock-node-surface);
+}
+
+.recap-card span,
+.recap-card p {
+  color: var(--text-secondary);
+  line-height: var(--line-copy);
+}
+
+.recap-card--focus {
+  grid-column: 1 / -1;
+}
+
 /* =====================
    Lesson
 ===================== */
@@ -967,7 +1005,8 @@ dl { margin-top: 0; }
 }
 
 .task-form textarea,
-.task-form input {
+.task-form input,
+.task-form select {
   width: 100%;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-control);
@@ -981,9 +1020,19 @@ dl { margin-top: 0; }
   padding: 10px;
 }
 
-.task-form input {
+.task-form input,
+.task-form select {
   height: 38px;
   padding: 0 10px;
+}
+
+.stuck-panel {
+  background: var(--lesson-nav-surface);
+}
+
+.stuck-panel h3 {
+  margin: var(--space-3) 0 var(--space-1);
+  font-size: var(--font-size-md);
 }
 
 .lesson-nav-panel {
@@ -1073,6 +1122,7 @@ dl { margin-top: 0; }
   }
 
   .card-grid--ops { grid-template-columns: 1fr; }
+  .recap-grid { grid-template-columns: 1fr; }
   .world-clock {
     position: relative;
     width: 100%;
