@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "devDependencies": {
+    "@storybook/addon-essentials": "^8.6.18",
+    "@storybook/html-vite": "^8.6.18",
+    "storybook": "^8.6.18",
+    "typescript": "^5.8.3"
+  }
+}
