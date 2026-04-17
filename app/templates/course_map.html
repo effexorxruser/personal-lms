@@ -3,108 +3,116 @@
 {% block title %}Курс | {{ course.title }}{% endblock %}
 
 {% block content %}
-<nav class="breadcrumbs" aria-label="Навигация по разделу">
-  <a href="/dashboard">Главная</a>
-  <span>/</span>
-  <span aria-current="page">Карта курса</span>
-</nav>
+<section class="workspace-shell course-workspace">
+  <main class="workspace-pane course-pane">
+    <nav class="breadcrumbs" aria-label="Навигация по разделу">
+      <a href="/dashboard">Главная</a>
+      <span>/</span>
+      <span aria-current="page">Карта курса</span>
+    </nav>
 
-<section class="hero hero--compact hero--course bg-course" data-page="course" data-hero-bg="course" aria-labelledby="course-title">
-  <div class="hero__visual overlay-dark" aria-hidden="true"></div>
-  <div class="hero__content">
-    <p class="eyebrow">Карта курса</p>
-    <h1 id="course-title">{{ course.title }}</h1>
-    <p class="hero-copy">{{ course.description }}</p>
-    <div class="meta-row">
-      <span class="meta-pill">Версия: {{ course.version }}</span>
-      <span class="meta-pill">Оценка: {{ course.estimated_weeks }} нед.</span>
-      <span class="meta-pill">Прогресс: {{ progress_pct }}%</span>
-      {% if next_step_key %}
-      <span class="meta-pill">Следующий шаг: <a class="inline-link" href="/lessons/{{ next_step_key }}">урок</a></span>
-      {% endif %}
-    </div>
-  </div>
-</section>
-
-<section class="module-list" aria-label="Список модулей">
-  {% for module in course.modules %}
-  {% set ns = namespace(has_active=false) %}
-  {% for lesson in module.lessons %}
-    {% set status = lesson_statuses.get(lesson.key, 'доступен') %}
-    {% if status != 'завершён' and not ns.has_active %}
-      {% set ns.has_active = true %}
-    {% endif %}
-  {% endfor %}
-  <details class="ui-card module-card module-details" {% if ns.has_active or loop.first %}open{% endif %}>
-    <summary class="module-head">
-      <h2>{{ loop.index }}. {{ module.title }}</h2>
-      <p>{{ module.description }}</p>
-      <span class="status-chip {% if module_statuses.get(module.slug) == 'завершён' %}status-chip--success{% elif module_statuses.get(module.slug) == 'требует доработки' %}status-chip--revision{% else %}status-chip--active{% endif %}">
-        Модуль: {{ module_statuses.get(module.slug, 'доступен') }}
-      </span>
-    </summary>
-    <ol class="lesson-list lesson-list--structured">
-      {% for lesson in module.lessons %}
-      {% set status = lesson_statuses.get(lesson.key, 'доступен') %}
-      <li class="lesson-row">
-        <a class="inline-link" href="/lessons/{{ lesson.key }}">{{ lesson.title }}</a>
-        <span class="status-chip {% if status == 'завершён' %}status-chip--success{% elif status == 'требует доработки' %}status-chip--revision{% elif status == 'review пройден' or status == 'в процессе' or status == 'отправлено' %}status-chip--active{% endif %}">Статус: {{ status }}</span>
-      </li>
-      {% endfor %}
-    </ol>
-    {% set checkpoint_snapshot = module_checkpoint_snapshots.get(module.slug) %}
-    {% if checkpoint_snapshot and checkpoint_snapshot.checkpoint %}
-    {% set checkpoint = checkpoint_snapshot.checkpoint %}
-    <section id="checkpoint-{{ checkpoint.slug }}" class="checkpoint-panel">
-      <div class="checkpoint-panel__head">
-        <p class="status-kicker">Checkpoint artifact</p>
-        <span class="status-chip {% if checkpoint_snapshot.is_approved %}status-chip--success{% elif checkpoint_snapshot.state == 'needs_revision' %}status-chip--revision{% else %}status-chip--active{% endif %}">
-          {{ checkpoint_snapshot.state_label }}
-        </span>
-      </div>
-      <h3>{{ checkpoint.title }}</h3>
-      <p>{{ checkpoint.summary }}</p>
-      <p class="rail-card__muted">{{ checkpoint.description }}</p>
-
-      <div class="checkpoint-grid">
-        <div>
-          <h4>Требования</h4>
-          <ul>
-            {% for item in checkpoint.requirements %}
-            <li>{{ item }}</li>
-            {% endfor %}
-          </ul>
-        </div>
-        <div>
-          <h4>Portfolio ожидания</h4>
-          <ul>
-            {% for item in checkpoint.portfolio_expectations %}
-            <li>{{ item }}</li>
-            {% endfor %}
-          </ul>
+    <section class="hero hero--compact hero--course bg-course" data-page="course" data-hero-bg="course" aria-labelledby="course-title">
+      <div class="hero__visual overlay-dark" aria-hidden="true"></div>
+      <div class="hero__content">
+        <p class="eyebrow">Карта курса</p>
+        <h1 id="course-title">{{ course.title }}</h1>
+        <p class="hero-copy">{{ course.description }}</p>
+        <div class="meta-row">
+          <span class="meta-pill">Версия: {{ course.version }}</span>
+          <span class="meta-pill">Оценка: {{ course.estimated_weeks }} нед.</span>
+          <span class="meta-pill">Прогресс: {{ progress_pct }}%</span>
+          {% if next_step_key %}
+          <span class="meta-pill">Следующий шаг: <a class="inline-link" href="/lessons/{{ next_step_key }}">урок</a></span>
+          {% endif %}
         </div>
       </div>
-
-      {% if checkpoint_snapshot.review %}
-      <div class="task-review {% if checkpoint_snapshot.state == 'needs_revision' %}task-review--revision{% else %}task-review--approved{% endif %}">
-        <p class="status-kicker">Результат проверки</p>
-        <p>{{ checkpoint_snapshot.review.feedback }}</p>
-      </div>
-      {% endif %}
-
-      {% if not checkpoint_snapshot.is_approved %}
-      <form class="task-form checkpoint-form" method="post" action="/checkpoints/{{ checkpoint.slug }}/submissions">
-        <input type="hidden" name="submission_type" value="{{ checkpoint.submission_type }}">
-        <label for="checkpoint_link_{{ checkpoint.slug }}">{{ checkpoint_submission_type_label(checkpoint.submission_type) }}</label>
-        <input id="checkpoint_link_{{ checkpoint.slug }}" name="content_link" type="url" placeholder="https://github.com/..." value="{{ checkpoint_snapshot.latest_submission.content_link if checkpoint_snapshot.latest_submission and checkpoint_snapshot.latest_submission.content_link else '' }}">
-        <label for="checkpoint_text_{{ checkpoint.slug }}">Короткое описание артефакта</label>
-        <textarea id="checkpoint_text_{{ checkpoint.slug }}" name="content_text" rows="4" placeholder="Что собрано, как запустить, что проверить">{{ checkpoint_snapshot.latest_submission.content_text if checkpoint_snapshot.latest_submission and checkpoint_snapshot.latest_submission.content_text else '' }}</textarea>
-        <button type="submit" class="btn btn--primary">Отправить checkpoint</button>
-      </form>
-      {% endif %}
     </section>
-    {% endif %}
-  </details>
-  {% endfor %}
+
+    <section class="module-list" data-accordion="single" aria-label="Список модулей">
+      {% set course_ns = namespace(opened=false) %}
+      {% for module in course.modules %}
+      {% set module_state = module_statuses.get(module.slug, 'доступен') %}
+      {% set should_open = (not course_ns.opened and module_state != 'завершён') or (loop.first and not course_ns.opened) %}
+      {% if should_open %}{% set course_ns.opened = true %}{% endif %}
+      <details class="ui-card module-card module-details" {% if should_open %}open{% endif %}>
+        <summary class="module-head">
+          <span class="module-head__index">{{ loop.index }}</span>
+          <span class="module-head__body">
+            <h2>{{ module.title }}</h2>
+            <p>{{ module.description }}</p>
+          </span>
+          <span class="status-chip {% if module_state == 'завершён' %}status-chip--success{% elif module_state == 'требует доработки' %}status-chip--revision{% else %}status-chip--active{% endif %}">
+            Модуль: {{ module_state }}
+          </span>
+        </summary>
+
+        <div class="module-details__content">
+          <ol class="lesson-list lesson-list--structured">
+            {% for lesson in module.lessons %}
+            {% set status = lesson_statuses.get(lesson.key, 'доступен') %}
+            <li class="lesson-row">
+              <a class="inline-link" href="/lessons/{{ lesson.key }}">{{ lesson.title }}</a>
+              <span class="status-chip {% if status == 'завершён' %}status-chip--success{% elif status == 'требует доработки' %}status-chip--revision{% elif status == 'review пройден' or status == 'в процессе' or status == 'отправлено' %}status-chip--active{% endif %}">Статус: {{ status }}</span>
+            </li>
+            {% endfor %}
+          </ol>
+
+          {% set checkpoint_snapshot = module_checkpoint_snapshots.get(module.slug) %}
+          {% if checkpoint_snapshot and checkpoint_snapshot.checkpoint %}
+          {% set checkpoint = checkpoint_snapshot.checkpoint %}
+          <section id="checkpoint-{{ checkpoint.slug }}" class="checkpoint-panel">
+            <div class="checkpoint-panel__head">
+              <p class="status-kicker">Checkpoint artifact</p>
+              <span class="status-chip {% if checkpoint_snapshot.is_approved %}status-chip--success{% elif checkpoint_snapshot.state == 'needs_revision' %}status-chip--revision{% else %}status-chip--active{% endif %}">
+                {{ checkpoint_snapshot.state_label }}
+              </span>
+            </div>
+            <h3>{{ checkpoint.title }}</h3>
+            <p>{{ checkpoint.summary }}</p>
+            <p class="rail-card__muted">{{ checkpoint.description }}</p>
+
+            <div class="checkpoint-grid">
+              <div>
+                <h4>Требования</h4>
+                <ul>
+                  {% for item in checkpoint.requirements %}
+                  <li>{{ item }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+              <div>
+                <h4>Portfolio ожидания</h4>
+                <ul>
+                  {% for item in checkpoint.portfolio_expectations %}
+                  <li>{{ item }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+
+            {% if checkpoint_snapshot.review %}
+            <div class="task-review {% if checkpoint_snapshot.state == 'needs_revision' %}task-review--revision{% else %}task-review--approved{% endif %}">
+              <p class="status-kicker">Результат проверки</p>
+              <p>{{ checkpoint_snapshot.review.feedback }}</p>
+            </div>
+            {% endif %}
+
+            {% if not checkpoint_snapshot.is_approved %}
+            <form class="task-form checkpoint-form" method="post" action="/checkpoints/{{ checkpoint.slug }}/submissions">
+              <input type="hidden" name="submission_type" value="{{ checkpoint.submission_type }}">
+              <label for="checkpoint_link_{{ checkpoint.slug }}">{{ checkpoint_submission_type_label(checkpoint.submission_type) }}</label>
+              <input id="checkpoint_link_{{ checkpoint.slug }}" name="content_link" type="url" placeholder="https://github.com/..." value="{{ checkpoint_snapshot.latest_submission.content_link if checkpoint_snapshot.latest_submission and checkpoint_snapshot.latest_submission.content_link else '' }}">
+              <label for="checkpoint_text_{{ checkpoint.slug }}">Короткое описание артефакта</label>
+              <textarea id="checkpoint_text_{{ checkpoint.slug }}" name="content_text" rows="4" placeholder="Что собрано, как запустить, что проверить">{{ checkpoint_snapshot.latest_submission.content_text if checkpoint_snapshot.latest_submission and checkpoint_snapshot.latest_submission.content_text else '' }}</textarea>
+              <button type="submit" class="btn btn--primary">Отправить checkpoint</button>
+            </form>
+            {% endif %}
+          </section>
+          {% endif %}
+        </div>
+      </details>
+      {% endfor %}
+    </section>
+  </main>
 </section>
 {% endblock %}

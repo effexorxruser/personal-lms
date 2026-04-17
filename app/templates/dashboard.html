@@ -10,14 +10,17 @@
   {% if card.title == 'Прогресс недели' %}{% set ns.progress = card %}{% endif %}
 {% endfor %}
 
-<nav class="section-nav" aria-label="Навигация по секциям">
-  <a href="#dashboard-main">Центр</a>
-  <a href="#dashboard-summary">Сводка</a>
-  <a href="#dashboard-rail">Модули</a>
-</nav>
+<section class="workspace-shell dashboard-workspace">
+  <div class="workspace-toolbar">
+    <nav class="section-nav" aria-label="Навигация по секциям">
+      <a href="#dashboard-main">Центр</a>
+      <a href="#dashboard-summary">Сводка</a>
+      <a href="#dashboard-rail">Модули</a>
+    </nav>
+  </div>
 
-<div class="dashboard-layout section-flow">
-  <main class="dashboard-main">
+  <div class="workspace-grid dashboard-layout section-flow">
+    <main class="workspace-pane dashboard-main">
     <section id="dashboard-main" class="hero hero--compact hero--node bg-dashboard section-block" data-page="dashboard" data-hero-bg="dashboard" aria-labelledby="dashboard-title">
       <div class="hero__visual overlay-dark" aria-hidden="true"></div>
       <div class="hero__ghost hero__ghost--lain" aria-hidden="true"></div>
@@ -63,9 +66,9 @@
       </article>
       {% endfor %}
     </section>
-  </main>
+    </main>
 
-  <aside id="dashboard-rail" class="dashboard-rail section-block" aria-label="Системные модули">
+    <aside id="dashboard-rail" class="workspace-pane workspace-rail dashboard-rail section-block" aria-label="Системные модули">
     <section class="ui-card rail-card execution-rail" aria-label="Текущая задача">
       <p class="status-kicker">Выполнение</p>
       <h2>{{ execution_summary.task.title if execution_summary.task else 'Текущая задача' }}</h2>
@@ -114,6 +117,7 @@
       <p class="rail-card__muted">Фокус: {{ weekly_recap.next_focus_title }}</p>
       <a class="card-link" href="/recap">Открыть итоги</a>
     </section>
-  </aside>
-</div>
+    </aside>
+  </div>
+</section>
 {% endblock %}

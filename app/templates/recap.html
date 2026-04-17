@@ -3,93 +3,99 @@
 {% block title %}Итоги недели | personal-lms{% endblock %}
 
 {% block content %}
-<nav class="breadcrumbs" aria-label="Навигация по разделу">
-  <a href="/dashboard">Главная</a>
-  <span>/</span>
-  <span aria-current="page">Итоги недели</span>
-</nav>
+<section class="workspace-shell recap-workspace">
+  <div class="workspace-toolbar">
+    <nav class="breadcrumbs" aria-label="Навигация по разделу">
+      <a href="/dashboard">Главная</a>
+      <span>/</span>
+      <span aria-current="page">Итоги недели</span>
+    </nav>
 
-<nav class="section-nav" aria-label="Навигация по итогам">
-  <a href="#recap-overview">Обзор</a>
-  <a href="#recap-lessons">Уроки</a>
-  <a href="#recap-execution">Практика</a>
-  <a href="#recap-focus">Фокус</a>
-</nav>
-
-<section id="recap-overview" class="hero hero--compact bg-dashboard section-block" data-page="dashboard" data-hero-bg="dashboard" aria-labelledby="recap-title">
-  <div class="hero__visual overlay-dark" aria-hidden="true"></div>
-  <div class="hero__content">
-    <p class="eyebrow">Итоги недели</p>
-    <h1 id="recap-title">Итоги последних 7 дней</h1>
-    <p class="hero-copy">Итоги собираются из реальных учебных событий: завершённые уроки, отправки, проверки и моменты, где ты застрял.</p>
-    <div class="meta-row">
-      <span class="meta-pill">Уроки: {{ weekly_recap.completed_count }}</span>
-      <span class="meta-pill">Отправки: {{ weekly_recap.submission_count }}</span>
-      <span class="meta-pill">Проверки: {{ weekly_recap.review_count }}</span>
-      <span class="meta-pill">Блокеры: {{ weekly_recap.stuck_count }}</span>
-    </div>
+    <nav class="workspace-tabs" data-tabs aria-label="Навигация по итогам">
+      <button type="button" class="is-active" data-tab-target="recap-lessons">Уроки</button>
+      <button type="button" data-tab-target="recap-execution">Практика</button>
+      <button type="button" data-tab-target="recap-blockers">Блокеры</button>
+      <button type="button" data-tab-target="recap-focus">Фокус</button>
+    </nav>
   </div>
-</section>
 
-<section class="recap-grid section-flow" aria-label="Детали итогов недели">
-  <article id="recap-lessons" class="ui-card recap-card section-block">
-    <p class="status-kicker">Завершённые уроки</p>
-    {% if weekly_recap.completed_lessons %}
-    <ul>
-      {% for item in weekly_recap.completed_lessons %}
-      <li><strong>{{ item.title }}</strong><span>{{ item.meta }}</span></li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p>За последние 7 дней завершённых уроков нет.</p>
-    {% endif %}
-  </article>
+  <main class="workspace-pane recap-pane">
+    <section id="recap-overview" class="hero hero--compact bg-dashboard section-block" data-page="dashboard" data-hero-bg="dashboard" aria-labelledby="recap-title">
+      <div class="hero__visual overlay-dark" aria-hidden="true"></div>
+      <div class="hero__content">
+        <p class="eyebrow">Итоги недели</p>
+        <h1 id="recap-title">Итоги последних 7 дней</h1>
+        <p class="hero-copy">Итоги собираются из реальных учебных событий: завершённые уроки, отправки, проверки и моменты, где ты застрял.</p>
+        <div class="meta-row">
+          <span class="meta-pill">Уроки: {{ weekly_recap.completed_count }}</span>
+          <span class="meta-pill">Отправки: {{ weekly_recap.submission_count }}</span>
+          <span class="meta-pill">Проверки: {{ weekly_recap.review_count }}</span>
+          <span class="meta-pill">Блокеры: {{ weekly_recap.stuck_count }}</span>
+        </div>
+      </div>
+    </section>
 
-  <article id="recap-execution" class="ui-card recap-card section-block">
-    <p class="status-kicker">Отправки</p>
-    {% if weekly_recap.submissions %}
-    <ul>
-      {% for item in weekly_recap.submissions %}
-      <li><strong>{{ item.title }}</strong><span>{{ item.meta }}</span></li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p>Отправок ещё не было.</p>
-    {% endif %}
-  </article>
+    <section class="recap-tab-panels" aria-label="Детали итогов недели">
+      <article id="recap-lessons" class="ui-card recap-card" data-tab-panel>
+        <p class="status-kicker">Завершённые уроки</p>
+        {% if weekly_recap.completed_lessons %}
+        <ul>
+          {% for item in weekly_recap.completed_lessons %}
+          <li><strong>{{ item.title }}</strong><span>{{ item.meta }}</span></li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p>За последние 7 дней завершённых уроков нет.</p>
+        {% endif %}
+      </article>
 
-  <article class="ui-card recap-card">
-    <p class="status-kicker">Результаты проверки</p>
-    {% if weekly_recap.reviews %}
-    <ul>
-      {% for item in weekly_recap.reviews %}
-      <li><strong>{{ item.title }}</strong><span>{{ item.meta }}</span></li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p>Результатов проверки пока нет.</p>
-    {% endif %}
-  </article>
+      <article id="recap-execution" class="ui-card recap-card" data-tab-panel hidden>
+        <p class="status-kicker">Отправки</p>
+        {% if weekly_recap.submissions %}
+        <ul>
+          {% for item in weekly_recap.submissions %}
+          <li><strong>{{ item.title }}</strong><span>{{ item.meta }}</span></li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p>Отправок ещё не было.</p>
+        {% endif %}
 
-  <article class="ui-card recap-card">
-    <p class="status-kicker">Блокеры</p>
-    {% if weekly_recap.stuck_events %}
-    <ul>
-      {% for item in weekly_recap.stuck_events %}
-      <li><strong>{{ item.title }}</strong><span>{{ item.meta }}</span></li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p>Зафиксированных блокеров нет.</p>
-    {% endif %}
-  </article>
+        <div class="recap-subpanel">
+          <p class="status-kicker">Результаты проверки</p>
+          {% if weekly_recap.reviews %}
+          <ul>
+            {% for item in weekly_recap.reviews %}
+            <li><strong>{{ item.title }}</strong><span>{{ item.meta }}</span></li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p>Результатов проверки пока нет.</p>
+          {% endif %}
+        </div>
+      </article>
 
-  <article id="recap-focus" class="ui-card recap-card recap-card--focus section-block">
-    <p class="status-kicker">Следующий фокус</p>
-    <h2>{{ weekly_recap.next_focus_title }}</h2>
-    {% if weekly_recap.next_focus_href %}
-    <a class="btn btn--primary" href="{{ weekly_recap.next_focus_href }}">Продолжить</a>
-    {% endif %}
-  </article>
+      <article id="recap-blockers" class="ui-card recap-card" data-tab-panel hidden>
+        <p class="status-kicker">Блокеры</p>
+        {% if weekly_recap.stuck_events %}
+        <ul>
+          {% for item in weekly_recap.stuck_events %}
+          <li><strong>{{ item.title }}</strong><span>{{ item.meta }}</span></li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p>Зафиксированных блокеров нет.</p>
+        {% endif %}
+      </article>
+
+      <article id="recap-focus" class="ui-card recap-card recap-card--focus" data-tab-panel hidden>
+        <p class="status-kicker">Следующий фокус</p>
+        <h2>{{ weekly_recap.next_focus_title }}</h2>
+        {% if weekly_recap.next_focus_href %}
+        <a class="btn btn--primary" href="{{ weekly_recap.next_focus_href }}">Продолжить</a>
+        {% endif %}
+      </article>
+    </section>
+  </main>
 </section>
 {% endblock %}

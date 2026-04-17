@@ -3,6 +3,8 @@
 {% block title %}Урок | {{ lesson.title }}{% endblock %}
 
 {% block content %}
+<section class="workspace-shell lesson-shell">
+  <div class="workspace-toolbar">
 <nav class="breadcrumbs" aria-label="Навигация по разделу">
   <a href="/dashboard">Главная</a>
   <span>/</span>
@@ -10,7 +12,10 @@
   <span>/</span>
   <span aria-current="page">Урок</span>
 </nav>
+  </div>
 
+  <section class="workspace-grid lesson-workspace" aria-label="Рабочая область урока">
+    <main class="workspace-pane lesson-reading-pane">
 <section class="hero hero--compact hero--lesson bg-lesson" data-page="lesson" data-hero-bg="lesson" aria-labelledby="lesson-title">
   <div class="hero__visual overlay-dark" aria-hidden="true"></div>
   <div class="hero__ghost hero__ghost--lain-soft" aria-hidden="true"></div>
@@ -43,12 +48,13 @@
   </div>
 </section>
 
-<section class="lesson-workspace" aria-label="Рабочая область урока">
   <article class="markdown-body lesson-main">
     {{ lesson.body_html | safe }}
   </article>
+    </main>
 
-  <aside class="lesson-side">
+    <aside class="workspace-pane workspace-rail lesson-rail-pane">
+      <div class="lesson-side">
     <nav class="ui-card lesson-jump-panel lesson-side-dock" aria-label="Быстрые переходы по уроку">
       <p class="lesson-nav-title">Быстрые переходы</p>
       <div class="lesson-jumps">
@@ -196,6 +202,8 @@
         {% endif %}
       </div>
     </nav>
-  </aside>
+      </div>
+    </aside>
+  </section>
 </section>
 {% endblock %}

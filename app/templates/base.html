@@ -52,8 +52,8 @@
     </header>
     {% endif %}
 
-    <main class="page-shell {% if disable_topbar %}page-shell--auth{% endif %}">
-      <div class="page-stack">
+    <main class="page-shell {% if disable_topbar %}page-shell--auth{% else %}app-shell{% endif %}">
+      <div class="page-stack {% if not disable_topbar %}app-shell__stack{% endif %}">
         {% block content %}{% endblock %}
       </div>
     </main>

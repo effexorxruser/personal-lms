@@ -22,8 +22,8 @@ export function storyShell(content: string, options: { page?: 'dashboard' | 'cou
       <div class="page-bg__glow"></div>
       <div class="page-bg__noise"></div>
     </div>
-    <main class="page-shell" data-story-page="${options.page ?? 'dashboard'}" style="--shell-max-width: ${options.width ?? '1140px'}">
-      ${content}
+    <main class="page-shell app-shell" data-story-page="${options.page ?? 'dashboard'}" style="--shell-max-width: ${options.width ?? '1710px'}">
+      <div class="page-stack app-shell__stack">${content}</div>
     </main>
   `;
   return root;

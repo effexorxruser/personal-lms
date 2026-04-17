@@ -1427,3 +1427,365 @@ dl { margin-top: 0; }
     display: none;
   }
 }
+
+/* =====================
+   App shell workspace
+===================== */
+:root {
+  --shell-max-width: 1710px;
+  --topbar-height: 56px;
+  --workspace-gap: var(--space-3);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  overflow: hidden;
+}
+
+.page-shell.app-shell {
+  height: calc(100dvh - var(--topbar-height));
+  min-height: 0;
+  padding: var(--space-3) 0;
+  overflow: hidden;
+}
+
+.app-shell__stack,
+.workspace-shell,
+.workspace-grid {
+  min-height: 0;
+  height: 100%;
+}
+
+.app-shell__stack {
+  gap: 0;
+}
+
+.workspace-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--workspace-gap);
+}
+
+.workspace-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 0;
+}
+
+.workspace-toolbar .breadcrumbs,
+.workspace-toolbar .section-nav,
+.workspace-toolbar .workspace-tabs {
+  margin-bottom: 0;
+}
+
+.workspace-grid {
+  display: grid;
+  gap: var(--space-4);
+  align-items: stretch;
+}
+
+.workspace-grid--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.workspace-pane,
+.workspace-rail,
+.course-pane,
+.lesson-reading-pane,
+.lesson-rail-pane,
+.recap-pane {
+  min-height: 0;
+  overflow: auto;
+  scrollbar-color: var(--border-strong) transparent;
+  scrollbar-width: thin;
+}
+
+.workspace-pane::-webkit-scrollbar,
+.workspace-rail::-webkit-scrollbar,
+.course-pane::-webkit-scrollbar,
+.lesson-reading-pane::-webkit-scrollbar,
+.lesson-rail-pane::-webkit-scrollbar,
+.recap-pane::-webkit-scrollbar {
+  width: 9px;
+}
+
+.workspace-pane::-webkit-scrollbar-thumb,
+.workspace-rail::-webkit-scrollbar-thumb,
+.course-pane::-webkit-scrollbar-thumb,
+.lesson-reading-pane::-webkit-scrollbar-thumb,
+.lesson-rail-pane::-webkit-scrollbar-thumb,
+.recap-pane::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--border-strong);
+  background-clip: content-box;
+}
+
+.section-nav {
+  position: static;
+  top: auto;
+}
+
+.dashboard-layout {
+  grid-template-columns: minmax(0, 1fr) clamp(260px, 22vw, 330px);
+  align-items: stretch;
+}
+
+.dashboard-main,
+.dashboard-rail,
+.course-pane,
+.lesson-reading-pane,
+.lesson-side,
+.recap-pane {
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+}
+
+.dashboard-rail,
+.lesson-side-dock {
+  position: static;
+  top: auto;
+}
+
+.hero__content {
+  padding: 18px 22px;
+}
+
+.hero--node .hero__content--node {
+  grid-template-columns: minmax(0, 1.32fr) minmax(260px, 0.82fr);
+  min-height: 210px;
+  gap: var(--space-3);
+}
+
+.hero--course .hero__content,
+.hero--lesson .hero__content {
+  min-height: 148px;
+}
+
+.card-grid--ops {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.status-card {
+  min-height: 104px;
+  padding: 13px;
+}
+
+.rail-card,
+.lesson-card,
+.checkpoint-panel,
+.recap-card {
+  padding: 14px;
+}
+
+.course-pane {
+  padding-right: 2px;
+}
+
+.module-list {
+  gap: var(--space-3);
+}
+
+.module-details > .module-head {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 13px 16px;
+}
+
+.module-head__index {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-control);
+  color: var(--accent-primary);
+  background: var(--clock-node-surface);
+  box-shadow: var(--glass-inner);
+}
+
+.module-head__body h2,
+.module-head__body p {
+  margin-bottom: 0;
+}
+
+.module-details__content {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0 16px 16px;
+}
+
+.module-details > .lesson-list,
+.module-details > .checkpoint-panel {
+  margin: 0;
+  padding: 0;
+}
+
+.module-details .checkpoint-panel {
+  max-height: min(48vh, 520px);
+  overflow: auto;
+}
+
+.lesson-workspace {
+  grid-template-columns: minmax(0, 1.5fr) clamp(330px, 34vw, 520px);
+  align-items: stretch;
+}
+
+.lesson-reading-pane {
+  padding-right: 2px;
+}
+
+.lesson-rail-pane {
+  padding-right: 2px;
+}
+
+.lesson-main {
+  min-height: min(42vh, 520px);
+}
+
+.lesson-jump-panel {
+  padding: 10px 12px;
+}
+
+.stuck-panel h2 {
+  font-size: var(--font-size-lg);
+}
+
+.task-form textarea {
+  min-height: 92px;
+}
+
+.panel-scroll {
+  max-height: min(34vh, 430px);
+}
+
+.stuck-recovery {
+  max-height: min(24vh, 260px);
+}
+
+.workspace-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 5px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-panel);
+  background: var(--surface-glass-strong);
+  backdrop-filter: var(--blur-glass-soft);
+  -webkit-backdrop-filter: var(--blur-glass-soft);
+  box-shadow: var(--glass-inner);
+}
+
+.workspace-tabs button {
+  padding: 5px 9px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  background: transparent;
+}
+
+.workspace-tabs button:hover,
+.workspace-tabs button:focus-visible,
+.workspace-tabs button.is-active {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+  background: var(--button-surface);
+  outline: none;
+}
+
+.recap-tab-panels {
+  display: grid;
+  min-height: 0;
+}
+
+.recap-tab-panels [hidden] {
+  display: none !important;
+}
+
+.recap-card {
+  min-height: 0;
+}
+
+.recap-card ul {
+  max-height: min(46vh, 560px);
+}
+
+.recap-subpanel {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-soft);
+}
+
+@media (max-width: 1200px) {
+  .dashboard-layout,
+  .lesson-workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.52fr);
+  }
+
+  .hero--node .hero__content--node,
+  .card-grid--ops {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 980px) {
+  body {
+    overflow: auto;
+  }
+
+  .page-shell.app-shell {
+    height: auto;
+    min-height: calc(100dvh - var(--topbar-height));
+    overflow: visible;
+  }
+
+  .app-shell__stack,
+  .workspace-shell,
+  .workspace-grid {
+    height: auto;
+  }
+
+  .workspace-pane,
+  .workspace-rail,
+  .course-pane,
+  .lesson-reading-pane,
+  .lesson-rail-pane,
+  .recap-pane {
+    overflow: visible;
+  }
+
+  .workspace-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .module-details > .module-head,
+  .dashboard-layout,
+  .lesson-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .module-details .checkpoint-panel,
+  .panel-scroll,
+  .stuck-recovery,
+  .recap-card ul {
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+.course-workspace {
+  grid-template-rows: minmax(0, 1fr);
+}
