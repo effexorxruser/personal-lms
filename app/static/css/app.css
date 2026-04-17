@@ -898,6 +898,10 @@ dl { margin-top: 0; }
   padding: 12px 18px 16px;
 }
 
+.module-details > .checkpoint-panel {
+  margin: 0 18px 18px;
+}
+
 .module-details:not([open]) > .module-head {
   border-bottom: 0;
 }
@@ -931,6 +935,50 @@ dl { margin-top: 0; }
   border-radius: var(--radius-panel);
   background: var(--glass-specular), var(--surface-row);
   box-shadow: var(--glass-inner);
+}
+
+.checkpoint-panel {
+  display: grid;
+  gap: var(--space-3);
+  padding: 14px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-panel);
+  background: var(--lesson-nav-surface);
+  box-shadow: var(--glass-inner);
+}
+
+.checkpoint-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.checkpoint-panel h3,
+.checkpoint-panel h4 {
+  margin-bottom: 0;
+  text-shadow: var(--text-shadow-crisp);
+}
+
+.checkpoint-panel p,
+.checkpoint-panel li {
+  color: var(--text-secondary);
+  line-height: var(--line-copy);
+}
+
+.checkpoint-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.checkpoint-grid ul {
+  margin: var(--space-2) 0 0;
+  padding-left: 18px;
+}
+
+.checkpoint-form {
+  margin-top: 0;
 }
 
 .recap-grid {

@@ -33,6 +33,7 @@ def dashboard(request: Request):
     with Session(get_engine()) as session:
         snapshot = ensure_progress_initialized(session, int(user_id), course.slug)
         session.commit()
+        snapshot = ensure_progress_initialized(session, int(user_id), course.slug)
 
     with Session(get_engine()) as session:
         next_lesson = registry.lessons.get(snapshot.next_lesson_key) if snapshot.next_lesson_key else None
@@ -42,8 +43,29 @@ def dashboard(request: Request):
     next_lesson_key = snapshot.next_lesson_key
     course_href = f"/courses/{course.slug}" if course else "/courses/python-backend-ai"
     lesson_href = f"/lessons/{next_lesson_key}" if next_lesson_key else "/lessons/foundation-intro"
+    checkpoint_href = (
+        f"{course_href}#checkpoint-{snapshot.next_checkpoint_slug}"
+        if snapshot.next_checkpoint_slug
+        else course_href
+    )
     next_step_body = (
-        f"{snapshot.next_lesson_title}" if snapshot.next_lesson_title else "Курс завершён, можно повторить материалы"
+        f"{snapshot.next_lesson_title}"
+        if snapshot.next_lesson_title
+        else (
+            f"Checkpoint: {snapshot.next_checkpoint_title}"
+            if snapshot.next_checkpoint_title
+            else "Курс завершён, можно повторить материалы"
+        )
+    )
+    continue_href = (
+        lesson_href
+        if next_lesson_key
+        else checkpoint_href
+    )
+    current_checkpoint_snapshot = (
+        snapshot.module_checkpoint_snapshots.get(snapshot.next_checkpoint_module_slug)
+        if snapshot.next_checkpoint_module_slug
+        else None
     )
 
     cards = [
@@ -56,8 +78,12 @@ def dashboard(request: Request):
         {
             "title": "Следующий шаг",
             "body": next_step_body,
-            "href": (lesson_href if next_lesson_key else None),
-            "link_label": ("Открыть следующий урок" if next_lesson_key else "Открыть карту курса"),
+            "href": (lesson_href if next_lesson_key else (checkpoint_href if snapshot.next_checkpoint_slug else None)),
+            "link_label": (
+                "Открыть следующий урок"
+                if next_lesson_key
+                else ("Открыть checkpoint" if snapshot.next_checkpoint_slug else "Открыть карту курса")
+            ),
         },
         {
             "title": "Прогресс недели",
@@ -72,8 +98,10 @@ def dashboard(request: Request):
         context={
             "cards": cards,
             "username": username,
-            "continue_href": lesson_href,
+            "continue_href": continue_href,
             "execution_summary": execution_summary,
+            "checkpoint_snapshot": current_checkpoint_snapshot,
+            "checkpoint_href": checkpoint_href,
             "weekly_recap": weekly_recap,
             "reason_label": reason_label,
             "nav_course_href": course_href,
@@ -97,6 +125,7 @@ def recap(request: Request):
     with Session(get_engine()) as session:
         snapshot = ensure_progress_initialized(session, int(user_id), course.slug)
         session.commit()
+        snapshot = ensure_progress_initialized(session, int(user_id), course.slug)
 
     with Session(get_engine()) as session:
         weekly_recap = build_weekly_recap(session, int(user_id), course.slug, snapshot)

@@ -9,6 +9,7 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CONTENT_ROOT = PROJECT_ROOT / "content" / "courses"
 TASK_ROOT = PROJECT_ROOT / "content" / "tasks"
+CHECKPOINT_ROOT = PROJECT_ROOT / "content" / "checkpoints"
 
 
 @dataclass
@@ -38,6 +39,20 @@ class TaskContent:
 
 
 @dataclass
+class CheckpointContent:
+    slug: str
+    title: str
+    summary: str
+    module_slug: str
+    description: str
+    requirements: list[str]
+    definition_of_done: list[str]
+    submission_type: str
+    portfolio_expectations: list[str]
+    hints: list[str]
+
+
+@dataclass
 class ModuleContent:
     slug: str
     title: str
@@ -63,6 +78,7 @@ class ContentIndex:
     lessons: dict[str, LessonContent]
     lesson_order: list[str]
     tasks: dict[str, TaskContent]
+    checkpoints: dict[str, CheckpointContent]
 
 
 def _parse_yaml(path: Path) -> dict:
@@ -123,6 +139,22 @@ def _load_task(path: Path) -> TaskContent:
     )
 
 
+def _load_checkpoint(path: Path) -> CheckpointContent:
+    checkpoint_data = _parse_yaml(path)
+    return CheckpointContent(
+        slug=str(checkpoint_data["slug"]),
+        title=str(checkpoint_data["title"]),
+        summary=str(checkpoint_data["summary"]),
+        module_slug=str(checkpoint_data["module_slug"]),
+        description=str(checkpoint_data["description"]).strip(),
+        requirements=[str(item) for item in checkpoint_data.get("requirements", [])],
+        definition_of_done=[str(item) for item in checkpoint_data.get("definition_of_done", [])],
+        submission_type=str(checkpoint_data["submission_type"]),
+        portfolio_expectations=[str(item) for item in checkpoint_data.get("portfolio_expectations", [])],
+        hints=[str(item) for item in checkpoint_data.get("hints", [])],
+    )
+
+
 def _load_module(course_path: Path, course_slug: str, module_slug: str) -> ModuleContent:
     module_path = course_path / "modules" / module_slug
     module_data = _parse_yaml(module_path / "module.yml")
@@ -148,10 +180,15 @@ def load_content_index() -> ContentIndex:
     lessons: dict[str, LessonContent] = {}
     lesson_order: list[str] = []
     tasks: dict[str, TaskContent] = {}
+    checkpoints: dict[str, CheckpointContent] = {}
 
     for task_path in sorted(TASK_ROOT.glob("*.yml")):
         task = _load_task(task_path)
         tasks[task.slug] = task
+
+    for checkpoint_path in sorted(CHECKPOINT_ROOT.glob("*.yml")):
+        checkpoint = _load_checkpoint(checkpoint_path)
+        checkpoints[checkpoint.slug] = checkpoint
 
     for course_path in sorted(CONTENT_ROOT.glob("*/course.yml")):
         manifest_path = course_path
@@ -179,4 +216,10 @@ def load_content_index() -> ContentIndex:
             modules=modules,
         )
 
-    return ContentIndex(courses=courses, lessons=lessons, lesson_order=lesson_order, tasks=tasks)
+    return ContentIndex(
+        courses=courses,
+        lessons=lessons,
+        lesson_order=lesson_order,
+        tasks=tasks,
+        checkpoints=checkpoints,
+    )

@@ -76,6 +76,19 @@
       {% endif %}
     </section>
 
+    <section class="ui-card rail-card checkpoint-rail" aria-label="Checkpoint artifact">
+      <p class="status-kicker">Checkpoint</p>
+      {% if checkpoint_snapshot and checkpoint_snapshot.checkpoint %}
+      <h2>{{ checkpoint_snapshot.checkpoint.title }}</h2>
+      <p>{{ checkpoint_snapshot.state_label }}</p>
+      <p class="rail-card__muted">{{ checkpoint_snapshot.checkpoint.summary }}</p>
+      <a class="card-link" href="{{ checkpoint_href }}">Открыть checkpoint</a>
+      {% else %}
+      <h2>Checkpoint не активен</h2>
+      <p class="rail-card__muted">Следующий block artifact появится после уроков модуля.</p>
+      {% endif %}
+    </section>
+
     <section class="ui-card rail-card friction-rail" aria-label="Активное застревание">
       <p class="status-kicker">Блокер</p>
       {% if weekly_recap.active_stuck %}

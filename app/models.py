@@ -65,6 +65,29 @@ class ReviewResult(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+class CheckpointSubmission(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(index=True, foreign_key="user.id")
+    course_slug: str = Field(index=True)
+    module_slug: str = Field(index=True)
+    checkpoint_slug: str = Field(index=True)
+    submission_type: str
+    content_text: str | None = None
+    content_link: str | None = None
+    status: str = Field(default="submitted", index=True)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class CheckpointReview(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    submission_id: int = Field(index=True, foreign_key="checkpointsubmission.id")
+    checkpoint_slug: str = Field(index=True)
+    verdict: str = Field(index=True)
+    feedback: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
 class StuckEvent(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(index=True, foreign_key="user.id")

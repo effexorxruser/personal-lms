@@ -11,7 +11,16 @@ from app.config import get_settings
 from app.db import get_engine, init_db
 from app.main import create_app
 from app.content_registry import get_content_registry
-from app.models import CourseProgress, LessonProgress, ReviewResult, StuckEvent, TaskSubmission, User
+from app.models import (
+    CheckpointReview,
+    CheckpointSubmission,
+    CourseProgress,
+    LessonProgress,
+    ReviewResult,
+    StuckEvent,
+    TaskSubmission,
+    User,
+)
 from app.security import hash_password
 
 DB_PATH = Path("instance/test_auth.db")
@@ -28,6 +37,8 @@ def _prepare_db() -> None:
     init_db()
     with Session(get_engine()) as session:
         session.exec(delete(StuckEvent))
+        session.exec(delete(CheckpointReview))
+        session.exec(delete(CheckpointSubmission))
         session.exec(delete(ReviewResult))
         session.exec(delete(TaskSubmission))
         session.exec(delete(LessonProgress))
@@ -157,6 +168,16 @@ def test_task_content_is_loaded_from_file_registry() -> None:
     assert task.title == "Проверить структуру приложения"
     assert task.submission_type == "text"
     assert "router" in " ".join(task.definition_of_done).lower()
+
+
+def test_checkpoint_content_is_loaded_from_file_registry() -> None:
+    registry = get_content_registry()
+    checkpoint = registry.checkpoints.get("foundation-cli-pack")
+
+    assert checkpoint is not None
+    assert checkpoint.module_slug == "foundation"
+    assert checkpoint.submission_type == "repository_link"
+    assert "README" in " ".join(checkpoint.definition_of_done)
 
 
 def test_completing_lesson_updates_progress_and_next_step() -> None:
@@ -355,6 +376,78 @@ def test_course_map_displays_supported_execution_states() -> None:
         client.post("/lessons/backend-structure/complete", follow_redirects=False)
         completed_course = client.get("/courses/python-backend-ai")
         assert "Статус: завершён" in completed_course.text
+
+
+def test_checkpoint_submission_review_and_module_completion_semantics() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+        client.post("/lessons/foundation-intro/complete", follow_redirects=False)
+        client.post(
+            "/lessons/backend-structure/submissions",
+            data={
+                "submission_type": "text",
+                "content_text": (
+                    "Router: app/routers/content.py. Loader: app/content_loader.py. "
+                    "Runtime progress: app/services/progress_service.py."
+                ),
+            },
+            follow_redirects=False,
+        )
+        client.post("/lessons/backend-structure/complete", follow_redirects=False)
+
+        course_without_checkpoint = client.get("/courses/python-backend-ai")
+        dashboard_without_checkpoint = client.get("/dashboard")
+
+        assert "Checkpoint artifact" in course_without_checkpoint.text
+        assert "checkpoint ожидает отправки" in course_without_checkpoint.text
+        assert "Модуль: checkpoint ожидает отправки" in course_without_checkpoint.text
+        assert "Foundation artifact: CLI utility pack" in dashboard_without_checkpoint.text
+
+        bad_checkpoint = client.post(
+            "/checkpoints/foundation-cli-pack/submissions",
+            data={
+                "submission_type": "repository_link",
+                "content_link": "bad",
+                "content_text": "ok",
+            },
+            follow_redirects=False,
+        )
+        assert bad_checkpoint.status_code == 303
+
+        revision_course = client.get("/courses/python-backend-ai")
+        assert "Ссылка на checkpoint должна начинаться" in revision_course.text
+        assert "Модуль: требует доработки" in revision_course.text
+
+        approved_checkpoint = client.post(
+            "/checkpoints/foundation-cli-pack/submissions",
+            data={
+                "submission_type": "repository_link",
+                "content_link": "https://github.com/example/foundation-cli-pack",
+                "content_text": "README содержит запуск, demo path и проверяемый run scenario.",
+            },
+            follow_redirects=False,
+        )
+        assert approved_checkpoint.status_code == 303
+
+        approved_course = client.get("/courses/python-backend-ai")
+
+    assert "Checkpoint принят" in approved_course.text
+    assert "checkpoint пройден" in approved_course.text
+    assert "Модуль: завершён" in approved_course.text
+
+    with Session(get_engine()) as session:
+        checkpoint_submission = session.exec(
+            select(CheckpointSubmission).order_by(CheckpointSubmission.updated_at.desc())
+        ).first()
+        checkpoint_review = session.exec(
+            select(CheckpointReview).order_by(CheckpointReview.created_at.desc())
+        ).first()
+
+    assert checkpoint_submission is not None
+    assert checkpoint_submission.status == "approved"
+    assert checkpoint_review is not None
+    assert checkpoint_review.verdict == "approved"
 
 
 def test_clean_flow_keeps_dashboard_course_and_lesson_progress_consistent() -> None:

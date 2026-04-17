@@ -7,6 +7,7 @@ from sqlmodel import Session, select
 
 from app.content_registry import get_content_registry
 from app.models import CourseProgress, LessonProgress
+from app.services.checkpoint_service import CheckpointSnapshot, get_checkpoint_snapshot, resolve_module_checkpoint
 from app.services.submission_service import get_submission_snapshot
 
 STATUS_NOT_STARTED = "not_started"
@@ -23,6 +24,11 @@ class ProgressSnapshot:
     next_lesson_key: str | None
     next_lesson_title: str | None
     lesson_statuses: dict[str, str]
+    module_statuses: dict[str, str]
+    module_checkpoint_snapshots: dict[str, CheckpointSnapshot]
+    next_checkpoint_slug: str | None
+    next_checkpoint_title: str | None
+    next_checkpoint_module_slug: str | None
 
 
 def _now() -> datetime:
@@ -132,10 +138,12 @@ def _compute_snapshot(session: Session, user_id: int, course_slug: str) -> Progr
     completed_count = 0
     next_lesson_key: str | None = None
     lesson_statuses: dict[str, str] = {}
+    lesson_progress_statuses: dict[str, str] = {}
 
     for lesson_key in lesson_keys:
         lesson_progress = by_key.get(lesson_key)
         status = lesson_progress.status if lesson_progress else STATUS_NOT_STARTED
+        lesson_progress_statuses[lesson_key] = status
         lesson_statuses[lesson_key] = _lesson_state_label(session, user_id, lesson_key, status)
 
         if status == STATUS_COMPLETED:
@@ -150,6 +158,41 @@ def _compute_snapshot(session: Session, user_id: int, course_slug: str) -> Progr
     if next_lesson_key:
         next_lesson_title = registry.lessons[next_lesson_key].title
 
+    module_statuses: dict[str, str] = {}
+    module_checkpoint_snapshots: dict[str, CheckpointSnapshot] = {}
+    next_checkpoint_slug: str | None = None
+    next_checkpoint_title: str | None = None
+    next_checkpoint_module_slug: str | None = None
+
+    for module in course.modules:
+        module_lesson_keys = [lesson.key for lesson in module.lessons]
+        module_lesson_statuses = [
+            lesson_progress_statuses.get(lesson_key, STATUS_NOT_STARTED)
+            for lesson_key in module_lesson_keys
+        ]
+        lessons_completed = bool(module_lesson_statuses) and all(
+            status == STATUS_COMPLETED for status in module_lesson_statuses
+        )
+        lessons_started = any(status != STATUS_NOT_STARTED for status in module_lesson_statuses)
+
+        checkpoint = resolve_module_checkpoint(module.slug)
+        checkpoint_snapshot = get_checkpoint_snapshot(session, user_id, checkpoint)
+        module_checkpoint_snapshots[module.slug] = checkpoint_snapshot
+
+        if not lessons_completed:
+            module_statuses[module.slug] = "в процессе" if lessons_started else "доступен"
+            continue
+
+        if checkpoint and not checkpoint_snapshot.is_approved:
+            module_statuses[module.slug] = checkpoint_snapshot.state_label
+            if next_checkpoint_slug is None:
+                next_checkpoint_slug = checkpoint.slug
+                next_checkpoint_title = checkpoint.title
+                next_checkpoint_module_slug = module.slug
+            continue
+
+        module_statuses[module.slug] = "завершён"
+
     return ProgressSnapshot(
         course_slug=course_slug,
         total_lessons=total,
@@ -158,6 +201,11 @@ def _compute_snapshot(session: Session, user_id: int, course_slug: str) -> Progr
         next_lesson_key=next_lesson_key,
         next_lesson_title=next_lesson_title,
         lesson_statuses=lesson_statuses,
+        module_statuses=module_statuses,
+        module_checkpoint_snapshots=module_checkpoint_snapshots,
+        next_checkpoint_slug=next_checkpoint_slug,
+        next_checkpoint_title=next_checkpoint_title,
+        next_checkpoint_module_slug=next_checkpoint_module_slug,
     )
 
 
@@ -174,7 +222,15 @@ def _update_course_progress_record(
     course_progress.progress_pct = snapshot.progress_pct
     course_progress.updated_at = current_time
 
-    if snapshot.completed_lessons == snapshot.total_lessons and snapshot.total_lessons > 0:
+    modules_completed = bool(snapshot.module_statuses) and all(
+        status == "завершён" for status in snapshot.module_statuses.values()
+    )
+
+    if (
+        snapshot.completed_lessons == snapshot.total_lessons
+        and snapshot.total_lessons > 0
+        and modules_completed
+    ):
         course_progress.status = STATUS_COMPLETED
         course_progress.completed_at = course_progress.completed_at or current_time
         course_progress.current_lesson_slug = None
@@ -190,9 +246,14 @@ def _update_course_progress_record(
             lesson = registry.lessons[snapshot.next_lesson_key]
             course_progress.current_lesson_slug = lesson.key
             course_progress.current_module_slug = lesson.module_slug
+        elif snapshot.next_checkpoint_module_slug:
+            course_progress.current_lesson_slug = None
+            course_progress.current_module_slug = snapshot.next_checkpoint_module_slug
 
     if course_progress.started_at is None and (
-        snapshot.completed_lessons > 0 or snapshot.next_lesson_key is not None
+        snapshot.completed_lessons > 0
+        or snapshot.next_lesson_key is not None
+        or snapshot.next_checkpoint_slug is not None
     ):
         course_progress.started_at = current_time
 

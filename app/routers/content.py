@@ -6,6 +6,12 @@ from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 
 from app.db import get_engine
+from app.services.checkpoint_service import (
+    checkpoint_course_slug,
+    checkpoint_submission_type_label,
+    create_checkpoint_submission,
+    get_checkpoint,
+)
 from app.services.content_service import (
     get_course_or_404,
     get_lesson_or_404,
@@ -46,6 +52,7 @@ def course_map(request: Request, course_slug: str):
     with Session(get_engine()) as session:
         snapshot = ensure_progress_initialized(session, user_id, course.slug)
         session.commit()
+        snapshot = ensure_progress_initialized(session, user_id, course.slug)
 
     first_lesson_key = course.modules[0].lessons[0].key if course.modules and course.modules[0].lessons else None
     first_lesson_href = (
@@ -61,6 +68,9 @@ def course_map(request: Request, course_slug: str):
             "course": course,
             "next_step_key": snapshot.next_lesson_key,
             "lesson_statuses": snapshot.lesson_statuses,
+            "module_statuses": snapshot.module_statuses,
+            "module_checkpoint_snapshots": snapshot.module_checkpoint_snapshots,
+            "checkpoint_submission_type_label": checkpoint_submission_type_label,
             "progress_pct": snapshot.progress_pct,
             "nav_course_href": f"/courses/{course.slug}",
             "nav_lessons_href": first_lesson_href,
@@ -199,6 +209,51 @@ def submit_lesson_task(
         session.commit()
 
     return RedirectResponse(url=f"/lessons/{lesson.key}#task", status_code=303)
+
+
+@router.post("/checkpoints/{checkpoint_slug}/submissions")
+def submit_checkpoint(
+    request: Request,
+    checkpoint_slug: str,
+    submission_type: str = Form(...),
+    content_text: str = Form(default=""),
+    content_link: str = Form(default=""),
+):
+    auth_result = _require_auth(request)
+    if isinstance(auth_result, RedirectResponse):
+        return auth_result
+    user_id = auth_result
+
+    checkpoint = get_checkpoint(checkpoint_slug)
+    if checkpoint is None:
+        return RedirectResponse(url="/dashboard", status_code=303)
+    course_slug = checkpoint_course_slug(checkpoint)
+    if course_slug is None:
+        return RedirectResponse(url="/dashboard", status_code=303)
+
+    with Session(get_engine()) as session:
+        try:
+            create_checkpoint_submission(
+                session=session,
+                user_id=user_id,
+                checkpoint=checkpoint,
+                submission_type=submission_type,
+                content_text=content_text,
+                content_link=content_link,
+            )
+        except ValueError:
+            session.rollback()
+            return RedirectResponse(
+                url=f"/dashboard?checkpoint_error=invalid_submission",
+                status_code=303,
+            )
+        ensure_progress_initialized(session, user_id, course_slug)
+        session.commit()
+
+    return RedirectResponse(
+        url=f"/courses/{course_slug}#checkpoint-{checkpoint.slug}",
+        status_code=303,
+    )
 
 
 @router.post("/lessons/{lesson_key}/stuck")

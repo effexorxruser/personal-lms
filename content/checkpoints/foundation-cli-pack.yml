@@ -1,0 +1,27 @@
+slug: foundation-cli-pack
+module_slug: foundation
+title: "Foundation artifact: CLI utility pack"
+summary: Собрать небольшой checkpoint-артефакт по итогам foundation-модуля.
+description: >
+  Нужно объединить базовую ориентацию в проекте, работу с терминалом,
+  структуру Python backend-приложения и Git workflow в один проверяемый
+  результат, который можно показать как первый portfolio artifact.
+requirements:
+  - Есть отдельный репозиторий или ветка с результатом.
+  - В README описано назначение, запуск и проверка результата.
+  - Есть минимум один воспроизводимый run scenario.
+  - Понятно, какие файлы являются основным артефактом.
+definition_of_done:
+  - Ссылка на репозиторий открывается для review.
+  - README содержит run instructions.
+  - Есть sample input/output или короткий demo path.
+  - Артефакт выглядит как small usable tool, а не случайный набор файлов.
+submission_type: repository_link
+portfolio_expectations:
+  - Репозиторий можно показать как первый portfolio artifact.
+  - README объясняет пользу и способ запуска.
+  - Результат демонстрирует практическое понимание foundation-блока.
+hints:
+  - Не усложняй архитектуру, важнее reproducible execution.
+  - Сначала добейся одного понятного сценария запуска.
+  - Добавь короткое описание ограничений и следующего улучшения.
