@@ -81,6 +81,35 @@ Tailwind CSS и Alpine.js используются как легкий frontend 
 
 Контент в файлах облегчает review, curation и подключение репозитория как source в GPT Projects. БД хранит состояние пользователя, progress, submissions и другие runtime-сущности.
 
+## Platform hardening before curriculum scale-up
+
+Перед массовым curriculum onboarding архитектура должна пройти platform hardening и выйти в authoring-ready состояние.
+
+Фиксируется порядок:
+
+- runtime/UX stabilization;
+- authoring model readiness;
+- ограниченный first curriculum pass;
+- только после этого content scale-up.
+
+Это снижает риск масштабирования нестабильной модели уроков и execution-flow.
+
+## Authoring model readiness
+
+С точки зрения архитектуры обязательна поддержка согласованной структуры:
+
+- block;
+- module;
+- lesson;
+- task;
+- checkpoint (как evolvable сущность).
+
+Checkpoint entity/model может быть добавлена как отдельная evolution-итерация, когда текущий runtime стабилизирован и требования явно закреплены.
+
+## Практическое направление текущего этапа
+
+Текущий прикладной фокус архитектурно совместим с веткой Telegram / automation / AI utility tools, но сама архитектура остается общей и не превращается в curriculum-специфичный документ.
+
 ## Локальный запуск
 
 На старте приоритет — локальный запуск:
