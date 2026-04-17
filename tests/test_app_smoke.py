@@ -426,7 +426,7 @@ def test_stuck_event_creation_and_recovery_path_rendering() -> None:
 
         lesson_response = client.get("/lessons/backend-structure")
 
-    assert "Активный blocker: Не понимаю задачу" in lesson_response.text
+    assert "Активный блокер: Не понимаю задачу" in lesson_response.text
     assert "Не понимаю, где искать loader" in lesson_response.text
     assert "План возврата" in lesson_response.text
 

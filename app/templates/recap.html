@@ -9,12 +9,19 @@
   <span aria-current="page">Итоги недели</span>
 </nav>
 
-<section class="hero hero--compact bg-dashboard" data-page="dashboard" data-hero-bg="dashboard" aria-labelledby="recap-title">
+<nav class="section-nav" aria-label="Навигация по итогам">
+  <a href="#recap-overview">Обзор</a>
+  <a href="#recap-lessons">Уроки</a>
+  <a href="#recap-execution">Практика</a>
+  <a href="#recap-focus">Фокус</a>
+</nav>
+
+<section id="recap-overview" class="hero hero--compact bg-dashboard section-block" data-page="dashboard" data-hero-bg="dashboard" aria-labelledby="recap-title">
   <div class="hero__visual overlay-dark" aria-hidden="true"></div>
   <div class="hero__content">
     <p class="eyebrow">Итоги недели</p>
     <h1 id="recap-title">Итоги последних 7 дней</h1>
-    <p class="hero-copy">Итоги собираются из реальных учебных событий: завершённые уроки, отправки, review и моменты, где ты застрял.</p>
+    <p class="hero-copy">Итоги собираются из реальных учебных событий: завершённые уроки, отправки, проверки и моменты, где ты застрял.</p>
     <div class="meta-row">
       <span class="meta-pill">Уроки: {{ weekly_recap.completed_count }}</span>
       <span class="meta-pill">Отправки: {{ weekly_recap.submission_count }}</span>
@@ -24,8 +31,8 @@
   </div>
 </section>
 
-<section class="recap-grid" aria-label="Детали итогов недели">
-  <article class="ui-card recap-card">
+<section class="recap-grid section-flow" aria-label="Детали итогов недели">
+  <article id="recap-lessons" class="ui-card recap-card section-block">
     <p class="status-kicker">Завершённые уроки</p>
     {% if weekly_recap.completed_lessons %}
     <ul>
@@ -38,7 +45,7 @@
     {% endif %}
   </article>
 
-  <article class="ui-card recap-card">
+  <article id="recap-execution" class="ui-card recap-card section-block">
     <p class="status-kicker">Отправки</p>
     {% if weekly_recap.submissions %}
     <ul>
@@ -77,7 +84,7 @@
     {% endif %}
   </article>
 
-  <article class="ui-card recap-card recap-card--focus">
+  <article id="recap-focus" class="ui-card recap-card recap-card--focus section-block">
     <p class="status-kicker">Следующий фокус</p>
     <h2>{{ weekly_recap.next_focus_title }}</h2>
     {% if weekly_recap.next_focus_href %}

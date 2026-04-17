@@ -28,11 +28,18 @@
 
 <section class="module-list" aria-label="Список модулей">
   {% for module in course.modules %}
-  <article class="ui-card module-card">
-    <header class="module-head">
+  {% set ns = namespace(has_active=false) %}
+  {% for lesson in module.lessons %}
+    {% set status = lesson_statuses.get(lesson.key, 'доступен') %}
+    {% if status != 'завершён' and not ns.has_active %}
+      {% set ns.has_active = true %}
+    {% endif %}
+  {% endfor %}
+  <details class="ui-card module-card module-details" {% if ns.has_active or loop.first %}open{% endif %}>
+    <summary class="module-head">
       <h2>{{ loop.index }}. {{ module.title }}</h2>
       <p>{{ module.description }}</p>
-    </header>
+    </summary>
     <ol class="lesson-list lesson-list--structured">
       {% for lesson in module.lessons %}
       {% set status = lesson_statuses.get(lesson.key, 'доступен') %}
@@ -42,7 +49,7 @@
       </li>
       {% endfor %}
     </ol>
-  </article>
+  </details>
   {% endfor %}
 </section>
 {% endblock %}

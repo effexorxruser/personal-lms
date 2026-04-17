@@ -10,9 +10,15 @@
   {% if card.title == 'Прогресс недели' %}{% set ns.progress = card %}{% endif %}
 {% endfor %}
 
-<div class="dashboard-layout">
+<nav class="section-nav" aria-label="Навигация по секциям">
+  <a href="#dashboard-main">Центр</a>
+  <a href="#dashboard-summary">Сводка</a>
+  <a href="#dashboard-rail">Модули</a>
+</nav>
+
+<div class="dashboard-layout section-flow">
   <main class="dashboard-main">
-    <section class="hero hero--compact hero--node bg-dashboard" data-page="dashboard" data-hero-bg="dashboard" aria-labelledby="dashboard-title">
+    <section id="dashboard-main" class="hero hero--compact hero--node bg-dashboard section-block" data-page="dashboard" data-hero-bg="dashboard" aria-labelledby="dashboard-title">
       <div class="hero__visual overlay-dark" aria-hidden="true"></div>
       <div class="hero__ghost hero__ghost--lain" aria-hidden="true"></div>
       <div class="hero__content hero__content--node">
@@ -46,7 +52,7 @@
       </div>
     </section>
 
-    <section class="card-grid card-grid--ops" aria-label="Сводка панели">
+    <section id="dashboard-summary" class="card-grid card-grid--ops section-block" aria-label="Сводка панели">
       {% for card in cards %}
       <article class="ui-card status-card {% if card.title == 'Следующий шаг' %}status-card--focus{% elif card.title == 'Текущий курс' %}status-card--course{% else %}status-card--progress{% endif %}">
         <p class="status-kicker">{{ card.title }}</p>
@@ -59,7 +65,7 @@
     </section>
   </main>
 
-  <aside class="dashboard-rail" aria-label="Системные модули">
+  <aside id="dashboard-rail" class="dashboard-rail section-block" aria-label="Системные модули">
     <section class="ui-card rail-card execution-rail" aria-label="Текущая задача">
       <p class="status-kicker">Выполнение</p>
       <h2>{{ execution_summary.task.title if execution_summary.task else 'Текущая задача' }}</h2>
@@ -80,7 +86,7 @@
       {% endif %}
       <a class="card-link" href="/lessons/{{ weekly_recap.active_stuck.lesson_key }}#stuck">Открыть план возврата</a>
       <form method="post" action="/stuck/{{ weekly_recap.active_stuck.id }}/resolve">
-        <button type="submit" class="btn btn--ghost btn--sm">Снять blocker</button>
+        <button type="submit" class="btn btn--ghost btn--sm">Снять блокер</button>
       </form>
       {% else %}
       <h2>Блокер не активен</h2>
