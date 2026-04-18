@@ -71,7 +71,11 @@
 
   function openLessonTerminal(panel) {
     if (!panel) return;
-    panel.open = true;
+    if (panel.tagName && panel.tagName.toLowerCase() === 'details') {
+      panel.open = true;
+    } else {
+      panel.hidden = false;
+    }
     var launch = document.querySelector('[data-terminal-launch="' + panel.id + '"]');
     if (launch) launch.classList.add('is-open');
     var input = panel.querySelector('[data-terminal-input]');
@@ -89,6 +93,11 @@
     });
 
     document.querySelectorAll('[data-terminal]').forEach(function (panel) {
+      if (panel.hidden) {
+        var launch = document.querySelector('[data-terminal-launch="' + panel.id + '"]');
+        if (launch) launch.classList.remove('is-open');
+      }
+      if (!(panel.tagName && panel.tagName.toLowerCase() === 'details')) return;
       panel.addEventListener('toggle', function () {
         var launch = document.querySelector('[data-terminal-launch="' + panel.id + '"]');
         if (launch) launch.classList.toggle('is-open', panel.open);
@@ -108,22 +117,21 @@
   }
 
   function formatTerminalRun(run) {
-    var status = run.status || "completed";
     var header = "$ " + (run.normalized_command || run.command_text || "");
-    var meta = "status: " + status + (run.exit_code !== null && run.exit_code !== undefined ? " / exit: " + run.exit_code : "");
     var output = run.stdout_text || "";
     var error = run.stderr_text || "";
-    return [header, meta, output, error ? "stderr:\n" + error : ""].filter(Boolean).join("\n");
+    var footer = run.exit_code !== null && run.exit_code !== undefined ? "[exit " + run.exit_code + "]" : "";
+    return [header, output, error ? "stderr:\n" + error : "", footer].filter(Boolean).join("\n");
   }
 
   function renderTerminalHistory(output, runs) {
     if (!output) return;
     if (!runs || !runs.length) {
-      output.textContent = "История запусков появится здесь.";
+      output.textContent = "";
       return;
     }
-    output.textContent = runs.map(formatTerminalRun).join("\n\n---\n\n");
-    output.scrollTop = 0;
+    output.textContent = runs.map(formatTerminalRun).join("\n\n");
+    output.scrollTop = output.scrollHeight;
   }
 
   function setupLessonTerminals() {
@@ -134,18 +142,10 @@
       var output = panel.querySelector("[data-terminal-output]");
       var status = panel.querySelector("[data-terminal-status]");
       if (!lessonKey || !input || !form || !output) return;
+      var visibleRuns = [];
 
       function setStatus(value) {
         if (status) status.textContent = value;
-      }
-
-      function loadHistory() {
-        fetch("/api/terminal/lessons/" + encodeURIComponent(lessonKey) + "/history", {
-          headers: { "Accept": "application/json" }
-        })
-          .then(function (response) { return response.ok ? response.json() : { runs: [] }; })
-          .then(function (data) { renderTerminalHistory(output, data.runs); })
-          .catch(function () { setStatus("history error"); });
       }
 
       function runCommand(command) {
@@ -161,9 +161,9 @@
           .then(function (response) { return response.json(); })
           .then(function (data) {
             if (data.run) {
-              renderTerminalHistory(output, [data.run]);
+              visibleRuns.push(data.run);
+              renderTerminalHistory(output, visibleRuns);
               setStatus(data.run.status || "completed");
-              loadHistory();
             } else {
               setStatus("error");
             }
@@ -171,8 +171,10 @@
           .catch(function () { setStatus("network error"); });
       }
 
-      panel.querySelectorAll("[data-terminal-command]").forEach(function (button) {
+      var presetSelector = '[data-terminal-command][data-terminal-target="' + panel.id + '"], #' + panel.id + ' [data-terminal-command]:not([data-terminal-target])';
+      document.querySelectorAll(presetSelector).forEach(function (button) {
         button.addEventListener("click", function () {
+          if (panel.hidden) openLessonTerminal(panel);
           runCommand(button.getAttribute("data-terminal-command"));
         });
       });
@@ -182,7 +184,7 @@
         runCommand();
       });
 
-      loadHistory();
+      renderTerminalHistory(output, visibleRuns);
     });
   }
 
