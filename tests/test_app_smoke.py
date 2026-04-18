@@ -1,4 +1,5 @@
 import os
+import shutil
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -692,7 +693,7 @@ def test_terminal_timeout_is_recorded() -> None:
         assert user is not None
         sandbox = lesson_sandbox_dir(user.id, lesson.key)
         sandbox.mkdir(parents=True, exist_ok=True)
-        (sandbox / "slow.py").write_text("import time\ntime.sleep(5)\n", encoding="utf-8")
+        (sandbox / "slow.py").write_text("import time\ntime.sleep(8)\n", encoding="utf-8")
 
         result = run_terminal_command(
             session=session,
@@ -716,3 +717,100 @@ def test_terminal_api_hidden_when_task_terminal_disabled() -> None:
         response = client.get("/api/terminal/lessons/foundation-intro/history")
 
     assert response.status_code == 404
+
+
+
+def test_terminal_pytest_lesson_uses_deterministic_target() -> None:
+    _prepare_db()
+    registry = get_content_registry()
+    lesson = registry.lessons["backend-structure"]
+    task = registry.tasks["inspect-app-layout"]
+
+    with Session(get_engine()) as session:
+        user = session.exec(select(User).where(User.username == "admin")).first()
+        assert user is not None
+        sandbox = lesson_sandbox_dir(user.id, lesson.key)
+        shutil.rmtree(sandbox, ignore_errors=True)
+        sandbox.mkdir(parents=True, exist_ok=True)
+        (sandbox / "test_lesson.py").write_text("def test_lesson_target():\n    assert True\n", encoding="utf-8")
+        (sandbox / "tests").mkdir()
+        (sandbox / "tests" / "test_should_not_run.py").write_text(
+            "def test_should_not_run():\n    assert False\n",
+            encoding="utf-8",
+        )
+
+        result = run_terminal_command(
+            session=session,
+            user_id=user.id,
+            lesson=lesson,
+            task=task,
+            command_text="pytest lesson",
+        )
+        status = result.run.status
+        exit_code = result.run.exit_code
+        stdout_text = result.run.stdout_text
+        session.commit()
+
+    assert status == "completed"
+    assert exit_code == 0
+    assert "1 passed" in stdout_text
+
+
+def test_terminal_python_run_lesson_is_transparent_without_artifact() -> None:
+    _prepare_db()
+    registry = get_content_registry()
+    lesson = registry.lessons["backend-structure"]
+    task = registry.tasks["inspect-app-layout"]
+
+    with Session(get_engine()) as session:
+        user = session.exec(select(User).where(User.username == "admin")).first()
+        assert user is not None
+        sandbox = lesson_sandbox_dir(user.id, lesson.key)
+        shutil.rmtree(sandbox, ignore_errors=True)
+
+        result = run_terminal_command(
+            session=session,
+            user_id=user.id,
+            lesson=lesson,
+            task=task,
+            command_text="python run lesson",
+        )
+        status = result.run.status
+        stdout_text = result.run.stdout_text
+        session.commit()
+
+    assert status == "completed"
+    assert "ещё не подготовлен" in stdout_text
+    assert not (sandbox / "lesson.py").exists()
+
+
+def test_terminal_manual_input_policy_is_enforced_on_backend() -> None:
+    _prepare_db()
+    registry = get_content_registry()
+    task = registry.tasks["inspect-app-layout"]
+    assert task.terminal is not None
+    previous_policy = task.terminal.allow_manual_input
+    task.terminal.allow_manual_input = False
+    try:
+        with TestClient(create_app()) as client:
+            _login(client)
+            blocked = client.post(
+                "/api/terminal/lessons/backend-structure/run",
+                json={"command": "pwd"},
+            )
+            preset = client.post(
+                "/api/terminal/lessons/backend-structure/run",
+                json={"command": "help"},
+            )
+    finally:
+        task.terminal.allow_manual_input = previous_policy
+
+    assert blocked.status_code == 200
+    blocked_run = blocked.json()["run"]
+    assert blocked_run["status"] == "blocked"
+    assert "Manual input отключён" in blocked_run["stderr_text"]
+
+    assert preset.status_code == 200
+    preset_run = preset.json()["run"]
+    assert preset_run["status"] == "completed"
+    assert "Доступные команды" in preset_run["stdout_text"]

@@ -16,7 +16,7 @@ from app.models import TerminalRun
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 INSTANCE_ROOT = PROJECT_ROOT / "instance" / "terminal"
 MAX_OUTPUT_CHARS = 12_000
-DEFAULT_TIMEOUT_SECONDS = 1
+DEFAULT_TIMEOUT_SECONDS = 5
 
 
 @dataclass(frozen=True)
@@ -49,15 +49,17 @@ def _safe_relative_path(raw_path: str) -> Path:
     return candidate
 
 
-def _ensure_lesson_file(sandbox_dir: Path, lesson: LessonContent) -> Path:
-    lesson_file = sandbox_dir / "lesson.py"
-    if not lesson_file.exists():
-        lesson_file.write_text(
-            "print('lesson sandbox ready')\n"
-            f"print('lesson: {lesson.key}')\n",
-            encoding="utf-8",
-        )
-    return lesson_file
+def _lesson_artifact_path(sandbox_dir: Path) -> Path:
+    return sandbox_dir / "lesson.py"
+
+
+def _missing_lesson_artifact_message(lesson: LessonContent) -> str:
+    return (
+        "Runnable lesson file ещё не подготовлен для этого урока.\n"
+        "Команда `python run lesson` запускает только явный файл `lesson.py` "
+        "в sandbox урока. Сейчас такого артефакта нет.\n"
+        f"Урок: {lesson.key}"
+    )
 
 
 def _tree(sandbox_dir: Path) -> str:
@@ -238,6 +240,12 @@ def _normalize_tokens(command_text: str) -> tuple[list[str], str]:
     return tokens, " ".join(tokens)
 
 
+def _preset_commands(task: TaskContent) -> set[str]:
+    if not task.terminal:
+        return set()
+    return {preset.command.strip() for preset in task.terminal.presets}
+
+
 def run_terminal_command(
     session: Session,
     user_id: int,
@@ -252,6 +260,17 @@ def run_terminal_command(
         tokens, normalized = _normalize_tokens(command_text)
     except TerminalCommandError as exc:
         return _blocked_run(session, user_id, lesson, task, command_text, command_text.strip(), str(exc))
+
+    if not task.terminal.allow_manual_input and normalized not in _preset_commands(task):
+        return _blocked_run(
+            session,
+            user_id,
+            lesson,
+            task,
+            command_text,
+            normalized,
+            "Manual input отключён для этой задачи. Используй preset-команды.",
+        )
 
     root_command = tokens[0]
     if root_command not in set(task.terminal.allowed_commands):
@@ -274,7 +293,6 @@ def run_terminal_command(
         if tokens == ["pwd"]:
             return _completed_internal_run(session, user_id, lesson, task, command_text, normalized, str(sandbox_dir))
         if tokens == ["tree"]:
-            _ensure_lesson_file(sandbox_dir, lesson)
             return _completed_internal_run(session, user_id, lesson, task, command_text, normalized, _tree(sandbox_dir))
         if tokens == ["show", "task"]:
             return _completed_internal_run(session, user_id, lesson, task, command_text, normalized, _task_text(task))
@@ -283,7 +301,17 @@ def run_terminal_command(
         if tokens == ["python", "--version"]:
             return _subprocess_run(session, user_id, lesson, task, command_text, normalized, [sys.executable, "--version"], sandbox_dir)
         if tokens == ["python", "run", "lesson"]:
-            lesson_file = _ensure_lesson_file(sandbox_dir, lesson)
+            lesson_file = _lesson_artifact_path(sandbox_dir)
+            if not lesson_file.exists():
+                return _completed_internal_run(
+                    session,
+                    user_id,
+                    lesson,
+                    task,
+                    command_text,
+                    normalized,
+                    _missing_lesson_artifact_message(lesson),
+                )
             return _subprocess_run(session, user_id, lesson, task, command_text, normalized, [sys.executable, str(lesson_file)], sandbox_dir)
         if len(tokens) == 4 and tokens[:3] == ["python", "run", "file"]:
             relative_path = _safe_relative_path(tokens[3])
@@ -296,17 +324,23 @@ def run_terminal_command(
         if tokens == ["pytest", "lesson"]:
             tests_dir = sandbox_dir / "tests"
             test_file = sandbox_dir / "test_lesson.py"
-            if not tests_dir.exists() and not test_file.exists():
-                return _completed_internal_run(
-                    session,
-                    user_id,
-                    lesson,
-                    task,
-                    command_text,
-                    normalized,
-                    "Тесты урока пока не добавлены в sandbox.",
+            if test_file.exists():
+                return _subprocess_run(
+                    session, user_id, lesson, task, command_text, normalized, [sys.executable, "-m", "pytest", "-q", "test_lesson.py"], sandbox_dir
                 )
-            return _subprocess_run(session, user_id, lesson, task, command_text, normalized, [sys.executable, "-m", "pytest", "-q"], sandbox_dir)
+            if tests_dir.exists():
+                return _subprocess_run(
+                    session, user_id, lesson, task, command_text, normalized, [sys.executable, "-m", "pytest", "-q", "tests"], sandbox_dir
+                )
+            return _completed_internal_run(
+                session,
+                user_id,
+                lesson,
+                task,
+                command_text,
+                normalized,
+                "Тесты урока пока не добавлены в sandbox.",
+            )
     except TerminalCommandError as exc:
         return _blocked_run(session, user_id, lesson, task, command_text, normalized, str(exc))
 
