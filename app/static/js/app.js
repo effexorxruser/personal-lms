@@ -68,6 +68,45 @@
   }
 
 
+
+  function openLessonTerminal(panel) {
+    if (!panel) return;
+    panel.open = true;
+    var launch = document.querySelector('[data-terminal-launch="' + panel.id + '"]');
+    if (launch) launch.classList.add('is-open');
+    var input = panel.querySelector('[data-terminal-input]');
+    window.setTimeout(function () {
+      panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (input && !input.readOnly) input.focus({ preventScroll: true });
+    }, 20);
+  }
+
+  function setupTerminalLaunchers() {
+    document.querySelectorAll('[data-terminal-open]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        openLessonTerminal(document.getElementById(button.getAttribute('data-terminal-open')));
+      });
+    });
+
+    document.querySelectorAll('[data-terminal]').forEach(function (panel) {
+      panel.addEventListener('toggle', function () {
+        var launch = document.querySelector('[data-terminal-launch="' + panel.id + '"]');
+        if (launch) launch.classList.toggle('is-open', panel.open);
+      });
+    });
+
+    document.addEventListener('keydown', function (event) {
+      if (!event.ctrlKey || event.key !== 'Enter') return;
+      var target = event.target;
+      var tagName = target && target.tagName ? target.tagName.toLowerCase() : '';
+      if (tagName === 'textarea' || tagName === 'input' || tagName === 'select' || (target && target.isContentEditable)) return;
+      var terminal = document.querySelector('[data-terminal]');
+      if (!terminal) return;
+      event.preventDefault();
+      openLessonTerminal(terminal);
+    });
+  }
+
   function formatTerminalRun(run) {
     var status = run.status || "completed";
     var header = "$ " + (run.normalized_command || run.command_text || "");
@@ -152,6 +191,7 @@
     updateWorldClocks();
     setupSingleAccordions();
     setupTabs();
+    setupTerminalLaunchers();
     setupLessonTerminals();
     window.setInterval(updateWorldClocks, 30000);
   });

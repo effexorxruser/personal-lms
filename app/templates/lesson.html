@@ -106,13 +106,16 @@
       </article>
 
       {% if execution.task and execution.task.terminal and execution.task.terminal.enabled %}
+      <div class="terminal-launch-row" data-terminal-launch="lesson-terminal">
+        <button type="button" class="btn btn--primary" data-terminal-open="lesson-terminal">Открыть терминал</button>
+        <span>Ctrl+Enter открывает execution surface для этой задачи.</span>
+      </div>
       <details
         class="ui-card lesson-card terminal-panel"
         id="lesson-terminal"
         data-terminal
         data-terminal-lesson="{{ lesson.key }}"
         data-terminal-manual="{{ 'true' if execution.task.terminal.allow_manual_input else 'false' }}"
-        open
       >
         <summary class="terminal-panel__summary">
           <span>
@@ -141,26 +144,6 @@
       {% endif %}
       </section>
       {% endif %}
-
-      <section class="lesson-support-grid" aria-label="Опорные материалы урока">
-        <details class="ui-card lesson-card lesson-card--ops compact-details">
-          <summary>Цели</summary>
-          <ul>
-            {% for objective in lesson.objectives %}
-            <li>{{ objective }}</li>
-            {% endfor %}
-          </ul>
-        </details>
-
-        <details class="ui-card lesson-card lesson-card--ops compact-details">
-          <summary>Чеклист</summary>
-          <ul>
-            {% for item in lesson.checklist %}
-            <li>{{ item }}</li>
-            {% endfor %}
-          </ul>
-        </details>
-      </section>
     </main>
 
     <aside class="workspace-pane workspace-rail lesson-rail-pane">
@@ -202,6 +185,23 @@
           </div>
         </details>
 
+        <details class="ui-card lesson-card lesson-card--ops compact-details">
+          <summary>Цели</summary>
+          <ul>
+            {% for objective in lesson.objectives %}
+            <li>{{ objective }}</li>
+            {% endfor %}
+          </ul>
+        </details>
+
+        <details class="ui-card lesson-card lesson-card--ops compact-details">
+          <summary>Чеклист</summary>
+          <ul>
+            {% for item in lesson.checklist %}
+            <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </details>
 
         <nav id="next-action" class="ui-card lesson-nav-panel" aria-label="Навигация по урокам">
           <p class="lesson-nav-title">Следующее действие</p>
