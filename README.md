@@ -12,6 +12,7 @@ Self-hosted LMS-like платформа для обучения Python backend +
 - страница урока (`/lessons/{lesson_key}`): чтение, задача, submission, review, stuck flow;
 - recap страница (`/recap`) с weekly summary;
 - lesson-scoped учебный терминал через API (`/api/terminal/...`) с sandbox-ограничениями;
+- встроенный Lain Helper v0: floating launcher + mini-chat lesson-aware AI-тьютора;
 - persistence runtime state в SQLite через SQLModel.
 
 ## Что в проекте сейчас
@@ -103,6 +104,13 @@ cp .env.example .env
 
 - `PERSONAL_LMS_SESSION_SECRET_KEY`
 
+Для Lain Helper:
+
+- `PERSONAL_LMS_AI_HELPER_ENABLED`
+- `PERSONAL_LMS_OPENAI_API_KEY` (если helper включен)
+- `PERSONAL_LMS_AI_HELPER_MODEL` (опционально)
+- `PERSONAL_LMS_AI_HELPER_TIMEOUT_SECONDS` (опционально)
+
 ### 3. Инициализация БД
 
 ```bash
@@ -148,6 +156,7 @@ uvicorn app.main:app --reload
 - `GET /recap`
 - `GET /api/terminal/lessons/{lesson_key}/history`
 - `POST /api/terminal/lessons/{lesson_key}/run`
+- `POST /api/ai/helper`
 
 ## Учебный терминал (MVP)
 
@@ -159,6 +168,16 @@ uvicorn app.main:app --reload
 - timeout команд: 5 секунд
 - stdout/stderr обрезаются до 12_000 символов
 - каждый запуск сохраняется как `TerminalRun`
+
+## Lain Helper v0
+
+Lain — встроенный lesson-scoped AI-тьютор внутри LMS:
+
+- floating launcher внизу справа на внутренних страницах;
+- mini-chat panel с quick actions (`Объясни текущий урок`, `Помоги начать`, `Я застрял`, `Проверь мой ответ`);
+- endpoint: `POST /api/ai/helper`;
+- ответы ограничены контекстом текущего урока и guardrails-логикой;
+- interaction log сохраняется в `LainHelperInteraction`.
 
 ## Тесты
 

@@ -5,6 +5,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 
+from app.config import get_settings
 from app.db import get_engine
 from app.services.checkpoint_service import (
     checkpoint_course_slug,
@@ -60,6 +61,8 @@ def course_map(request: Request, course_slug: str):
         if snapshot.next_lesson_key
         else (f"/lessons/{first_lesson_key}" if first_lesson_key else "/lessons/foundation-intro")
     )
+    helper_lesson_key = snapshot.next_lesson_key or first_lesson_key or "foundation-intro"
+    ai_helper_enabled = get_settings().ai_helper_enabled
 
     return templates.TemplateResponse(
         request=request,
@@ -74,6 +77,8 @@ def course_map(request: Request, course_slug: str):
             "progress_pct": snapshot.progress_pct,
             "nav_course_href": f"/courses/{course.slug}",
             "nav_lessons_href": first_lesson_href,
+            "ai_helper_enabled": ai_helper_enabled,
+            "ai_helper_lesson_key": helper_lesson_key,
         },
     )
 
@@ -120,6 +125,7 @@ def lesson_page(request: Request, lesson_key: str):
             prev_lesson_key,
             next_lesson_key,
         )
+    ai_helper_enabled = get_settings().ai_helper_enabled
 
     return templates.TemplateResponse(
         request=request,
@@ -140,6 +146,8 @@ def lesson_page(request: Request, lesson_key: str):
             "next_lesson_key": next_lesson_key,
             "nav_course_href": nav_course_href,
             "nav_lessons_href": nav_lessons_href,
+            "ai_helper_enabled": ai_helper_enabled,
+            "ai_helper_lesson_key": lesson.key,
         },
     )
 

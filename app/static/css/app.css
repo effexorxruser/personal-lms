@@ -3235,3 +3235,211 @@ body {
     min-height: 240px;
   }
 }
+
+/* =====================
+   Lain helper v0
+===================== */
+.lain-helper {
+  position: fixed;
+  right: 20px;
+  bottom: 18px;
+  z-index: 70;
+  display: grid;
+  justify-items: end;
+  gap: 10px;
+}
+
+.lain-helper__launcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(232, 238, 232, 0.34);
+  border-radius: 999px;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  cursor: pointer;
+  background: rgba(10, 12, 16, 0.9);
+  box-shadow: var(--shadow-soft), var(--glass-inner);
+}
+
+.lain-helper__launcher:hover,
+.lain-helper__launcher:focus-visible {
+  border-color: rgba(146, 185, 138, 0.72);
+  outline: none;
+}
+
+.lain-helper__signal {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(146, 185, 138, 0.92);
+  box-shadow: 0 0 0 5px rgba(146, 185, 138, 0.18);
+}
+
+.lain-chat {
+  width: min(380px, calc(100vw - 24px));
+  max-height: min(72vh, 620px);
+  padding: 12px;
+  overflow: hidden;
+  border-color: rgba(232, 238, 232, 0.34);
+  background: rgba(8, 10, 13, 0.94);
+}
+
+.lain-chat__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.lain-chat__identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lain-chat__avatar {
+  width: 38px;
+  height: 38px;
+  overflow: hidden;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+}
+
+.lain-chat__avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 52% 22%;
+  transform: scale(1.38);
+  transform-origin: center;
+}
+
+.lain-chat__identity strong {
+  display: block;
+  font-size: var(--font-size-md);
+}
+
+.lain-chat__identity p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.lain-chat__quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: var(--space-2);
+}
+
+.lain-chat__quick-actions .btn {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  justify-content: flex-start;
+  font-size: var(--font-size-xs);
+}
+
+.lain-chat__messages {
+  display: grid;
+  gap: 8px;
+  min-height: 220px;
+  max-height: min(40vh, 340px);
+  overflow: auto;
+  padding: 2px 2px 2px 0;
+  margin-bottom: var(--space-2);
+}
+
+.lain-chat__empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  line-height: 1.45;
+}
+
+.lain-chat__message {
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-control);
+  white-space: pre-wrap;
+  line-height: 1.45;
+  font-size: var(--font-size-sm);
+}
+
+.lain-chat__message--assistant {
+  background: rgba(17, 21, 27, 0.86);
+  color: var(--text-secondary);
+}
+
+.lain-chat__message--user {
+  margin-left: 20px;
+  background: rgba(146, 185, 138, 0.14);
+  color: var(--text-primary);
+}
+
+.lain-chat__message--loading {
+  opacity: 0.75;
+}
+
+.lain-chat__form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.lain-chat__form input {
+  height: 38px;
+  min-width: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--text-primary);
+  font: inherit;
+  padding: 0 10px;
+}
+
+.lain-chat__form .btn {
+  height: 38px;
+}
+
+.lain-chat__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.lain-helper.is-loading .lain-helper__launcher {
+  opacity: 0.85;
+}
+
+@media (max-width: 720px) {
+  .lain-helper {
+    right: 10px;
+    bottom: 10px;
+  }
+
+  .lain-chat {
+    width: min(390px, calc(100vw - 20px));
+    max-height: min(76vh, 640px);
+  }
+
+  .lain-chat__quick-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .lain-chat__form {
+    grid-template-columns: 1fr;
+  }
+}

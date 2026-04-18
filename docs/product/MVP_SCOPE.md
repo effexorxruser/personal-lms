@@ -45,11 +45,11 @@ MVP должен быть small and sharp.
 - stuck flow;
 - weekly recap;
 - lesson-scoped terminal execution surface;
+- lesson-scoped AI helper (Lain v0);
 - file-based authoring model: курс/модуль/урок/task/checkpoint.
 
 ## Что в MVP пока не реализовано
 
-- lesson-scoped AI helper;
 - production-ready migration workflow (Alembic scaffold);
 - multi-course масштабирование beyond текущего content snapshot.
 

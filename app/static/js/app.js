@@ -188,6 +188,176 @@
     });
   }
 
+  function setupAIHelper() {
+    var root = document.querySelector("[data-ai-helper]");
+    if (!root) return;
+
+    var launcher = root.querySelector("[data-ai-launcher]");
+    var panel = root.querySelector("[data-ai-panel]");
+    var closeButton = root.querySelector("[data-ai-close]");
+    var messages = root.querySelector("[data-ai-messages]");
+    var emptyState = root.querySelector("[data-ai-empty]");
+    var form = root.querySelector("[data-ai-form]");
+    var input = root.querySelector("[data-ai-input]");
+    var quickActions = root.querySelector("[data-ai-quick-actions]");
+    var endpoint = root.getAttribute("data-ai-endpoint") || "/api/ai/helper";
+    var lessonKey = (root.getAttribute("data-ai-lesson") || "").trim();
+    if (!launcher || !panel || !messages || !form || !input) return;
+
+    var isBusy = false;
+
+    var actionMessages = {
+      explain_lesson: "Объясни текущий урок: что важно понять перед практикой?",
+      help_start: "Помоги начать: какой первый маленький шаг сделать прямо сейчас?",
+      stuck_help: "Я застрял. Помоги выбрать следующий шаг, чтобы вернуться к выполнению.",
+      submission_hint: "Проверь мой ответ и подскажи, что улучшить перед отправкой."
+    };
+
+    function readSubmissionDraft() {
+      var textDraft = document.getElementById("content_text");
+      var linkDraft = document.getElementById("content_link");
+      if (textDraft && textDraft.value && textDraft.value.trim()) return textDraft.value.trim();
+      if (linkDraft && linkDraft.value && linkDraft.value.trim()) return linkDraft.value.trim();
+      return "";
+    }
+
+    function readStuckDraft() {
+      var stuckDraft = document.getElementById("stuck_note");
+      if (!stuckDraft || !stuckDraft.value) return "";
+      return stuckDraft.value.trim();
+    }
+
+    function setEmptyState(visible) {
+      if (!emptyState) return;
+      emptyState.hidden = !visible;
+    }
+
+    function setBusy(nextBusy) {
+      isBusy = nextBusy;
+      root.classList.toggle("is-loading", nextBusy);
+      form.querySelectorAll("input, button").forEach(function (node) {
+        node.disabled = nextBusy;
+      });
+      if (quickActions) {
+        quickActions.querySelectorAll("button").forEach(function (node) {
+          node.disabled = nextBusy;
+        });
+      }
+    }
+
+    function appendMessage(role, text, className) {
+      if (!text) return null;
+      var node = document.createElement("article");
+      node.className = "lain-chat__message lain-chat__message--" + role + (className ? " " + className : "");
+      node.textContent = text;
+      messages.appendChild(node);
+      setEmptyState(false);
+      messages.scrollTop = messages.scrollHeight;
+      return node;
+    }
+
+    function openPanel() {
+      panel.hidden = false;
+      root.classList.add("is-open");
+      window.setTimeout(function () {
+        input.focus({ preventScroll: true });
+      }, 20);
+    }
+
+    function closePanel() {
+      panel.hidden = true;
+      root.classList.remove("is-open");
+    }
+
+    function sendRequest(mode, messageText, submissionDraft) {
+      if (isBusy) return;
+
+      var trimmedMessage = (messageText || "").trim();
+      if (mode === "free_question" && !trimmedMessage) return;
+      if (!lessonKey) {
+        appendMessage("assistant", "Сначала открой урок, чтобы я могла помочь в контексте шага.");
+        return;
+      }
+
+      if (trimmedMessage) appendMessage("user", trimmedMessage);
+      var loading = appendMessage("assistant", "Lain анализирует текущий шаг...", "lain-chat__message--loading");
+      setBusy(true);
+
+      fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          lesson_key: lessonKey,
+          mode: mode,
+          message: trimmedMessage,
+          submission_draft: (submissionDraft || "").trim() || null
+        })
+      })
+        .then(function (response) {
+          if (!response.ok) {
+            return response.json().then(function (payload) {
+              var detail = payload && payload.detail ? String(payload.detail) : "AI helper request failed";
+              throw new Error(detail);
+            });
+          }
+          return response.json();
+        })
+        .then(function (data) {
+          if (loading && loading.parentNode) loading.parentNode.removeChild(loading);
+          appendMessage("assistant", data.assistant_message || "Сейчас не смогла ответить по этому шагу.");
+        })
+        .catch(function () {
+          if (loading && loading.parentNode) loading.parentNode.removeChild(loading);
+          appendMessage("assistant", "Ошибка соединения с Lain. Попробуй еще раз через минуту.");
+        })
+        .finally(function () {
+          setBusy(false);
+          input.focus({ preventScroll: true });
+        });
+    }
+
+    launcher.addEventListener("click", function () {
+      if (panel.hidden) {
+        openPanel();
+      } else {
+        closePanel();
+      }
+    });
+
+    if (closeButton) {
+      closeButton.addEventListener("click", function () {
+        closePanel();
+      });
+    }
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var outgoing = input.value || "";
+      input.value = "";
+      sendRequest("free_question", outgoing, "");
+    });
+
+    if (quickActions) {
+      quickActions.querySelectorAll("[data-ai-mode]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          var mode = button.getAttribute("data-ai-mode");
+          var message = actionMessages[mode] || "";
+          if (mode === "stuck_help") {
+            var stuckDraft = readStuckDraft();
+            if (stuckDraft) message = message + "\nКонтекст блокера: " + stuckDraft;
+          }
+          var draft = mode === "submission_hint" ? readSubmissionDraft() : "";
+          sendRequest(mode, message, draft);
+          openPanel();
+        });
+      });
+    }
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && !panel.hidden) closePanel();
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     document.documentElement.dataset.appReady = "true";
     updateWorldClocks();
@@ -195,6 +365,7 @@
     setupTabs();
     setupTerminalLaunchers();
     setupLessonTerminals();
+    setupAIHelper();
     window.setInterval(updateWorldClocks, 30000);
   });
 })();

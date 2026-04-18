@@ -114,3 +114,13 @@ class TerminalRun(SQLModel, table=True):
     status: str = Field(default="completed", index=True)
     duration_ms: int = Field(default=0)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class LainHelperInteraction(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(index=True, foreign_key="user.id")
+    lesson_key: str = Field(index=True)
+    mode: str = Field(index=True)
+    user_message: str = ""
+    assistant_message: str = ""
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

@@ -57,5 +57,52 @@
         {% block content %}{% endblock %}
       </div>
     </main>
+
+    {% set helper_enabled = ai_helper_enabled | default(false) %}
+    {% if request.session.get('user_id') and helper_enabled %}
+    <div
+      class="lain-helper"
+      data-ai-helper
+      data-ai-endpoint="/api/ai/helper"
+      data-ai-lesson="{{ ai_helper_lesson_key | default('') }}"
+    >
+      <button type="button" class="lain-helper__launcher" data-ai-launcher aria-label="Открыть Lain helper">
+        <span class="lain-helper__signal" aria-hidden="true"></span>
+        <span>Lain</span>
+      </button>
+
+      <section class="ui-card lain-chat" data-ai-panel hidden aria-label="Lain helper">
+        <header class="lain-chat__header">
+          <div class="lain-chat__identity">
+            <span class="lain-chat__avatar" aria-hidden="true">
+              <img class="lain-chat__avatar-image" src="{{ url_for('static', path='/img/illustrations/lain/lain-image-5.jpg') }}" alt="Lain avatar">
+            </span>
+            <div>
+              <strong>Lain</strong>
+              <p>AI helper текущего урока</p>
+            </div>
+          </div>
+          <button type="button" class="btn btn--ghost btn--sm" data-ai-close>Закрыть</button>
+        </header>
+
+        <div class="lain-chat__quick-actions" data-ai-quick-actions>
+          <button type="button" class="btn btn--ghost btn--sm" data-ai-mode="explain_lesson">Объясни текущий урок</button>
+          <button type="button" class="btn btn--ghost btn--sm" data-ai-mode="help_start">Помоги начать</button>
+          <button type="button" class="btn btn--ghost btn--sm" data-ai-mode="stuck_help">Я застрял</button>
+          <button type="button" class="btn btn--ghost btn--sm" data-ai-mode="submission_hint">Проверь мой ответ</button>
+        </div>
+
+        <div class="lain-chat__messages" data-ai-messages aria-live="polite">
+          <p class="lain-chat__empty" data-ai-empty>Lain рядом. Выбери действие или задай вопрос по текущему уроку.</p>
+        </div>
+
+        <form class="lain-chat__form" data-ai-form>
+          <label class="lain-chat__sr-only" for="lain-helper-input">Сообщение для Lain</label>
+          <input id="lain-helper-input" name="message" type="text" autocomplete="off" placeholder="Вопрос по текущему шагу урока" data-ai-input>
+          <button type="submit" class="btn btn--primary" data-ai-send>Отправить</button>
+        </form>
+      </section>
+    </div>
+    {% endif %}
   </body>
 </html>
