@@ -106,6 +106,37 @@
       <p>В уроке указан task slug `{{ execution.missing_task_slug }}`, но task definition отсутствует в file-based registry.</p>
       {% endif %}
     </article>
+    {% if execution.task and execution.task.terminal and execution.task.terminal.enabled %}
+    <article
+      class="ui-card lesson-card terminal-panel"
+      id="lesson-terminal"
+      data-terminal
+      data-terminal-lesson="{{ lesson.key }}"
+      data-terminal-manual="{{ 'true' if execution.task.terminal.allow_manual_input else 'false' }}"
+    >
+      <div class="terminal-panel__header">
+        <div>
+          <p class="lesson-nav-title">Терминал урока</p>
+          <h2>Execution surface</h2>
+        </div>
+        <span class="terminal-status" data-terminal-status>готов</span>
+      </div>
+      <p class="rail-card__muted">Ограниченный учебный терминал: только команды этой задачи, без shell-доступа к системе.</p>
+      <div class="terminal-presets" data-terminal-presets>
+        {% for preset in execution.task.terminal.presets %}
+        <button type="button" class="btn btn--ghost btn--sm" data-terminal-command="{{ preset.command }}">{{ preset.label }}</button>
+        {% endfor %}
+      </div>
+      <form class="terminal-form" data-terminal-form>
+        <label for="terminal-command-{{ lesson.key }}">Команда</label>
+        <div class="terminal-input-row">
+          <input id="terminal-command-{{ lesson.key }}" name="command" type="text" autocomplete="off" placeholder="help" data-terminal-input {% if not execution.task.terminal.allow_manual_input %}readonly{% endif %}>
+          <button type="submit" class="btn btn--primary">Run</button>
+        </div>
+      </form>
+      <div class="terminal-output" data-terminal-output aria-live="polite">История запусков появится здесь.</div>
+    </article>
+    {% endif %}
     {% endif %}
 
     <details class="ui-card lesson-card stuck-panel compact-details" id="stuck">

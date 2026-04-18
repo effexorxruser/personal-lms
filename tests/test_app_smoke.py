@@ -19,9 +19,11 @@ from app.models import (
     ReviewResult,
     StuckEvent,
     TaskSubmission,
+    TerminalRun,
     User,
 )
 from app.security import hash_password
+from app.services.terminal_service import lesson_sandbox_dir, run_terminal_command
 
 DB_PATH = Path("instance/test_auth.db")
 
@@ -36,6 +38,7 @@ def _prepare_db() -> None:
 
     init_db()
     with Session(get_engine()) as session:
+        session.exec(delete(TerminalRun))
         session.exec(delete(StuckEvent))
         session.exec(delete(CheckpointReview))
         session.exec(delete(CheckpointSubmission))
@@ -612,3 +615,104 @@ def test_weekly_recap_page_aggregates_clean_flow_artifacts() -> None:
     assert "review пройден" in recap_response.text
     assert "Не хватает контекста" in recap_response.text
     assert "Урок 2: Структура backend" in recap_response.text
+
+
+
+def test_terminal_ui_is_scoped_to_task_terminal_config() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+        lesson_without_terminal = client.get("/lessons/foundation-intro")
+        lesson_with_terminal = client.get("/lessons/backend-structure")
+
+    assert "Терминал урока" not in lesson_without_terminal.text
+    assert "Терминал урока" in lesson_with_terminal.text
+    assert "Проверить Python" in lesson_with_terminal.text
+
+
+def test_terminal_allows_safe_command_and_persists_history() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+        run_response = client.post(
+            "/api/terminal/lessons/backend-structure/run",
+            json={"command": "python --version"},
+        )
+        history_response = client.get("/api/terminal/lessons/backend-structure/history")
+
+    assert run_response.status_code == 200
+    run = run_response.json()["run"]
+    assert run["status"] == "completed"
+    assert run["normalized_command"] == "python --version"
+    assert "Python" in (run["stdout_text"] + run["stderr_text"])
+
+    assert history_response.status_code == 200
+    runs = history_response.json()["runs"]
+    assert runs
+    assert runs[0]["normalized_command"] == "python --version"
+
+    with Session(get_engine()) as session:
+        stored_run = session.exec(select(TerminalRun)).first()
+
+    assert stored_run is not None
+    assert stored_run.lesson_key == "backend-structure"
+    assert stored_run.status == "completed"
+
+
+def test_terminal_blocks_forbidden_command_and_path_traversal() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+        forbidden = client.post(
+            "/api/terminal/lessons/backend-structure/run",
+            json={"command": "rm -rf ."},
+        )
+        traversal = client.post(
+            "/api/terminal/lessons/backend-structure/run",
+            json={"command": "python run file ../secret.py"},
+        )
+
+    assert forbidden.status_code == 200
+    assert forbidden.json()["run"]["status"] == "blocked"
+    assert "не разрешена" in forbidden.json()["run"]["stderr_text"]
+
+    assert traversal.status_code == 200
+    assert traversal.json()["run"]["status"] == "blocked"
+    assert "относительным" in traversal.json()["run"]["stderr_text"]
+
+
+def test_terminal_timeout_is_recorded() -> None:
+    _prepare_db()
+    registry = get_content_registry()
+    lesson = registry.lessons["backend-structure"]
+    task = registry.tasks["inspect-app-layout"]
+
+    with Session(get_engine()) as session:
+        user = session.exec(select(User).where(User.username == "admin")).first()
+        assert user is not None
+        sandbox = lesson_sandbox_dir(user.id, lesson.key)
+        sandbox.mkdir(parents=True, exist_ok=True)
+        (sandbox / "slow.py").write_text("import time\ntime.sleep(5)\n", encoding="utf-8")
+
+        result = run_terminal_command(
+            session=session,
+            user_id=user.id,
+            lesson=lesson,
+            task=task,
+            command_text="python run file slow.py",
+        )
+        status = result.run.status
+        stderr_text = result.run.stderr_text
+        session.commit()
+
+    assert status == "timeout"
+    assert "timeout" in stderr_text
+
+
+def test_terminal_api_hidden_when_task_terminal_disabled() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+        response = client.get("/api/terminal/lessons/foundation-intro/history")
+
+    assert response.status_code == 404

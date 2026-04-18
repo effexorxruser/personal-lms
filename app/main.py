@@ -9,6 +9,7 @@ from app.middleware import configure_middleware
 from app.routers.auth import router as auth_router
 from app.routers.content import router as content_router
 from app.routers.dashboard import router as dashboard_router
+from app.routers.terminal import router as terminal_router
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -26,6 +27,7 @@ def create_app() -> FastAPI:
     application.include_router(auth_router)
     application.include_router(content_router)
     application.include_router(dashboard_router)
+    application.include_router(terminal_router)
 
     @application.get("/health")
     def health() -> dict[str, str]:

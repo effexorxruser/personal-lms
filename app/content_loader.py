@@ -27,6 +27,20 @@ class LessonContent:
 
 
 @dataclass
+class TerminalPreset:
+    label: str
+    command: str
+
+
+@dataclass
+class TerminalConfig:
+    enabled: bool
+    presets: list[TerminalPreset]
+    allow_manual_input: bool
+    allowed_commands: list[str]
+
+
+@dataclass
 class TaskContent:
     slug: str
     title: str
@@ -36,6 +50,7 @@ class TaskContent:
     definition_of_done: list[str]
     review_mode: str
     hints: list[str]
+    terminal: TerminalConfig | None = None
 
 
 @dataclass
@@ -125,6 +140,28 @@ def _load_lesson(path: Path, module_slug: str, course_slug: str) -> LessonConten
     )
 
 
+def _load_terminal_config(task_data: dict) -> TerminalConfig | None:
+    terminal_data = task_data.get("terminal")
+    if not isinstance(terminal_data, dict):
+        return None
+
+    presets = [
+        TerminalPreset(label=str(item.get("label", "Команда")), command=str(item.get("command", "help")))
+        for item in terminal_data.get("presets", [])
+        if isinstance(item, dict)
+    ]
+    allowed_commands = [str(item) for item in terminal_data.get("allowed_commands", [])]
+    if not allowed_commands:
+        allowed_commands = ["help", "pwd", "tree", "python", "pytest", "show"]
+
+    return TerminalConfig(
+        enabled=bool(terminal_data.get("enabled", False)),
+        presets=presets,
+        allow_manual_input=bool(terminal_data.get("allow_manual_input", False)),
+        allowed_commands=allowed_commands,
+    )
+
+
 def _load_task(path: Path) -> TaskContent:
     task_data = _parse_yaml(path)
     return TaskContent(
@@ -136,6 +173,7 @@ def _load_task(path: Path) -> TaskContent:
         definition_of_done=[str(item) for item in task_data.get("definition_of_done", [])],
         review_mode=str(task_data.get("review_mode", "deterministic")),
         hints=[str(item) for item in task_data.get("hints", [])],
+        terminal=_load_terminal_config(task_data),
     )
 
 

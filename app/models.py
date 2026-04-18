@@ -99,3 +99,18 @@ class StuckEvent(SQLModel, table=True):
     status: str = Field(default="open", index=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     resolved_at: datetime | None = None
+
+
+class TerminalRun(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(index=True, foreign_key="user.id")
+    lesson_key: str = Field(index=True)
+    task_slug: str | None = Field(default=None, index=True)
+    command_text: str
+    normalized_command: str
+    exit_code: int | None = None
+    stdout_text: str = ""
+    stderr_text: str = ""
+    status: str = Field(default="completed", index=True)
+    duration_ms: int = Field(default=0)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

@@ -2459,3 +2459,94 @@ body {
     opacity: 0.1;
   }
 }
+
+/* =====================
+   Lesson-scoped terminal
+===================== */
+.terminal-panel {
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(245, 248, 244, 0.06), transparent 34%),
+    var(--lesson-nav-surface);
+}
+
+.terminal-panel__header {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  align-items: flex-start;
+  margin-bottom: var(--space-2);
+}
+
+.terminal-panel__header h2 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.terminal-status {
+  padding: 4px 8px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-pill);
+  color: var(--accent-primary);
+  background: var(--clock-node-surface);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+}
+
+.terminal-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: var(--space-3) 0;
+}
+
+.terminal-form {
+  display: grid;
+  gap: 7px;
+  margin: var(--space-3) 0;
+}
+
+.terminal-form label {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.terminal-input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.terminal-input-row input {
+  min-width: 0;
+  height: 38px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: rgba(2, 3, 4, 0.56);
+  color: var(--text-primary);
+  font: inherit;
+  padding: 0 10px;
+}
+
+.terminal-output {
+  max-height: clamp(180px, 28vh, 320px);
+  overflow: auto;
+  padding: 10px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-panel);
+  color: var(--text-secondary);
+  background:
+    linear-gradient(180deg, rgba(245, 248, 244, 0.035), transparent 42%),
+    rgba(2, 3, 4, 0.64);
+  font-size: var(--font-size-sm);
+  line-height: 1.45;
+  white-space: pre-wrap;
+  scrollbar-color: var(--border-strong) transparent;
+  scrollbar-width: thin;
+}
+
+@media (max-width: 720px) {
+  .terminal-input-row {
+    grid-template-columns: 1fr;
+  }
+}

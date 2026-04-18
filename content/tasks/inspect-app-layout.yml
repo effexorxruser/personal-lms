@@ -15,3 +15,22 @@ review_mode: deterministic
 hints:
   - Начни с `app/routers/content.py`.
   - Затем проверь `app/content_loader.py` и `app/services/progress_service.py`.
+terminal:
+  enabled: true
+  presets:
+    - label: "Показать помощь"
+      command: "help"
+    - label: "Проверить Python"
+      command: "python --version"
+    - label: "Показать задание"
+      command: "show task"
+    - label: "Запустить файл урока"
+      command: "python run lesson"
+  allow_manual_input: true
+  allowed_commands:
+    - help
+    - pwd
+    - tree
+    - python
+    - pytest
+    - show
