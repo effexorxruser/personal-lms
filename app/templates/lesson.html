@@ -16,14 +16,11 @@
 
   <section class="workspace-grid lesson-workspace" aria-label="Рабочая область урока">
     <main class="workspace-pane lesson-reading-pane">
-<section class="ui-card lesson-context-strip bg-lesson" data-page="lesson" data-hero-bg="lesson" aria-labelledby="lesson-title">
-  <div class="hero__visual overlay-dark" aria-hidden="true"></div>
-  <div class="hero__ghost hero__ghost--lain-soft" aria-hidden="true"></div>
-  <div class="lesson-context-strip__body">
-    <div>
+  <article class="markdown-body lesson-main" aria-labelledby="lesson-title">
+    <header class="lesson-inline-header">
       <p class="eyebrow">Режим урока</p>
       <h1 id="lesson-title">{{ lesson.title }}</h1>
-      <p class="hero-copy">{{ lesson.summary }}</p>
+      <p>{{ lesson.summary }}</p>
       <div class="meta-row">
         <span class="meta-pill">Статус: {{ lesson_status_label }}</span>
         <span class="meta-pill">Раздел: {{ module_title }}</span>
@@ -33,38 +30,13 @@
         <span class="meta-pill">Задача не найдена: {{ execution.missing_task_slug }}</span>
         {% endif %}
       </div>
-    </div>
-    <div class="lesson-context-actions">
-      {% if is_lesson_completed %}
-      <span class="status-chip status-chip--success">Урок завершён</span>
-      {% elif lesson.task_slug and not execution.submission_snapshot.is_approved %}
-      <a class="btn btn--ghost" href="#task">Сначала выполнить задачу</a>
-      {% else %}
-      <form method="post" action="/lessons/{{ lesson.key }}/complete">
-        <button type="submit" class="btn btn--primary">Отметить урок завершённым</button>
-      </form>
-      {% endif %}
-    </div>
-  </div>
-</section>
-
-  <article class="markdown-body lesson-main">
+    </header>
     {{ lesson.body_html | safe }}
   </article>
     </main>
 
     <aside class="workspace-pane workspace-rail lesson-rail-pane">
       <div class="lesson-side">
-    <nav class="ui-card lesson-jump-panel lesson-side-dock" aria-label="Быстрые переходы по уроку">
-      <p class="lesson-nav-title">Быстрые переходы</p>
-      <div class="lesson-jumps">
-        {% if lesson.task_slug %}<a href="#task">Задача</a>{% endif %}
-        {% if execution.submission_snapshot.review %}<a href="#review">Проверка</a>{% endif %}
-        <a href="#stuck">Блокер</a>
-        <a href="#next-action">Дальше</a>
-      </div>
-    </nav>
-
     {% if lesson.task_slug %}
     <article class="ui-card lesson-card task-panel" id="task">
       <p class="lesson-nav-title">Связанная задача</p>
@@ -136,10 +108,10 @@
     </article>
     {% endif %}
 
-    <article class="ui-card lesson-card stuck-panel" id="stuck">
-      <p class="lesson-nav-title">Блокер</p>
-      <h2>Я застрял</h2>
+    <details class="ui-card lesson-card stuck-panel compact-details" id="stuck">
+      <summary>Блокер</summary>
       <div class="stuck-panel__body">
+        <h2>Я застрял</h2>
         {% if stuck_context.active_event %}
         <p>Активный блокер: {{ stuck_context.reason_options.get(stuck_context.active_event.reason_code, stuck_context.active_event.reason_code) }}</p>
         {% if stuck_context.active_event.note %}
@@ -171,7 +143,7 @@
           {% endfor %}
         </ul>
       </div>
-    </article>
+    </details>
 
     <details class="ui-card lesson-card lesson-card--ops compact-details" open>
       <summary>Цели</summary>
@@ -193,6 +165,17 @@
 
     <nav id="next-action" class="ui-card lesson-nav-panel" aria-label="Навигация по урокам">
       <p class="lesson-nav-title">Следующее действие</p>
+      <div class="lesson-completion-action">
+        {% if is_lesson_completed %}
+        <span class="status-chip status-chip--success">Урок завершён</span>
+        {% elif lesson.task_slug and not execution.submission_snapshot.is_approved %}
+        <a class="btn btn--ghost" href="#task">Сначала выполнить задачу</a>
+        {% else %}
+        <form method="post" action="/lessons/{{ lesson.key }}/complete">
+          <button type="submit" class="btn btn--primary">Отметить урок завершённым</button>
+        </form>
+        {% endif %}
+      </div>
       <div class="lesson-nav">
         {% if prev_lesson_key %}
         <a class="btn btn--ghost" href="/lessons/{{ prev_lesson_key }}">← Предыдущий урок</a>

@@ -11,8 +11,8 @@ export function renderDashboardWorkspace(args: { checkpointState: UiState; block
     <section class="workspace-shell dashboard-workspace dashboard-workspace--resume">
       <div class="workspace-grid dashboard-resume-layout">
         <main class="workspace-pane dashboard-main dashboard-main--resume">
+          <div class="dashboard-ambient" aria-hidden="true"></div>
           <section class="dashboard-context-strip" aria-label="Текущий контекст обучения" style="--progress-value: 67%">
-            <div class="dashboard-context-strip__lain" aria-hidden="true"></div>
             <div class="dashboard-context-strip__identity"><span class="dashboard-context-strip__user">effexorxruser</span><span>Python Backend + AI Learning</span></div>
             <div class="dashboard-context-strip__state"><span>Модуль: Основа backend</span><span>Checkpoint: ${checkpointLabel}</span></div>
             <div class="dashboard-context-strip__progress"><span class="progress-line"><span></span></span><strong>67%</strong></div>
@@ -48,8 +48,7 @@ export function renderLessonWorkspace(args: { state: UiState; reviewApproved: bo
     <section class="workspace-shell lesson-shell">
       <div class="workspace-grid lesson-workspace">
         <main class="workspace-pane lesson-reading-pane">
-          <section class="ui-card lesson-context-strip bg-lesson"><div class="hero__visual overlay-dark"></div><div><p class="eyebrow">Урок</p><h1>Урок 2: Структура backend</h1><p class="hero-copy">Спокойное чтение слева, выполнение и blockers справа.</p></div></section>
-          <article class="markdown-body lesson-main"><h1>Структура backend</h1><p>Текущий каркас использует <strong>FastAPI</strong>, шаблоны Jinja2 и файловый контент.</p><p>Ключевой принцип: данные курса живут только в content/.</p></article>
+          <article class="markdown-body lesson-main"><header class="lesson-inline-header"><p class="eyebrow">Режим урока</p><h1>Урок 2: Структура backend</h1><p>Спокойное чтение слева, выполнение и блокеры справа.</p><div class="meta-row"><span class="meta-pill">Статус: в процессе</span><span class="meta-pill">Раздел: Основа backend</span></div></header><p>Текущий каркас использует <strong>FastAPI</strong>, шаблоны Jinja2 и файловый контент.</p><p>Ключевой принцип: данные курса живут только в content/.</p></article>
         </main>
         <aside class="workspace-pane workspace-rail lesson-rail-pane">${renderExecutionRail({ taskTitle: 'Проверить структуру приложения', state: args.state, reviewApproved: args.reviewApproved })}</aside>
       </div>

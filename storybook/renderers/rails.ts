@@ -14,21 +14,19 @@ export function renderRailPanel(args: { kicker: string; title: string; body: str
 
 export function renderBlockerPanel(args: { active: boolean; reason: string; note: string }): string {
   return `
-    <article class="ui-card lesson-card stuck-panel">
-      <p class="lesson-nav-title">Блокер</p>
-      <h2>${args.active ? 'Я застрял' : 'Блокер не активен'}</h2>
-      ${args.active ? `<p>Активный блокер: ${escapeHtml(args.reason)}</p><p class="rail-card__muted">${escapeHtml(args.note)}</p><button class="btn btn--ghost" type="button">Снять блокер</button>` : '<p class="rail-card__muted">Если застрянешь, отметь это на странице урока.</p>'}
-    </article>
+    <details class="ui-card lesson-card stuck-panel compact-details" ${args.active ? 'open' : ''}>
+      <summary>Блокер</summary>
+      <div class="stuck-panel__body">
+        <h2>${args.active ? 'Я застрял' : 'Блокер не активен'}</h2>
+        ${args.active ? `<p>Активный блокер: ${escapeHtml(args.reason)}</p><p class="rail-card__muted">${escapeHtml(args.note)}</p><button class="btn btn--ghost" type="button">Снять блокер</button>` : '<p class="rail-card__muted">Если застрянешь, раскрой блокер и зафиксируй место остановки.</p>'}
+      </div>
+    </details>
   `;
 }
 
 export function renderExecutionRail(args: { taskTitle: string; state: UiState; reviewApproved: boolean }): string {
   return `
     <aside class="lesson-side">
-      <nav class="ui-card lesson-jump-panel lesson-side-dock">
-        <p class="lesson-nav-title">Быстрые переходы</p>
-        <div class="lesson-jumps"><a href="#">Задача</a><a href="#">Проверка</a><a href="#">Блокер</a><a href="#">Дальше</a></div>
-      </nav>
       <article class="ui-card lesson-card task-panel">
         <p class="lesson-nav-title">Связанная задача</p>
         <h2>${escapeHtml(args.taskTitle)}</h2>
