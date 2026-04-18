@@ -1,21 +1,30 @@
 # START HERE
 
-Если вы впервые в проекте:
+Если вы впервые в проекте, идите в таком порядке.
 
-## 1. Продуктовый смысл
-- PRODUCT_VISION.md
+## 1. Общее состояние репозитория
 
-## 2. Границы MVP
-- MVP_SCOPE.md
+- [README.md](../README.md)
 
-## 3. Как устроено обучение
-- LEARNING_MODEL.md
-- CONTENT_STRATEGY.md
+## 2. Продуктовый смысл
 
-## 4. Архитектура
-- ARCHITECTURE_OVERVIEW.md
+- [PRODUCT_VISION.md](product/PRODUCT_VISION.md)
 
-## 5. Ограничения
-- PROJECT_GUARDRAILS.md
+## 3. Границы MVP
 
-Этот порядок важен — он отражает реальную логику проекта.
+- [MVP_SCOPE.md](product/MVP_SCOPE.md)
+
+## 4. Как устроено обучение
+
+- [LEARNING_MODEL.md](product/LEARNING_MODEL.md)
+- [CONTENT_STRATEGY.md](product/CONTENT_STRATEGY.md)
+
+## 5. Архитектура и runtime
+
+- [ARCHITECTURE_OVERVIEW.md](product/ARCHITECTURE_OVERVIEW.md)
+
+## 6. Ограничения
+
+- [PROJECT_GUARDRAILS.md](product/PROJECT_GUARDRAILS.md)
+
+Этот порядок важен: сначала текущее состояние кода, потом продуктовые ограничения и архитектура.

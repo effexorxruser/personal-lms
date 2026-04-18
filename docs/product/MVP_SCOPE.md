@@ -2,132 +2,95 @@
 
 ## Назначение документа
 
-Документ фиксирует границы MVP: что входит, что не входит, какой стек используется и какие anti-scope правила защищают проект от расползания.
+Документ фиксирует границы MVP и явно разделяет:
+
+- что уже реализовано в репозитории;
+- что остается целевым направлением, но еще не сделано.
+
+Актуализация: 18 апреля 2026.
 
 ## Принцип MVP
 
-MVP должен быть small and sharp. Его задача — доказать, что personal source-backed LMS может вести пользователя по маршруту Python backend + AI in real products лучше, чем хаотичный серфинг по интернету.
+MVP должен быть small and sharp.
 
-MVP не должен становиться giant LMS, платформой для всех пользователей или enterprise-системой.
+Цель: доказать, что personal source-backed LMS помогает регулярно выполнять практические шаги в направлении Python backend + AI, а не просто потреблять контент.
 
 ## Формат продукта
 
-MVP — web-first приложение.
-
-Основной режим использования:
-
-- браузер;
-- локальный запуск на старте;
-- пользовательский и информационный слой на русском языке.
-
-Mobile-first, desktop-first и browser IDE не являются целями MVP.
+- web-first приложение;
+- локальный запуск как основной режим MVP;
+- UI и пользовательский слой — на русском;
+- без mobile/desktop app как отдельного продукта.
 
 ## Зафиксированный стек MVP
 
-- FastAPI;
-- Jinja2;
-- SQLite;
-- Tailwind CSS;
-- Alpine.js.
+- FastAPI
+- Jinja2
+- SQLite
+- SQLModel
+- Vanilla CSS + Vanilla JS
 
-SQLite является базой MVP. PostgreSQL / Supabase могут быть рассмотрены позже, но не являются стартовой базой.
+`alembic` присутствует как зависимость, но migration scaffold пока не создан.
 
-## Что входит в MVP
+## Что уже входит в MVP (и реализовано)
 
-Минимально нужные продуктовые части:
-
-- вход в приложение;
-- dashboard с текущим состоянием обучения;
+- login/logout и сессионная авторизация;
+- dashboard;
 - карта курса;
 - страница урока;
 - progress по урокам/курсу;
 - task layer;
-- submissions;
-- review;
+- submissions + review state;
+- checkpoint submissions + checkpoint review state;
 - stuck flow;
 - weekly recap;
-- минимальный встроенный терминал / terminal-like execution surface;
+- lesson-scoped terminal execution surface;
+- file-based authoring model: курс/модуль/урок/task/checkpoint.
+
+## Что в MVP пока не реализовано
+
 - lesson-scoped AI helper;
-- authoring-ready структура curriculum сущностей.
+- production-ready migration workflow (Alembic scaffold);
+- multi-course масштабирование beyond текущего content snapshot.
 
-Минимально нужные сущности:
-
-- пользователь;
-- курс;
-- модуль;
-- урок;
-- статус урока;
-- задача;
-- submission;
-- review result;
-- progress state.
-
-Точные поля сущностей могут уточняться по мере реализации.
-
-## Authoring/runtime readiness до массового curriculum onboarding
-
-До массовой загрузки реального курса MVP должен достигнуть authoring/runtime readiness.
-
-Минимально обязательные закрытия до real curriculum onboarding:
-
-- stuck flow;
-- weekly recap;
-- minimal terminal-like execution surface;
-- lesson-scoped AI helper;
-- authoring-ready curriculum structure.
-
-Эти пункты не расширяют MVP в сторону giant LMS, а фиксируют минимальную устойчивость выполнения и загрузки контента.
-
-## Что не входит в MVP
-
-В MVP не входят:
-
-- multi-tenant architecture;
-- сложная multi-user модель;
-- социальные функции;
-- публичный marketplace курсов;
-- полноценная IDE в браузере;
-- замена VS Code;
-- mobile app;
-- desktop app;
-- сложная role-based access model;
-- enterprise-функции;
-- AI autopilot, который меняет фиксированную структуру курса;
-- сложная VPS/multi-service инфраструктура как обязательное условие запуска.
+Эти пункты не должны реализовываться ad-hoc: только через отдельные решения с проверкой scope.
 
 ## Минимальный встроенный терминал
 
-В MVP согласован минимальный встроенный терминал / terminal-like execution surface.
+Терминал в MVP — это учебный execution layer, а не полноценный shell.
 
-Это не полноценная IDE и не универсальный remote shell. Его роль:
+Границы текущей реализации:
 
-- дать учебный execution layer;
-- поддержать terminal literacy;
-- связать задание с выполнением;
-- усилить ощущение dev environment.
+- lesson-scoped sandbox;
+- whitelist команд на уровне task;
+- grammar ограничена поддерживаемыми командами;
+- возможен режим только preset-команд (без manual input);
+- timeout и ограничение вывода;
+- history сохраняется в `TerminalRun`.
 
-Границы безопасности и точная реализация могут быть уточнены позже.
+## Что не входит в MVP
+
+- multi-tenant architecture;
+- сложная multi-user/social модель;
+- публичный marketplace курсов;
+- browser IDE и замена VS Code;
+- split frontend/backend архитектура;
+- сложная role-based enterprise модель;
+- AI autopilot, который ломает фиксированную структуру курса.
 
 ## Anti-scope правила
 
-Новая идея не должна попадать в MVP, если она:
+Идея не должна попадать в MVP, если она:
 
-- не помогает пользователю сделать следующий учебный шаг;
-- не усиливает execution;
-- требует сложной платформенной инфраструктуры;
-- добавляет социальную/enterprise сложность;
+- не усиливает execution и следующую учебную итерацию;
+- требует существенной platform complexity;
 - превращает проект в generic LMS;
 - размывает фиксированный маршрут;
-- требует переписывания архитектуры без прямой пользы для обучения.
+- требует архитектурного разворота без прямой пользы для learner workflow.
 
 ## Что может быть позже
 
-Позже могут быть рассмотрены:
-
-- PostgreSQL / Supabase;
-- деплой за пределами локального режима;
-- расширенные review сценарии;
+- Alembic migrations как обязательный путь schema changes;
+- AI layer для lesson/runtime assist;
 - дополнительные курсы и треки;
-- более глубокие AI-assisted функции.
-
-Это не часть жесткого MVP, пока не зафиксировано отдельным решением.
+- production-like deployment profile.

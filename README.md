@@ -1,71 +1,90 @@
 # personal-lms
 
-Personal learning OS для Python backend + AI.
+Self-hosted LMS-like платформа для обучения Python backend + AI.
 
-## Что это
+## Актуальный статус (на 18 апреля 2026)
 
-`personal-lms` — personal learning system, а не каталог ссылок и не "видеокурс".
+Сейчас репозиторий содержит рабочий MVP с execution-first фокусом:
 
-Система:
-- строит маршрут обучения;
-- связывает внешние источники с практикой;
-- требует execution, а не только consumption;
-- фиксирует progress, submissions и review.
+- аутентификация (login/logout) и защищенный dashboard;
+- file-based контент из `content/` (курс -> модули -> уроки + tasks + checkpoints);
+- страница курса (`/courses/{course_slug}`) с прогрессом и checkpoint-блоками;
+- страница урока (`/lessons/{lesson_key}`): чтение, задача, submission, review, stuck flow;
+- recap страница (`/recap`) с weekly summary;
+- lesson-scoped учебный терминал через API (`/api/terminal/...`) с sandbox-ограничениями;
+- persistence runtime state в SQLite через SQLModel.
 
-## Куда проект развивается сейчас
+## Что в проекте сейчас
 
-Текущий product direction:
+### Backend
 
-- execution-driven, source-backed LMS;
-- целевая траектория: **Python backend + AI practical builder path**;
-- прикладная ветка текущего этапа: Telegram / automation / AI utility tools;
-- приоритет: platform hardening и authoring/runtime readiness до массового curriculum onboarding.
+- FastAPI app (`app/main.py`)
+- SSR шаблоны на Jinja2 (`app/templates/`)
+- SQLModel модели (`app/models.py`)
+- SQLite database (`instance/personal_lms.db`)
+- инициализация схемы через `scripts/init_db.py`
 
-## Что уже реализовано (текущее состояние)
+### Frontend
 
-- web-first MVP на FastAPI + Jinja2;
-- аутентификация и защищенный dashboard;
-- file-based карта курса и страницы уроков из `content/`;
-- базовый learning flow (курс/уроки/progress/task/submission/review) в развитии.
+- server-rendered страницы
+- кастомные стили в `app/static/css/app.css`
+- ванильный JS в `app/static/js/app.js`
 
-## Канонический продуктовый контекст
+Примечание: Tailwind/Alpine в текущей runtime-реализации не используются. Tailwind может быть добавлен позже отдельным решением.
 
-Source-of-truth документы находятся в `docs/product/`.
+### Контент
 
-Нейминг-канон для product docs в текущем репозитории: `UPPER_SNAKE_CASE.md`.
+Контент хранится в файлах:
 
-- [`PRODUCT_VISION.md`](docs/product/PRODUCT_VISION.md)
-- [`MVP_SCOPE.md`](docs/product/MVP_SCOPE.md)
-- [`CONTENT_STRATEGY.md`](docs/product/CONTENT_STRATEGY.md)
-- [`LEARNING_MODEL.md`](docs/product/LEARNING_MODEL.md)
-- [`ARCHITECTURE_OVERVIEW.md`](docs/product/ARCHITECTURE_OVERVIEW.md)
-- [`CURRICULUM_ARCHITECTURE.md`](docs/product/CURRICULUM_ARCHITECTURE.md)
-- [`SOURCE_STACK.md`](docs/product/SOURCE_STACK.md)
-- [`MONETIZATION_PATH.md`](docs/product/MONETIZATION_PATH.md)
-- [`PLATFORM_FIRST_ROADMAP.md`](docs/product/PLATFORM_FIRST_ROADMAP.md)
-- [`AUTHORING_MODEL.md`](docs/product/AUTHORING_MODEL.md)
-- [`UI_DIRECTION.md`](docs/product/UI_DIRECTION.md)
-- [`UI_BASELINE.md`](docs/product/UI_BASELINE.md)
-- [`PROJECT_GUARDRAILS.md`](docs/product/PROJECT_GUARDRAILS.md)
+- `content/courses/` — курс, модули, уроки (Markdown + front matter)
+- `content/tasks/` — task definitions (YAML)
+- `content/checkpoints/` — checkpoint definitions (YAML)
+
+Текущий content snapshot:
+
+- 1 курс
+- 2 модуля
+- 3 урока
+- 1 task
+- 1 checkpoint
+
+## Структура репозитория
+
+```text
+app/
+  routers/        # auth/content/dashboard/terminal
+  services/       # progress/execution/stuck/terminal/... 
+  templates/      # base, dashboard, course_map, lesson, recap, login
+  static/         # app.css, app.js
+content/
+  courses/
+  tasks/
+  checkpoints/
+instance/
+  personal_lms.db
+  terminal/       # sandbox-данные учебного терминала
+scripts/
+  init_db.py
+  create_user.py
+  reset_password.py
+docs/
+  START_HERE.md
+  product/
+```
 
 ## Стек
 
 - FastAPI
-- Jinja2 templates
+- Jinja2
 - SQLite
 - SQLModel
-- Alembic
-- Tailwind CSS
-- Alpine.js
+- Alembic (dependency only; scaffold пока не заведен)
+- Vanilla CSS + Vanilla JS
+- Markdown + YAML для file-based контента
 
-## Языковая политика
+## Быстрый старт
 
-- UI и пользовательский слой ведутся на русском языке.
-- Документация MVP ведется на русском языке.
-- Исключения: env vars, file names, route paths, команды, technical identifiers и имена зависимостей остаются на английском.
-- Multi-language support и i18n не добавляются до отдельного решения.
-
-## Установка зависимостей
+### 1. Установка
 
 ```bash
 python3 -m venv .venv
@@ -74,73 +93,106 @@ python3 -m pip install -U pip
 python3 -m pip install -e .
 ```
 
-## Конфигурация
-
-Скопируйте `.env.example` в `.env` и задайте `PERSONAL_LMS_SESSION_SECRET_KEY`.
+### 2. Конфигурация
 
 ```bash
 cp .env.example .env
 ```
 
-## Инициализация базы данных
+Обязательный минимум:
+
+- `PERSONAL_LMS_SESSION_SECRET_KEY`
+
+### 3. Инициализация БД
 
 ```bash
 source .venv/bin/activate
 python3 scripts/init_db.py
 ```
 
-## Создание администратора
+### 4. Создание администратора
 
 ```bash
 source .venv/bin/activate
 python3 scripts/create_user.py
 ```
 
-## Сброс пароля
+### 5. Сброс пароля (опционально)
 
 ```bash
 source .venv/bin/activate
 python3 scripts/reset_password.py
 ```
 
-## Запуск приложения
+### 6. Запуск
 
 ```bash
 source .venv/bin/activate
 uvicorn app.main:app --reload
 ```
 
-Основные страницы:
-- `GET /login` — форма входа
-- `GET /dashboard` — защищенная панель
-- `GET /courses/python-backend-ai` — карта курса
-- `GET /lessons/{lesson_key}` — страница урока
+## Основные маршруты
 
-## Запуск тестов
+- `GET /health`
+- `GET /login`
+- `POST /login`
+- `POST /logout`
+- `GET /dashboard`
+- `GET /courses/{course_slug}`
+- `GET /lessons/{lesson_key}`
+- `POST /lessons/{lesson_key}/submissions`
+- `POST /lessons/{lesson_key}/complete`
+- `POST /lessons/{lesson_key}/stuck`
+- `POST /checkpoints/{checkpoint_slug}/submissions`
+- `POST /stuck/{event_id}/resolve`
+- `GET /recap`
+- `GET /api/terminal/lessons/{lesson_key}/history`
+- `POST /api/terminal/lessons/{lesson_key}/run`
+
+## Учебный терминал (MVP)
+
+Терминал lesson-scoped и ограничен grammar/whitelist правилами:
+
+- sandbox путь: `instance/terminal/{user_id}/{lesson_key}`
+- команды валидируются по `allowed_commands` задачи
+- может быть отключен manual input (только preset-команды)
+- timeout команд: 5 секунд
+- stdout/stderr обрезаются до 12_000 символов
+- каждый запуск сохраняется как `TerminalRun`
+
+## Тесты
 
 ```bash
 source .venv/bin/activate
 pytest
 ```
 
-## Roadmap (high-level)
+Сейчас в репозитории базовый smoke test (`tests/test_app_smoke.py`).
 
-- documentation freeze продуктового контекста
-- platform hardening (stuck/recap/terminal-like/lesson AI helper)
-- authoring readiness и первый curriculum pass
-- расширение контента (source-backed)
+## UI sandbox
 
-## Для разработчиков
+Для локальных UI-экспериментов подключен Storybook:
 
-Если вы хотите разобраться в проекте:
+```bash
+npm run storybook
+npm run build-storybook
+```
 
-1. Начните с `docs/product/PRODUCT_VISION.md`
-2. Затем `MVP_SCOPE.md`
-3. Затем `ARCHITECTURE_OVERVIEW.md`
+## Документация продукта
 
-## Open Source
+Канонический продуктовый контекст: `docs/product/`.
 
-Проект готовится к постепенному открытию.
+Рекомендуемый вход:
 
-Перед добавлением изменений важно учитывать ограничения из:
-- docs/product/PROJECT_GUARDRAILS.md
+1. `docs/START_HERE.md`
+2. `docs/product/PRODUCT_VISION.md`
+3. `docs/product/MVP_SCOPE.md`
+4. `docs/product/ARCHITECTURE_OVERVIEW.md`
+
+## Ограничения MVP
+
+- без React/Next.js
+- без split frontend/backend
+- без browser IDE
+- без multi-tenant архитектуры
+- без расползания scope без явного решения

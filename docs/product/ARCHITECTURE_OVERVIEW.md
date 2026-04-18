@@ -2,159 +2,114 @@
 
 ## Назначение документа
 
-Документ фиксирует высокоуровневые архитектурные решения MVP и объясняет, как архитектура обслуживает цель обучения.
+Документ фиксирует фактическую архитектуру MVP в текущем репозитории и объясняет, почему она выбрана для execution-first обучения.
+
+Актуализация: 18 апреля 2026.
 
 ## Архитектурный формат
 
-`personal-lms` — web-first приложение.
+`personal-lms` — web-first server-rendered приложение.
 
-Стартовый режим — локальный запуск. MVP не должен зависеть от сложного деплоя, VPS, Kubernetes, multi-service инфраструктуры или внешней managed-платформы.
+- основной режим: локальный запуск;
+- без split frontend/backend;
+- без multi-service инфраструктуры для MVP;
+- UI и пользовательский слой — на русском.
 
-## Зафиксированный стек
+## Фактический стек
 
-Для MVP зафиксирован стек:
+### Backend
 
-- FastAPI;
-- Jinja2;
-- SQLite;
-- Tailwind CSS;
-- Alpine.js.
+- FastAPI
+- Jinja2 templates
+- SQLite
+- SQLModel
 
-Текущие технические детали могут развиваться, но MVP-решения должны оставаться совместимыми с этим направлением.
+### Frontend
+
+- HTML templates (SSR)
+- кастомный CSS (`app/static/css/app.css`)
+- ванильный JS (`app/static/js/app.js`)
+
+### Content layer
+
+- Markdown + YAML
+- file-based registry через `app/content_loader.py`
+
+### Важно про Tailwind/Alpine
+
+В текущей runtime-реализации Tailwind CSS и Alpine.js не используются.
+Они могут быть добавлены позже только отдельным решением, если это даст прямую пользу learning flow.
 
 ## Почему FastAPI + Jinja2
 
-FastAPI дает простой backend foundation:
+- быстрый Python-first backend для маршрутов и form actions;
+- простой SSR-слой без SPA-complexity;
+- достаточно для MVP-цикла: урок -> задача -> выполнение -> фиксация результата.
 
-- routes;
-- forms/actions;
-- API evolution позже;
-- Python-first developer experience.
+## Почему SQLite + SQLModel
 
-Jinja2 подходит MVP, потому что:
+- минимальный операционный overhead в локальном режиме;
+- достаточно для single-user trusted MVP;
+- хорошо подходит под runtime state (progress, submissions, stuck, terminal runs).
 
-- не требует split frontend/backend;
-- хорошо работает для server-rendered UI;
-- уменьшает complexity;
-- помогает быстрее строить учебный workflow.
+## Контент и runtime state
 
-## Почему SQLite
+Базовый принцип проекта соблюдается в коде:
 
-SQLite подходит MVP, потому что:
+- контент хранится в файлах (`content/`);
+- runtime state хранится в БД (`instance/personal_lms.db`).
 
-- простая локальная разработка;
-- нет внешней database infrastructure;
-- достаточно для single-user / trusted local MVP;
-- снижает operational overhead.
+Это разделение позволяет:
 
-PostgreSQL / Supabase могут быть рассмотрены позже, но не являются базой MVP.
+- версионировать учебный материал через git;
+- отдельно эволюционировать runtime-модели.
+
+## Текущие runtime сущности (SQLModel)
+
+В БД уже есть ключевые таблицы:
+
+- `User`
+- `CourseProgress`
+- `LessonProgress`
+- `TaskSubmission`
+- `ReviewResult`
+- `CheckpointSubmission`
+- `CheckpointReview`
+- `StuckEvent`
+- `TerminalRun`
+
+Checkpoint уже реализован как отдельная runtime-сущность, а не только как идея на будущее.
 
 ## Миграции БД
 
-В зависимостях проекта есть Alembic, но Alembic scaffold пока не создан: в репозитории нет `alembic.ini`, `env.py` и каталога версионированных migrations.
+В зависимостях проекта есть `alembic`, но Alembic scaffold пока не заведен.
 
-Текущий MVP-режим инициализации БД:
+Текущий режим:
 
-- модели описаны через SQLModel;
-- `scripts/init_db.py` вызывает `SQLModel.metadata.create_all()`;
-- новые таблицы для локальной SQLite базы создаются через повторный запуск `scripts/init_db.py`.
+- схема создается через `SQLModel.metadata.create_all()` (`scripts/init_db.py`);
+- это допустимо для локального MVP;
+- полноценные versioned migrations нужны до production-like этапа.
 
-Это сознательно допустимо для текущего локального MVP, но является tech debt. Перед production-like deploy или перед сложными schema changes нужно добавить полноценный Alembic scaffold и перевести изменения схемы в версионированные migrations.
+## Terminal architecture (MVP)
 
-## Tailwind CSS и Alpine.js
+Учебный терминал реализован как lesson-scoped execution service:
 
-Tailwind CSS и Alpine.js используются как легкий frontend layer.
+- API: `/api/terminal/lessons/{lesson_key}/history` и `/run`;
+- sandbox: `instance/terminal/{user_id}/{lesson_key}`;
+- whitelist-грамматика и `allowed_commands` на уровне task;
+- timeout и ограничение объема вывода;
+- результат каждого запуска пишется в `TerminalRun`.
 
-Цель:
+Это execution surface для обучения, а не универсальный shell и не browser IDE.
 
-- не строить React-first frontend;
-- не разделять приложение на отдельные frontend/backend проекты;
-- сохранять простую server-rendered архитектуру;
-- добавлять интерактивность только там, где она нужна.
+## Архитектурные границы MVP
 
-## Хранение данных и контента
+В MVP не закладываются:
 
-Принцип:
+- React/Next.js фронтенд
+- split frontend/backend
+- browser IDE
+- multi-tenant архитектура
+- enterprise complexity
 
-- контент хранить в файлах;
-- runtime state хранить в БД.
-
-Контент в файлах облегчает review, curation и подключение репозитория как source в GPT Projects. БД хранит состояние пользователя, progress, submissions и другие runtime-сущности.
-
-## Platform hardening before curriculum scale-up
-
-Перед массовым curriculum onboarding архитектура должна пройти platform hardening и выйти в authoring-ready состояние.
-
-Фиксируется порядок:
-
-- runtime/UX stabilization;
-- authoring model readiness;
-- ограниченный first curriculum pass;
-- только после этого content scale-up.
-
-Это снижает риск масштабирования нестабильной модели уроков и execution-flow.
-
-## Authoring model readiness
-
-С точки зрения архитектуры обязательна поддержка согласованной структуры:
-
-- block;
-- module;
-- lesson;
-- task;
-- checkpoint (как evolvable сущность).
-
-Checkpoint entity/model может быть добавлена как отдельная evolution-итерация, когда текущий runtime стабилизирован и требования явно закреплены.
-
-## Практическое направление текущего этапа
-
-Текущий прикладной фокус архитектурно совместим с веткой Telegram / automation / AI utility tools, но сама архитектура остается общей и не превращается в curriculum-специфичный документ.
-
-## Локальный запуск
-
-На старте приоритет — локальный запуск:
-
-- проще разрабатывать;
-- проще тестировать;
-- меньше инфраструктурного шума;
-- лучше соответствует personal LMS.
-
-Будущий деплой возможен, но не должен диктовать MVP-архитектуру.
-
-## Почему не React-first
-
-React-first подход не выбран для MVP, потому что:
-
-- увеличивает split frontend/backend complexity;
-- требует больше build/tooling решений;
-- отвлекает от learning workflow;
-- не нужен для проверки основной продуктовой идеи.
-
-## Почему не giant LMS
-
-Giant LMS architecture не нужна, потому что MVP не решает задачи:
-
-- multi-tenant платформы;
-- публичного каталога курсов;
-- enterprise администрирования;
-- сложной роли преподавателей;
-- social learning network.
-
-Архитектура должна оставаться узкой и полезной для персонального обучения.
-
-## Почему не desktop-first
-
-Desktop-first и browser IDE не являются целями MVP.
-
-Пользователь может использовать локальные dev tools, но платформа должна быть web-first orchestration layer: маршрут, progress, tasks, review и минимальный execution surface.
-
-## Архитектура обслуживает обучение
-
-Любое архитектурное усложнение должно проходить проверку:
-
-- помогает ли оно пользователю учиться регулярнее;
-- помогает ли оно выполнять задачи;
-- помогает ли оно фиксировать progress;
-- помогает ли оно снизить tutorial hell.
-
-Если нет, решение не должно попадать в MVP.
+Любое усложнение допустимо только если напрямую улучшает learning flow и execution.
