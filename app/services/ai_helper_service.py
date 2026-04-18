@@ -1,31 +1,26 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 import re
 
-import httpx
-from sqlmodel import Session
+from sqlalchemy import desc
+from sqlmodel import Session, select
 
 from app.config import Settings, get_settings
 from app.models import LainHelperInteraction
+from app.services.ai_helper_modes import LainHelperMode
 from app.services.content_service import get_lesson_or_404
 from app.services.execution_service import get_lesson_execution_context
+from app.services.lain_provider import LainProviderError, LainProviderRequest, request_lain_reply
 from app.services.stuck_service import latest_open_stuck_event, reason_label
 
-SUPPORTED_AI_HELPER_MODES = {
-    "explain_lesson",
-    "help_start",
-    "stuck_help",
-    "submission_hint",
-    "free_question",
-}
-
 _MODE_GUIDANCE = {
-    "explain_lesson": "Кратко объясни текущий урок и зачем он нужен в маршруте.",
-    "help_start": "Дай стартовый шаг на 5-10 минут и что проверить после шага.",
-    "stuck_help": "Помоги снять блокер и предложи самый маленький следующий шаг.",
-    "submission_hint": "Дай подсказку по улучшению черновика submission без готового решения.",
-    "free_question": "Ответь только в рамках текущего урока и верни пользователя к execution.",
+    LainHelperMode.EXPLAIN_LESSON: "Кратко объясни текущий урок и зачем он нужен в маршруте.",
+    LainHelperMode.HELP_START: "Дай стартовый шаг на 5-10 минут и что проверить после шага.",
+    LainHelperMode.STUCK_HELP: "Помоги снять блокер и предложи самый маленький следующий шаг.",
+    LainHelperMode.SUBMISSION_HINT: "Дай подсказку по улучшению черновика submission без готового решения.",
+    LainHelperMode.FREE_QUESTION: "Ответь только в рамках текущего урока и верни пользователя к execution.",
 }
 
 _SCOPE_REFUSAL_PATTERNS = (
@@ -46,9 +41,19 @@ _SCOPE_REFUSAL_PATTERNS = (
 class LainHelperResult:
     status: str
     lesson_key: str
-    mode: str
+    mode: LainHelperMode
     assistant_message: str
     interaction_id: int | None
+
+
+@dataclass(frozen=True)
+class LainHelperHistoryEntry:
+    id: int
+    lesson_key: str
+    mode: LainHelperMode
+    user_message: str
+    assistant_message: str
+    created_at: datetime
 
 
 class LainHelperError(ValueError):
@@ -65,8 +70,17 @@ def _tokenize(value: str) -> set[str]:
     return {token for token in re.findall(r"[a-zA-Zа-яА-Я0-9_]+", value.lower()) if len(token) >= 3}
 
 
-def _mode_instruction(mode: str) -> str:
-    return _MODE_GUIDANCE.get(mode, _MODE_GUIDANCE["free_question"])
+def _coerce_mode(mode: LainHelperMode | str) -> LainHelperMode:
+    if isinstance(mode, LainHelperMode):
+        return mode
+    try:
+        return LainHelperMode(mode.strip().lower())
+    except ValueError as exc:
+        raise LainHelperError("Unsupported helper mode") from exc
+
+
+def _mode_instruction(mode: LainHelperMode) -> str:
+    return _MODE_GUIDANCE[mode]
 
 
 def _scope_fallback_message(lesson_title: str) -> str:
@@ -152,7 +166,7 @@ def _build_context_text(
     )
 
 
-def _build_system_prompt(mode: str) -> str:
+def _build_system_prompt(mode: LainHelperMode) -> str:
     return (
         "Ты Lain — встроенный AI-тьютор personal-lms. "
         "Тон спокойный, точный, сдержанный, без театральности.\n"
@@ -164,12 +178,12 @@ def _build_system_prompt(mode: str) -> str:
         "- уводить в новый curriculum или общий чат 'обо всем'.\n"
         "Формат ответа: 3-7 коротких предложений.\n"
         "Всегда давай один явный следующий практический шаг.\n"
-        f"Режим запроса: {mode}. Инструкция режима: {_mode_instruction(mode)}"
+        f"Режим запроса: {mode.value}. Инструкция режима: {_mode_instruction(mode)}"
     )
 
 
 def _build_user_prompt(
-    mode: str,
+    mode: LainHelperMode,
     user_message: str,
     submission_draft: str | None,
     context_text: str,
@@ -177,59 +191,11 @@ def _build_user_prompt(
     safe_message = user_message.strip() or "Нужна помощь по текущему шагу урока."
     draft_block = _clip(submission_draft.strip(), 1200) if submission_draft and submission_draft.strip() else ""
     return (
-        f"Mode: {mode}\n"
+        f"Mode: {mode.value}\n"
         f"User request:\n{safe_message}\n\n"
         + (f"Submission draft:\n{draft_block}\n\n" if draft_block else "")
         + context_text
     )
-
-
-def _extract_openai_text(payload: dict) -> str:
-    output_text = payload.get("output_text")
-    if isinstance(output_text, str) and output_text.strip():
-        return output_text.strip()
-
-    fragments: list[str] = []
-    for item in payload.get("output", []):
-        if not isinstance(item, dict):
-            continue
-        for content in item.get("content", []):
-            if not isinstance(content, dict):
-                continue
-            candidate = content.get("text") or content.get("output_text")
-            if isinstance(candidate, str) and candidate.strip():
-                fragments.append(candidate.strip())
-    return "\n".join(fragments).strip()
-
-
-def _request_openai_reply(
-    *,
-    api_key: str,
-    model: str,
-    timeout_seconds: int,
-    system_prompt: str,
-    user_prompt: str,
-) -> str:
-    response = httpx.post(
-        "https://api.openai.com/v1/responses",
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": model,
-            "instructions": system_prompt,
-            "input": user_prompt,
-            "temperature": 0.2,
-            "max_output_tokens": 420,
-        },
-        timeout=timeout_seconds,
-    )
-    response.raise_for_status()
-    text = _extract_openai_text(response.json())
-    if not text:
-        raise RuntimeError("Empty AI helper response")
-    return text
 
 
 def _scope_refusal(user_message: str, lesson_title: str, lesson_summary: str, task_title: str | None) -> str | None:
@@ -248,20 +214,51 @@ def _scope_refusal(user_message: str, lesson_title: str, lesson_summary: str, ta
     return None
 
 
+def list_lain_history(
+    *,
+    session: Session,
+    user_id: int,
+    lesson_key: str | None = None,
+    limit: int = 12,
+) -> list[LainHelperHistoryEntry]:
+    normalized_limit = max(1, min(limit, 40))
+    statement = select(LainHelperInteraction).where(LainHelperInteraction.user_id == user_id)
+    if lesson_key and lesson_key.strip():
+        statement = statement.where(LainHelperInteraction.lesson_key == lesson_key.strip())
+
+    interactions = session.exec(
+        statement.order_by(desc(LainHelperInteraction.created_at), desc(LainHelperInteraction.id)).limit(normalized_limit)
+    ).all()
+
+    entries: list[LainHelperHistoryEntry] = []
+    for interaction in reversed(interactions):
+        if interaction.id is None:
+            continue
+        entries.append(
+            LainHelperHistoryEntry(
+                id=interaction.id,
+                lesson_key=interaction.lesson_key,
+                mode=_coerce_mode(interaction.mode),
+                user_message=interaction.user_message,
+                assistant_message=interaction.assistant_message,
+                created_at=interaction.created_at,
+            )
+        )
+    return entries
+
+
 def assist_with_lain(
     *,
     session: Session,
     user_id: int,
     lesson_key: str,
-    mode: str,
+    mode: LainHelperMode | str,
     user_message: str,
     submission_draft: str | None = None,
     settings: Settings | None = None,
 ) -> LainHelperResult:
     runtime = settings or get_settings()
-    normalized_mode = mode.strip().lower()
-    if normalized_mode not in SUPPORTED_AI_HELPER_MODES:
-        raise LainHelperError("Unsupported helper mode")
+    normalized_mode = _coerce_mode(mode)
     if not lesson_key.strip():
         raise LainHelperError("Lesson key is required")
 
@@ -309,23 +306,25 @@ def assist_with_lain(
             context_text=context_text,
         )
         try:
-            raw_reply = _request_openai_reply(
-                api_key=runtime.openai_api_key,
-                model=runtime.ai_helper_model,
-                timeout_seconds=runtime.ai_helper_timeout_seconds,
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
+            raw_reply = request_lain_reply(
+                LainProviderRequest(
+                    api_key=runtime.openai_api_key,
+                    model=runtime.ai_helper_model,
+                    timeout_seconds=runtime.ai_helper_timeout_seconds,
+                    system_prompt=system_prompt,
+                    user_prompt=user_prompt,
+                )
             )
             assistant_message = _clip(raw_reply.strip(), 1400)
             status = "ok"
-        except (httpx.HTTPError, RuntimeError):
+        except LainProviderError:
             assistant_message = _provider_error_message(lesson.title)
             status = "provider_error"
 
     interaction = LainHelperInteraction(
         user_id=user_id,
         lesson_key=lesson.key,
-        mode=normalized_mode,
+        mode=normalized_mode.value,
         user_message=(user_message or "").strip(),
         assistant_message=assistant_message,
     )

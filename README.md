@@ -12,7 +12,7 @@ Self-hosted LMS-like платформа для обучения Python backend +
 - страница урока (`/lessons/{lesson_key}`): чтение, задача, submission, review, stuck flow;
 - recap страница (`/recap`) с weekly summary;
 - lesson-scoped учебный терминал через API (`/api/terminal/...`) с sandbox-ограничениями;
-- встроенный Lain Helper v0: floating launcher + mini-chat lesson-aware AI-тьютора;
+- встроенный Lain Helper v0.5: floating launcher + mini-chat lesson-aware AI-тьютора с recent history;
 - persistence runtime state в SQLite через SQLModel.
 
 ## Что в проекте сейчас
@@ -157,6 +157,7 @@ uvicorn app.main:app --reload
 - `GET /api/terminal/lessons/{lesson_key}/history`
 - `POST /api/terminal/lessons/{lesson_key}/run`
 - `POST /api/ai/helper`
+- `GET /api/ai/helper/history`
 
 ## Учебный терминал (MVP)
 
@@ -175,8 +176,10 @@ Lain — встроенный lesson-scoped AI-тьютор внутри LMS:
 
 - floating launcher внизу справа на внутренних страницах;
 - mini-chat panel с quick actions (`Объясни текущий урок`, `Помоги начать`, `Я застрял`, `Проверь мой ответ`);
-- endpoint: `POST /api/ai/helper`;
+- endpoint-ы: `POST /api/ai/helper`, `GET /api/ai/helper/history`;
 - ответы ограничены контекстом текущего урока и guardrails-логикой;
+- при первом открытии panel подгружается недавняя история для текущего урока;
+- provider transport вынесен в отдельный слой `app/services/lain_provider.py`;
 - interaction log сохраняется в `LainHelperInteraction`.
 
 ## Тесты
@@ -186,7 +189,11 @@ source .venv/bin/activate
 pytest
 ```
 
-Сейчас в репозитории базовый smoke test (`tests/test_app_smoke.py`).
+Ключевые наборы тестов:
+
+- `tests/test_app_smoke.py` — базовый smoke/regression сценарий;
+- `tests/test_ai_helper.py` — backend/guardrails/history тесты Lain helper;
+- `tests/test_ai_helper_ui.py` — SSR/UI рендер helper на внутренних страницах.
 
 ## UI sandbox
 

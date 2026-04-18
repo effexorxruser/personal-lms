@@ -5,9 +5,9 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 
-from app.config import get_settings
 from app.content_registry import get_content_registry
 from app.db import get_engine
+from app.services.ai_helper_view import build_ai_helper_view_context
 from app.services.execution_service import dashboard_execution_summary
 from app.services.progress_service import ensure_progress_initialized
 from app.services.recap_service import build_weekly_recap
@@ -42,7 +42,6 @@ def dashboard(request: Request):
         weekly_recap = build_weekly_recap(session, int(user_id), course.slug, snapshot)
 
     next_lesson_key = snapshot.next_lesson_key
-    ai_helper_enabled = get_settings().ai_helper_enabled
     course_href = f"/courses/{course.slug}" if course else "/courses/python-backend-ai"
     lesson_href = f"/lessons/{next_lesson_key}" if next_lesson_key else "/lessons/foundation-intro"
     checkpoint_href = (
@@ -138,8 +137,7 @@ def dashboard(request: Request):
             "reason_label": reason_label,
             "nav_course_href": course_href,
             "nav_lessons_href": lesson_href,
-            "ai_helper_enabled": ai_helper_enabled,
-            "ai_helper_lesson_key": next_lesson_key or "foundation-intro",
+            **build_ai_helper_view_context(lesson_key=next_lesson_key),
         },
     )
 
@@ -165,7 +163,6 @@ def recap(request: Request):
         weekly_recap = build_weekly_recap(session, int(user_id), course.slug, snapshot)
 
     lesson_href = f"/lessons/{snapshot.next_lesson_key}" if snapshot.next_lesson_key else "/lessons/foundation-intro"
-    ai_helper_enabled = get_settings().ai_helper_enabled
     return templates.TemplateResponse(
         request=request,
         name="recap.html",
@@ -175,7 +172,6 @@ def recap(request: Request):
             "reason_label": reason_label,
             "nav_course_href": f"/courses/{course.slug}",
             "nav_lessons_href": lesson_href,
-            "ai_helper_enabled": ai_helper_enabled,
-            "ai_helper_lesson_key": snapshot.next_lesson_key or "foundation-intro",
+            **build_ai_helper_view_context(lesson_key=snapshot.next_lesson_key),
         },
     )

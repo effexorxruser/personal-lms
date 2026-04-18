@@ -201,10 +201,14 @@
     var input = root.querySelector("[data-ai-input]");
     var quickActions = root.querySelector("[data-ai-quick-actions]");
     var endpoint = root.getAttribute("data-ai-endpoint") || "/api/ai/helper";
+    var historyEndpoint = root.getAttribute("data-ai-history-endpoint") || "";
     var lessonKey = (root.getAttribute("data-ai-lesson") || "").trim();
     if (!launcher || !panel || !messages || !form || !input) return;
 
     var isBusy = false;
+    var isHistoryLoading = false;
+    var loadedHistoryForLesson = "";
+    var renderedInteractionIds = {};
 
     var actionMessages = {
       explain_lesson: "Объясни текущий урок: что важно понять перед практикой?",
@@ -227,9 +231,31 @@
       return stuckDraft.value.trim();
     }
 
+    function normalizeInteractionId(value) {
+      var parsed = Number(value);
+      if (!parsed || parsed <= 0) return "";
+      return String(parsed);
+    }
+
+    function rememberInteraction(interactionId) {
+      var normalized = normalizeInteractionId(interactionId);
+      if (!normalized) return;
+      renderedInteractionIds[normalized] = true;
+    }
+
+    function hasInteraction(interactionId) {
+      var normalized = normalizeInteractionId(interactionId);
+      if (!normalized) return false;
+      return renderedInteractionIds[normalized] === true;
+    }
+
     function setEmptyState(visible) {
       if (!emptyState) return;
       emptyState.hidden = !visible;
+    }
+
+    function refreshEmptyState() {
+      setEmptyState(messages.querySelectorAll(".lain-chat__message").length === 0);
     }
 
     function setBusy(nextBusy) {
@@ -245,20 +271,30 @@
       }
     }
 
-    function appendMessage(role, text, className) {
+    function appendMessage(role, text, className, interactionId) {
       if (!text) return null;
       var node = document.createElement("article");
       node.className = "lain-chat__message lain-chat__message--" + role + (className ? " " + className : "");
       node.textContent = text;
+      if (interactionId) {
+        node.setAttribute("data-ai-interaction-id", String(interactionId));
+      }
       messages.appendChild(node);
-      setEmptyState(false);
+      refreshEmptyState();
       messages.scrollTop = messages.scrollHeight;
       return node;
+    }
+
+    function removeNode(node) {
+      if (!node || !node.parentNode) return;
+      node.parentNode.removeChild(node);
+      refreshEmptyState();
     }
 
     function openPanel() {
       panel.hidden = false;
       root.classList.add("is-open");
+      loadHistory();
       window.setTimeout(function () {
         input.focus({ preventScroll: true });
       }, 20);
@@ -267,6 +303,49 @@
     function closePanel() {
       panel.hidden = true;
       root.classList.remove("is-open");
+    }
+
+    function appendHistoryItem(item) {
+      if (!item || hasInteraction(item.id)) return;
+
+      var normalizedId = normalizeInteractionId(item.id);
+      var userMessage = item.user_message ? String(item.user_message).trim() : "";
+      var assistantMessage = item.assistant_message ? String(item.assistant_message).trim() : "";
+
+      if (userMessage) appendMessage("user", userMessage, "", normalizedId);
+      if (assistantMessage) appendMessage("assistant", assistantMessage, "", normalizedId);
+      rememberInteraction(normalizedId);
+    }
+
+    function loadHistory() {
+      if (!historyEndpoint || !lessonKey || isHistoryLoading || loadedHistoryForLesson === lessonKey) return;
+
+      isHistoryLoading = true;
+      var loading = appendMessage("assistant", "Загружаю недавнюю историю...", "lain-chat__message--loading");
+
+      fetch(
+        historyEndpoint + "?lesson_key=" + encodeURIComponent(lessonKey) + "&limit=12",
+        { headers: { "Accept": "application/json" } }
+      )
+        .then(function (response) {
+          if (!response.ok) throw new Error("History request failed");
+          return response.json();
+        })
+        .then(function (payload) {
+          removeNode(loading);
+          var items = payload && Array.isArray(payload.items) ? payload.items : [];
+          items.forEach(function (item) {
+            appendHistoryItem(item);
+          });
+          loadedHistoryForLesson = lessonKey;
+        })
+        .catch(function () {
+          removeNode(loading);
+          appendMessage("assistant", "Не удалось загрузить историю Lain. Можно продолжить без нее.");
+        })
+        .finally(function () {
+          isHistoryLoading = false;
+        });
     }
 
     function sendRequest(mode, messageText, submissionDraft) {
@@ -279,7 +358,7 @@
         return;
       }
 
-      if (trimmedMessage) appendMessage("user", trimmedMessage);
+      var userNode = trimmedMessage ? appendMessage("user", trimmedMessage) : null;
       var loading = appendMessage("assistant", "Lain анализирует текущий шаг...", "lain-chat__message--loading");
       setBusy(true);
 
@@ -303,12 +382,27 @@
           return response.json();
         })
         .then(function (data) {
-          if (loading && loading.parentNode) loading.parentNode.removeChild(loading);
-          appendMessage("assistant", data.assistant_message || "Сейчас не смогла ответить по этому шагу.");
+          var assistantText = data.assistant_message || "Сейчас не смогла ответить по этому шагу.";
+          var interactionId = normalizeInteractionId(data.interaction_id);
+          if (loading) {
+            loading.textContent = assistantText;
+            loading.classList.remove("lain-chat__message--loading");
+            if (interactionId) loading.setAttribute("data-ai-interaction-id", interactionId);
+          } else {
+            appendMessage("assistant", assistantText, "", interactionId);
+          }
+          if (interactionId) {
+            rememberInteraction(interactionId);
+            if (userNode) userNode.setAttribute("data-ai-interaction-id", interactionId);
+          }
         })
         .catch(function () {
-          if (loading && loading.parentNode) loading.parentNode.removeChild(loading);
-          appendMessage("assistant", "Ошибка соединения с Lain. Попробуй еще раз через минуту.");
+          if (loading) {
+            loading.textContent = "Ошибка соединения с Lain. Попробуй еще раз через минуту.";
+            loading.classList.remove("lain-chat__message--loading");
+          } else {
+            appendMessage("assistant", "Ошибка соединения с Lain. Попробуй еще раз через минуту.");
+          }
         })
         .finally(function () {
           setBusy(false);
@@ -340,6 +434,7 @@
     if (quickActions) {
       quickActions.querySelectorAll("[data-ai-mode]").forEach(function (button) {
         button.addEventListener("click", function () {
+          openPanel();
           var mode = button.getAttribute("data-ai-mode");
           var message = actionMessages[mode] || "";
           if (mode === "stuck_help") {
@@ -348,7 +443,6 @@
           }
           var draft = mode === "submission_hint" ? readSubmissionDraft() : "";
           sendRequest(mode, message, draft);
-          openPanel();
         });
       });
     }

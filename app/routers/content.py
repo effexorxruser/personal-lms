@@ -5,7 +5,6 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 
-from app.config import get_settings
 from app.db import get_engine
 from app.services.checkpoint_service import (
     checkpoint_course_slug,
@@ -19,6 +18,7 @@ from app.services.content_service import (
     lesson_neighbors,
 )
 from app.services.execution_service import can_complete_lesson, get_lesson_execution_context
+from app.services.ai_helper_view import build_ai_helper_view_context
 from app.services.progress_service import (
     ensure_progress_initialized,
     get_lesson_status,
@@ -62,8 +62,6 @@ def course_map(request: Request, course_slug: str):
         else (f"/lessons/{first_lesson_key}" if first_lesson_key else "/lessons/foundation-intro")
     )
     helper_lesson_key = snapshot.next_lesson_key or first_lesson_key or "foundation-intro"
-    ai_helper_enabled = get_settings().ai_helper_enabled
-
     return templates.TemplateResponse(
         request=request,
         name="course_map.html",
@@ -77,8 +75,7 @@ def course_map(request: Request, course_slug: str):
             "progress_pct": snapshot.progress_pct,
             "nav_course_href": f"/courses/{course.slug}",
             "nav_lessons_href": first_lesson_href,
-            "ai_helper_enabled": ai_helper_enabled,
-            "ai_helper_lesson_key": helper_lesson_key,
+            **build_ai_helper_view_context(lesson_key=helper_lesson_key),
         },
     )
 
@@ -125,8 +122,6 @@ def lesson_page(request: Request, lesson_key: str):
             prev_lesson_key,
             next_lesson_key,
         )
-    ai_helper_enabled = get_settings().ai_helper_enabled
-
     return templates.TemplateResponse(
         request=request,
         name="lesson.html",
@@ -146,8 +141,7 @@ def lesson_page(request: Request, lesson_key: str):
             "next_lesson_key": next_lesson_key,
             "nav_course_href": nav_course_href,
             "nav_lessons_href": nav_lessons_href,
-            "ai_helper_enabled": ai_helper_enabled,
-            "ai_helper_lesson_key": lesson.key,
+            **build_ai_helper_view_context(lesson_key=lesson.key),
         },
     )
 

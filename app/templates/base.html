@@ -64,6 +64,7 @@
       class="lain-helper"
       data-ai-helper
       data-ai-endpoint="/api/ai/helper"
+      data-ai-history-endpoint="{{ ai_helper_history_endpoint | default('/api/ai/helper/history') }}"
       data-ai-lesson="{{ ai_helper_lesson_key | default('') }}"
     >
       <button type="button" class="lain-helper__launcher" data-ai-launcher aria-label="Открыть Lain helper">
