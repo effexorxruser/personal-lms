@@ -1,6 +1,6 @@
 slug: foundation
 title: "Модуль 1: Основа backend"
-description: Базовые принципы backend-приложения и архитектурный каркас.
+description: Переходный модуль для фиксации базового backend-каркаса и рабочего потока.
 lessons:
   - foundation-intro
   - backend-structure

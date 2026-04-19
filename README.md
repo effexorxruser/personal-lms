@@ -50,6 +50,8 @@ Self-hosted LMS-like платформа для обучения Python backend +
 - 1 task
 - 1 checkpoint
 
+Примечание: текущий curriculum в репозитории — **transitional baseline** для runtime/tests и preflight-пайплайна перед загрузкой первого реального foundation-блока.
+
 ## Структура репозитория
 
 ```text

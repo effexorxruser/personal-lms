@@ -1,17 +1,17 @@
 ---
 key: backend-structure
 title: "Урок 2: Структура backend"
-summary: Как устроен текущий каркас приложения и где находится ответственность слоев.
+summary: Где находятся ключевые backend-слои и как они связаны в рабочем потоке.
 objectives:
-  - Понять роль routers/templates/services
-  - Найти source of truth для контента
+  - Увидеть роли routers, services и templates
+  - Найти source of truth для file-based контента
 checklist:
-  - Просмотреть content loader
-  - Открыть lesson page в браузере
+  - Просмотреть content loader и registry
+  - Сопоставить lesson page с backend-роутом
 task_slug: inspect-app-layout
 ---
 # Структура backend
 
-Текущий каркас использует **FastAPI**, шаблоны Jinja2 и файловый контент.
+Текущий baseline использует **FastAPI**, шаблоны Jinja2 и file-based контент.
 
-Ключевой принцип: данные курса живут только в `content/`.
+Ключевой принцип: контент хранится в `content/`, runtime state хранится в БД.
