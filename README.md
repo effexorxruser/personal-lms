@@ -13,6 +13,7 @@ Self-hosted LMS-like платформа для обучения Python backend +
 - recap страница (`/recap`) с weekly summary;
 - lesson-scoped учебный терминал через API (`/api/terminal/...`) с sandbox-ограничениями;
 - встроенный Lain Helper v0.5: floating launcher + mini-chat lesson-aware AI-тьютора с recent history;
+- content authoring pipeline: схемы, graph validation и scaffold scripts для новых курсов;
 - persistence runtime state в SQLite через SQLModel.
 
 ## Что в проекте сейчас
@@ -182,6 +183,28 @@ Lain — встроенный lesson-scoped AI-тьютор внутри LMS:
 - provider transport вынесен в отдельный слой `app/services/lain_provider.py`;
 - interaction log сохраняется в `LainHelperInteraction`.
 
+## Content Pipeline (authoring readiness)
+
+Контентная модель остается file-based, но теперь добавлен явный preflight:
+
+- централизованные схемы: `app/content_pipeline.py`;
+- graph integrity checks (references/duplicates/orphans);
+- preflight скрипт: `python scripts/validate_content.py`;
+- scaffold scripts:
+  - `python scripts/scaffold_course.py`
+  - `python scripts/scaffold_module.py`
+  - `python scripts/scaffold_lesson.py`
+  - `python scripts/scaffold_task.py`
+  - `python scripts/scaffold_checkpoint.py`
+
+Рекомендуемый локальный workflow перед commit:
+
+```bash
+source .venv/bin/activate
+python scripts/validate_content.py
+pytest
+```
+
 ## Тесты
 
 ```bash
@@ -194,6 +217,9 @@ pytest
 - `tests/test_app_smoke.py` — базовый smoke/regression сценарий;
 - `tests/test_ai_helper.py` — backend/guardrails/history тесты Lain helper;
 - `tests/test_ai_helper_ui.py` — SSR/UI рендер helper на внутренних страницах.
+- `tests/test_content_validation.py` — schema validation контента;
+- `tests/test_content_integrity.py` — graph integrity checks;
+- `tests/test_content_scaffold.py` — scaffold scripts + preflight.
 
 ## UI sandbox
 

@@ -4,12 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import markdown
-import yaml
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-CONTENT_ROOT = PROJECT_ROOT / "content" / "courses"
-TASK_ROOT = PROJECT_ROOT / "content" / "tasks"
-CHECKPOINT_ROOT = PROJECT_ROOT / "content" / "checkpoints"
+from app.content_pipeline import CONTENT_ROOT, CHECKPOINT_ROOT, TASK_ROOT, load_content_bundle
 
 
 @dataclass
@@ -96,160 +92,119 @@ class ContentIndex:
     checkpoints: dict[str, CheckpointContent]
 
 
-def _parse_yaml(path: Path) -> dict:
-    with path.open("r", encoding="utf-8") as file_handle:
-        data = yaml.safe_load(file_handle)
-    if not isinstance(data, dict):
-        raise ValueError(f"Invalid YAML structure in {path}")
-    return data
-
-
-def _parse_front_matter(raw_text: str, path: Path) -> tuple[dict, str]:
-    if not raw_text.startswith("---\n"):
-        raise ValueError(f"Missing front matter in {path}")
-
-    parts = raw_text.split("\n---\n", 1)
-    if len(parts) != 2:
-        raise ValueError(f"Invalid front matter format in {path}")
-
-    front_matter_text = parts[0].replace("---\n", "", 1)
-    body_markdown = parts[1].strip()
-
-    front_matter = yaml.safe_load(front_matter_text)
-    if not isinstance(front_matter, dict):
-        raise ValueError(f"Invalid front matter YAML in {path}")
-
-    return front_matter, body_markdown
-
-
-def _load_lesson(path: Path, module_slug: str, course_slug: str) -> LessonContent:
-    raw_text = path.read_text(encoding="utf-8")
-    front_matter, body_markdown = _parse_front_matter(raw_text, path)
-
-    return LessonContent(
-        key=str(front_matter["key"]),
-        title=str(front_matter["title"]),
-        summary=str(front_matter["summary"]),
-        objectives=[str(item) for item in front_matter.get("objectives", [])],
-        checklist=[str(item) for item in front_matter.get("checklist", [])],
-        body_markdown=body_markdown,
-        body_html=markdown.markdown(body_markdown),
-        task_slug=(str(front_matter["task_slug"]) if front_matter.get("task_slug") else None),
-        module_slug=module_slug,
-        course_slug=course_slug,
-    )
-
-
-def _load_terminal_config(task_data: dict) -> TerminalConfig | None:
-    terminal_data = task_data.get("terminal")
-    if not isinstance(terminal_data, dict):
+def _to_terminal_config(raw_terminal) -> TerminalConfig | None:
+    if raw_terminal is None:
         return None
 
-    presets = [
-        TerminalPreset(label=str(item.get("label", "Команда")), command=str(item.get("command", "help")))
-        for item in terminal_data.get("presets", [])
-        if isinstance(item, dict)
-    ]
-    allowed_commands = [str(item) for item in terminal_data.get("allowed_commands", [])]
-    if not allowed_commands:
-        allowed_commands = ["help", "pwd", "tree", "python", "pytest", "show"]
-
     return TerminalConfig(
-        enabled=bool(terminal_data.get("enabled", False)),
-        presets=presets,
-        allow_manual_input=bool(terminal_data.get("allow_manual_input", False)),
-        allowed_commands=allowed_commands,
+        enabled=raw_terminal.enabled,
+        presets=[
+            TerminalPreset(label=preset.label, command=preset.command)
+            for preset in raw_terminal.presets
+        ],
+        allow_manual_input=raw_terminal.allow_manual_input,
+        allowed_commands=list(raw_terminal.allowed_commands),
     )
 
 
-def _load_task(path: Path) -> TaskContent:
-    task_data = _parse_yaml(path)
-    return TaskContent(
-        slug=str(task_data["slug"]),
-        title=str(task_data["title"]),
-        summary=str(task_data["summary"]),
-        instructions=str(task_data["instructions"]).strip(),
-        submission_type=str(task_data["submission_type"]),
-        definition_of_done=[str(item) for item in task_data.get("definition_of_done", [])],
-        review_mode=str(task_data.get("review_mode", "deterministic")),
-        hints=[str(item) for item in task_data.get("hints", [])],
-        terminal=_load_terminal_config(task_data),
+def load_content_index(
+    *,
+    content_root: Path = CONTENT_ROOT,
+    task_root: Path = TASK_ROOT,
+    checkpoint_root: Path = CHECKPOINT_ROOT,
+) -> ContentIndex:
+    bundle = load_content_bundle(
+        content_root=content_root,
+        task_root=task_root,
+        checkpoint_root=checkpoint_root,
+        raise_on_error=True,
     )
 
-
-def _load_checkpoint(path: Path) -> CheckpointContent:
-    checkpoint_data = _parse_yaml(path)
-    return CheckpointContent(
-        slug=str(checkpoint_data["slug"]),
-        title=str(checkpoint_data["title"]),
-        summary=str(checkpoint_data["summary"]),
-        module_slug=str(checkpoint_data["module_slug"]),
-        description=str(checkpoint_data["description"]).strip(),
-        requirements=[str(item) for item in checkpoint_data.get("requirements", [])],
-        definition_of_done=[str(item) for item in checkpoint_data.get("definition_of_done", [])],
-        submission_type=str(checkpoint_data["submission_type"]),
-        portfolio_expectations=[str(item) for item in checkpoint_data.get("portfolio_expectations", [])],
-        hints=[str(item) for item in checkpoint_data.get("hints", [])],
-    )
-
-
-def _load_module(course_path: Path, course_slug: str, module_slug: str) -> ModuleContent:
-    module_path = course_path / "modules" / module_slug
-    module_data = _parse_yaml(module_path / "module.yml")
-
-    lesson_keys = [str(item) for item in module_data.get("lessons", [])]
-    lessons: list[LessonContent] = []
-
-    for lesson_key in lesson_keys:
-        lesson_path = module_path / "lessons" / f"{lesson_key}.md"
-        lessons.append(_load_lesson(lesson_path, module_slug=module_slug, course_slug=course_slug))
-
-    return ModuleContent(
-        slug=str(module_data.get("slug", module_slug)),
-        title=str(module_data["title"]),
-        description=str(module_data["description"]),
-        lesson_keys=lesson_keys,
-        lessons=lessons,
-    )
-
-
-def load_content_index() -> ContentIndex:
-    courses: dict[str, CourseContent] = {}
-    lessons: dict[str, LessonContent] = {}
-    lesson_order: list[str] = []
     tasks: dict[str, TaskContent] = {}
     checkpoints: dict[str, CheckpointContent] = {}
+    lessons: dict[str, LessonContent] = {}
+    courses: dict[str, CourseContent] = {}
 
-    for task_path in sorted(TASK_ROOT.glob("*.yml")):
-        task = _load_task(task_path)
-        tasks[task.slug] = task
+    for task_slug, parsed_task in bundle.tasks_by_slug.items():
+        schema = parsed_task.schema
+        tasks[task_slug] = TaskContent(
+            slug=schema.slug,
+            title=schema.title,
+            summary=schema.summary,
+            instructions=schema.instructions,
+            submission_type=schema.submission_type,
+            definition_of_done=list(schema.definition_of_done),
+            review_mode=schema.review_mode,
+            hints=list(schema.hints),
+            terminal=_to_terminal_config(schema.terminal),
+        )
 
-    for checkpoint_path in sorted(CHECKPOINT_ROOT.glob("*.yml")):
-        checkpoint = _load_checkpoint(checkpoint_path)
-        checkpoints[checkpoint.slug] = checkpoint
+    for checkpoint_slug, parsed_checkpoint in bundle.checkpoints_by_slug.items():
+        schema = parsed_checkpoint.schema
+        checkpoints[checkpoint_slug] = CheckpointContent(
+            slug=schema.slug,
+            title=schema.title,
+            summary=schema.summary,
+            module_slug=schema.module_slug,
+            description=schema.description,
+            requirements=list(schema.requirements),
+            definition_of_done=list(schema.definition_of_done),
+            submission_type=schema.submission_type,
+            portfolio_expectations=list(schema.portfolio_expectations),
+            hints=list(schema.hints),
+        )
 
-    for course_path in sorted(CONTENT_ROOT.glob("*/course.yml")):
-        manifest_path = course_path
-        course_dir = manifest_path.parent
-        course_data = _parse_yaml(manifest_path)
+    lesson_order: list[str] = []
+    for lesson_key in bundle.lesson_order:
+        parsed_lesson = bundle.lessons_by_key.get(lesson_key)
+        if parsed_lesson is None:
+            continue
+        schema = parsed_lesson.schema
+        lesson = LessonContent(
+            key=schema.key,
+            title=schema.title,
+            summary=schema.summary,
+            objectives=list(schema.objectives),
+            checklist=list(schema.checklist),
+            body_markdown=parsed_lesson.body_markdown,
+            body_html=markdown.markdown(parsed_lesson.body_markdown),
+            task_slug=schema.task_slug,
+            module_slug=parsed_lesson.module_slug,
+            course_slug=parsed_lesson.course_slug,
+        )
+        lessons[schema.key] = lesson
+        lesson_order.append(schema.key)
 
-        course_slug = str(course_data["slug"])
-        module_order = [str(item) for item in course_data.get("modules", [])]
-
+    for parsed_course in bundle.courses:
+        module_order: list[str] = list(parsed_course.schema.modules)
         modules: list[ModuleContent] = []
         for module_slug in module_order:
-            module = _load_module(course_dir, course_slug=course_slug, module_slug=module_slug)
-            modules.append(module)
-            for lesson in module.lessons:
-                lessons[lesson.key] = lesson
-                lesson_order.append(lesson.key)
+            parsed_module = parsed_course.modules_by_folder.get(module_slug)
+            if parsed_module is None:
+                continue
+            module_schema = parsed_module.schema
+            module_lessons: list[LessonContent] = []
+            for lesson_key in module_schema.lessons:
+                lesson = lessons.get(lesson_key)
+                if lesson is not None:
+                    module_lessons.append(lesson)
+            modules.append(
+                ModuleContent(
+                    slug=module_schema.slug,
+                    title=module_schema.title,
+                    description=module_schema.description,
+                    lesson_keys=list(module_schema.lessons),
+                    lessons=module_lessons,
+                )
+            )
 
-        courses[course_slug] = CourseContent(
-            slug=course_slug,
-            title=str(course_data["title"]),
-            description=str(course_data["description"]),
-            version=str(course_data.get("version", "0.0.0")),
-            estimated_weeks=int(course_data.get("estimated_weeks", 0)),
+        course_schema = parsed_course.schema
+        courses[course_schema.slug] = CourseContent(
+            slug=course_schema.slug,
+            title=course_schema.title,
+            description=course_schema.description,
+            version=course_schema.version,
+            estimated_weeks=course_schema.estimated_weeks,
             module_order=module_order,
             modules=modules,
         )
