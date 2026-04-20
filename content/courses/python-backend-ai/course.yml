@@ -1,8 +1,0 @@
-slug: python-backend-ai
-title: Python Backend + AI Learning
-description: Переходный curriculum baseline для проверки runtime flow перед загрузкой реального блока.
-version: 0.3.0
-estimated_weeks: 12
-modules:
-  - foundation
-  - api-basics

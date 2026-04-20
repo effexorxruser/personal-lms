@@ -45,12 +45,12 @@ Self-hosted LMS-like платформа для обучения Python backend +
 Текущий content snapshot:
 
 - 1 курс
-- 2 модуля
+- 1 модуль
 - 3 урока
-- 1 task
+- 3 tasks
 - 1 checkpoint
 
-Примечание: текущий curriculum в репозитории — **transitional baseline** для runtime/tests и preflight-пайплайна перед загрузкой первого реального foundation-блока.
+Примечание: runtime переключён на реальный foundation-маршрут `python-backend-ai-foundation`; legacy transitional baseline удалён из пользовательского потока.
 
 ## Структура репозитория
 

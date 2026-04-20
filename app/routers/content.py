@@ -13,6 +13,7 @@ from app.services.checkpoint_service import (
     get_checkpoint,
 )
 from app.services.content_service import (
+    get_active_course_first_lesson_key,
     get_course_or_404,
     get_lesson_or_404,
     lesson_neighbors,
@@ -59,9 +60,9 @@ def course_map(request: Request, course_slug: str):
     first_lesson_href = (
         f"/lessons/{snapshot.next_lesson_key}"
         if snapshot.next_lesson_key
-        else (f"/lessons/{first_lesson_key}" if first_lesson_key else "/lessons/foundation-intro")
+        else (f"/lessons/{first_lesson_key}" if first_lesson_key else "/dashboard")
     )
-    helper_lesson_key = snapshot.next_lesson_key or first_lesson_key or "foundation-intro"
+    helper_lesson_key = snapshot.next_lesson_key or first_lesson_key or get_active_course_first_lesson_key()
     return templates.TemplateResponse(
         request=request,
         name="course_map.html",

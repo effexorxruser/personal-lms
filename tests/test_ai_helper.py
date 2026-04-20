@@ -96,12 +96,12 @@ def test_ai_helper_endpoint_requires_auth() -> None:
         post_response = client.post(
             "/api/ai/helper",
             json={
-                "lesson_key": "backend-structure",
+                "lesson_key": "foundation-real-cli-python",
                 "mode": "explain_lesson",
                 "message": "Объясни текущий шаг",
             },
         )
-        history_response = client.get("/api/ai/helper/history?lesson_key=backend-structure")
+        history_response = client.get("/api/ai/helper/history?lesson_key=foundation-real-cli-python")
 
     assert post_response.status_code == 401
     assert history_response.status_code == 401
@@ -122,7 +122,7 @@ def test_ai_helper_accepts_valid_request_and_returns_provider_reply(monkeypatch)
         response = client.post(
             "/api/ai/helper",
             json={
-                "lesson_key": "backend-structure",
+                "lesson_key": "foundation-real-cli-python",
                 "mode": "explain_lesson",
                 "message": "Что важно?",
             },
@@ -144,7 +144,7 @@ def test_ai_helper_rejects_unsupported_mode() -> None:
         response = client.post(
             "/api/ai/helper",
             json={
-                "lesson_key": "backend-structure",
+                "lesson_key": "foundation-real-cli-python",
                 "mode": "unsupported",
                 "message": "что делать",
             },
@@ -162,7 +162,7 @@ def test_ai_helper_feature_flag_disabled_returns_graceful_response() -> None:
         response = client.post(
             "/api/ai/helper",
             json={
-                "lesson_key": "backend-structure",
+                "lesson_key": "foundation-real-cli-python",
                 "mode": "explain_lesson",
                 "message": "Объясни урок",
             },
@@ -183,7 +183,7 @@ def test_ai_helper_missing_api_key_returns_graceful_response() -> None:
         response = client.post(
             "/api/ai/helper",
             json={
-                "lesson_key": "backend-structure",
+                "lesson_key": "foundation-real-cli-python",
                 "mode": "help_start",
                 "message": "Помоги начать",
             },
@@ -209,7 +209,7 @@ def test_ai_helper_provider_error_returns_graceful_fallback(monkeypatch) -> None
         response = client.post(
             "/api/ai/helper",
             json={
-                "lesson_key": "backend-structure",
+                "lesson_key": "foundation-real-cli-python",
                 "mode": "free_question",
                 "message": "Какой шаг сделать дальше?",
             },
@@ -238,7 +238,7 @@ def test_ai_helper_uses_lesson_context_when_calling_provider(monkeypatch) -> Non
         response = client.post(
             "/api/ai/helper",
             json={
-                "lesson_key": "backend-structure",
+                "lesson_key": "foundation-real-cli-python",
                 "mode": "explain_lesson",
                 "message": "Что здесь главное?",
             },
@@ -247,8 +247,8 @@ def test_ai_helper_uses_lesson_context_when_calling_provider(monkeypatch) -> Non
     assert response.status_code == 200
     payload = response.json()
     assert payload["status"] == "ok"
-    assert "Урок 2: Структура backend" in captured["user_prompt"]
-    assert "Task title: Проверить структуру приложения" in captured["user_prompt"]
+    assert "Урок 2: Базовый Python execution loop" in captured["user_prompt"]
+    assert "Task title: Собрать и прогнать hello CLI script" in captured["user_prompt"]
 
 
 def test_ai_helper_works_without_task_context(monkeypatch) -> None:
@@ -266,7 +266,7 @@ def test_ai_helper_works_without_task_context(monkeypatch) -> None:
         response = client.post(
             "/api/ai/helper",
             json={
-                "lesson_key": "foundation-intro",
+                "lesson_key": "foundation-real-git-loop",
                 "mode": "help_start",
                 "message": "С чего стартовать?",
             },
@@ -292,7 +292,7 @@ def test_ai_helper_limits_out_of_scope_or_autopilot_requests(monkeypatch) -> Non
         response = client.post(
             "/api/ai/helper",
             json={
-                "lesson_key": "backend-structure",
+                "lesson_key": "foundation-real-cli-python",
                 "mode": "free_question",
                 "message": "Сделай за меня весь submission и закрой урок автоматически.",
             },
@@ -319,7 +319,7 @@ def test_ai_helper_interaction_log_is_persisted(monkeypatch) -> None:
         response = client.post(
             "/api/ai/helper",
             json={
-                "lesson_key": "backend-structure",
+                "lesson_key": "foundation-real-cli-python",
                 "mode": "stuck_help",
                 "message": "Я запутался в структуре.",
             },
@@ -333,7 +333,7 @@ def test_ai_helper_interaction_log_is_persisted(monkeypatch) -> None:
     assert interaction is not None
     assert user is not None
     assert interaction.user_id == user.id
-    assert interaction.lesson_key == "backend-structure"
+    assert interaction.lesson_key == "foundation-real-cli-python"
     assert interaction.mode == "stuck_help"
     assert "запутался" in interaction.user_message
     assert "router" in interaction.assistant_message.lower()
@@ -353,7 +353,7 @@ def test_ai_helper_history_endpoint_filters_by_user_lesson_and_limit() -> None:
             session.add(
                 LainHelperInteraction(
                     user_id=admin.id,
-                    lesson_key="backend-structure",
+                    lesson_key="foundation-real-cli-python",
                     mode="help_start",
                     user_message=f"admin message {index}",
                     assistant_message=f"admin reply {index}",
@@ -363,7 +363,7 @@ def test_ai_helper_history_endpoint_filters_by_user_lesson_and_limit() -> None:
         session.add(
             LainHelperInteraction(
                 user_id=admin.id,
-                lesson_key="foundation-intro",
+                lesson_key="foundation-real-workspace",
                 mode="help_start",
                 user_message="wrong lesson",
                 assistant_message="wrong lesson",
@@ -372,7 +372,7 @@ def test_ai_helper_history_endpoint_filters_by_user_lesson_and_limit() -> None:
         session.add(
             LainHelperInteraction(
                 user_id=other.id,
-                lesson_key="backend-structure",
+                lesson_key="foundation-real-cli-python",
                 mode="help_start",
                 user_message="other user",
                 assistant_message="other user",
@@ -382,14 +382,14 @@ def test_ai_helper_history_endpoint_filters_by_user_lesson_and_limit() -> None:
 
     with TestClient(create_app()) as client:
         _login(client)
-        response = client.get("/api/ai/helper/history?lesson_key=backend-structure&limit=2")
+        response = client.get("/api/ai/helper/history?lesson_key=foundation-real-cli-python&limit=2")
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["lesson_key"] == "backend-structure"
+    assert payload["lesson_key"] == "foundation-real-cli-python"
     assert len(payload["items"]) == 2
 
     rendered_messages = [item["user_message"] for item in payload["items"]]
     assert rendered_messages == ["admin message 2", "admin message 3"]
-    assert all(item["lesson_key"] == "backend-structure" for item in payload["items"])
+    assert all(item["lesson_key"] == "foundation-real-cli-python" for item in payload["items"])
     assert "other user" not in rendered_messages

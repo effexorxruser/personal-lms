@@ -8,8 +8,7 @@ objectives:
 checklist:
   - Пройти указанные секции по VS Code Terminal и Python REPL
   - Выполнить стартовые команды в своём workspace
-  - Зафиксировать результат выполнения в task submission
-task_slug: foundation-workspace-ready
+  - Зафиксировать результат выполнения в собственном run-log
 ---
 # Зачем этот шаг в маршруте
 

@@ -7,6 +7,7 @@ from sqlmodel import Session
 
 from app.content_registry import get_content_registry
 from app.db import get_engine
+from app.services.content_service import get_active_course_first_lesson_key
 from app.services.ai_helper_view import build_ai_helper_view_context
 from app.services.execution_service import dashboard_execution_summary
 from app.services.progress_service import ensure_progress_initialized
@@ -27,7 +28,7 @@ def dashboard(request: Request):
         return RedirectResponse(url="/login", status_code=303)
 
     registry = get_content_registry()
-    course = registry.courses.get("python-backend-ai")
+    course = registry.courses.get("python-backend-ai-foundation")
     if not course:
         return RedirectResponse(url="/login", status_code=303)
 
@@ -42,8 +43,13 @@ def dashboard(request: Request):
         weekly_recap = build_weekly_recap(session, int(user_id), course.slug, snapshot)
 
     next_lesson_key = snapshot.next_lesson_key
-    course_href = f"/courses/{course.slug}" if course else "/courses/python-backend-ai"
-    lesson_href = f"/lessons/{next_lesson_key}" if next_lesson_key else "/lessons/foundation-intro"
+    first_lesson_key = get_active_course_first_lesson_key()
+    course_href = f"/courses/{course.slug}" if course else "/courses/python-backend-ai-foundation"
+    lesson_href = (
+        f"/lessons/{next_lesson_key}"
+        if next_lesson_key
+        else (f"/lessons/{first_lesson_key}" if first_lesson_key else "/dashboard")
+    )
     checkpoint_href = (
         f"{course_href}#checkpoint-{snapshot.next_checkpoint_slug}"
         if snapshot.next_checkpoint_slug
@@ -150,7 +156,7 @@ def recap(request: Request):
         return RedirectResponse(url="/login", status_code=303)
 
     registry = get_content_registry()
-    course = registry.courses.get("python-backend-ai")
+    course = registry.courses.get("python-backend-ai-foundation")
     if not course:
         return RedirectResponse(url="/login", status_code=303)
 
@@ -162,7 +168,12 @@ def recap(request: Request):
     with Session(get_engine()) as session:
         weekly_recap = build_weekly_recap(session, int(user_id), course.slug, snapshot)
 
-    lesson_href = f"/lessons/{snapshot.next_lesson_key}" if snapshot.next_lesson_key else "/lessons/foundation-intro"
+    first_lesson_key = get_active_course_first_lesson_key()
+    lesson_href = (
+        f"/lessons/{snapshot.next_lesson_key}"
+        if snapshot.next_lesson_key
+        else (f"/lessons/{first_lesson_key}" if first_lesson_key else "/dashboard")
+    )
     return templates.TemplateResponse(
         request=request,
         name="recap.html",

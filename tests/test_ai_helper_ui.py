@@ -80,8 +80,8 @@ def test_ai_helper_renders_on_internal_pages_with_consistent_context() -> None:
     with TestClient(create_app()) as client:
         _login(client)
         dashboard = client.get("/dashboard")
-        course = client.get("/courses/python-backend-ai")
-        lesson = client.get("/lessons/backend-structure")
+        course = client.get("/courses/python-backend-ai-foundation")
+        lesson = client.get("/lessons/foundation-real-cli-python")
         recap = client.get("/recap")
 
     for response in (dashboard, course, lesson, recap):
@@ -98,7 +98,7 @@ def test_ai_helper_panel_contains_quick_actions_and_empty_state() -> None:
 
     with TestClient(create_app()) as client:
         _login(client)
-        lesson = client.get("/lessons/backend-structure")
+        lesson = client.get("/lessons/foundation-real-cli-python")
 
     assert lesson.status_code == 200
     assert "Объясни текущий урок" in lesson.text
