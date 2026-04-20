@@ -1,0 +1,39 @@
+slug: foundation-python-cli-smoke
+title: "Собрать и прогнать hello CLI script"
+summary: Написать маленький Python CLI-скрипт и подтвердить его работу выводом команд.
+instructions: |
+  Создай файл scripts/hello_cli.py с argparse:
+
+  - обязательный аргумент --name;
+  - вывод строки вида Hello, <name>!;
+  - поддержка --help.
+
+  Прогони скрипт минимум 3 раза (2 запуска с --name + 1 запуск --help)
+  и отправь в submission команды вместе с их выводом.
+submission_type: command_output
+definition_of_done:
+  - В проекте есть файл scripts/hello_cli.py.
+  - В submission есть вывод минимум двух запусков с разными значениями --name.
+  - В submission есть вывод команды с --help.
+  - По выводу видно, что скрипт запускается без ручных правок между командами.
+review_mode: deterministic
+hints:
+  - Начни с argparse.ArgumentParser(description="...").
+  - Проверь, что переменная name реально подставляется в print.
+terminal:
+  enabled: true
+  presets:
+    - label: "Проверить Python"
+      command: "python --version"
+    - label: "Показать задание"
+      command: "show task"
+    - label: "Запустить lesson script"
+      command: "python run lesson"
+  allow_manual_input: true
+  allowed_commands:
+    - help
+    - pwd
+    - tree
+    - python
+    - pytest
+    - show

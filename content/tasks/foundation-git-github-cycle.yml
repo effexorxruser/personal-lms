@@ -1,0 +1,23 @@
+slug: foundation-git-github-cycle
+title: "Зафиксировать Git/GitHub execution cycle"
+summary: Выполнить минимальный цикл git status/add/commit/push и дать проверяемую ссылку на результат.
+instructions: |
+  В репозитории с foundation-практикой:
+
+  1) проверь git status;
+  2) добавь изменения (README и hello_cli.py);
+  3) создай commit с осмысленным сообщением;
+  4) отправь в GitHub;
+  5) приложи ссылку на commit или pull request.
+
+  В текстовом поле добавь 2-4 предложения: что изменил и зачем.
+submission_type: link
+definition_of_done:
+  - Ссылка начинается с http:// или https:// и открывается для review.
+  - В ссылке отражён commit или PR с изменениями по foundation-задаче.
+  - В описании submission есть краткое объяснение изменений и цели.
+  - В результате видно, что выполнен полный локальный цикл до публикации.
+review_mode: deterministic
+hints:
+  - Перед commit ещё раз проверь git status.
+  - Сообщение commit должно описывать учебный шаг, а не быть generic.

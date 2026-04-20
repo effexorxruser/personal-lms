@@ -1,0 +1,26 @@
+slug: foundation-real-start-pack
+module_slug: foundation-real
+title: "Foundation checkpoint: start pack"
+summary: Собрать маленький демонстрируемый foundation-артефакт с reproducible запуском.
+description: >
+  Объедини результаты блока в компактный артефакт: один CLI-скрипт,
+  понятный README и короткий run-log. Это контрольный шаг после
+  workspace/CLI/Git foundation без расширения в большой проект.
+requirements:
+  - Есть репозиторий или ветка с итоговым набором файлов.
+  - В README явно указан сценарий запуска.
+  - Есть пример команды и ожидаемого вывода.
+  - Есть короткое описание следующего шага обучения.
+definition_of_done:
+  - Ссылка на репозиторий открывается и содержит README + scripts/hello_cli.py.
+  - По README можно повторить запуск за 2-3 минуты.
+  - В артефакте есть run-log или эквивалентный след выполнения.
+  - Решение выглядит как маленький usable starter pack, а не как набор заметок.
+submission_type: repository_link
+portfolio_expectations:
+  - Можно показать как первый execution-first foundation результат.
+  - Есть понятная демонстрация навыков CLI, Python script и Git workflow.
+  - Артефакт готов как база для следующего backend-модуля.
+hints:
+  - "Держи scope маленьким: один скрипт и один сценарий запуска."
+  - Сначала добейся воспроизводимости, потом улучшай формулировки README.
