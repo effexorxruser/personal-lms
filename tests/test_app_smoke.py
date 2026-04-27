@@ -114,6 +114,16 @@ def _complete_block_0_prerequisites(client: TestClient) -> None:
         lesson_key="block-0-git-github-cycle",
         submission_type="link",
     )
+    _submit_and_complete_lesson(
+        client,
+        lesson_key="block-0-learning-loop-setup",
+        submission_type="text",
+    )
+    _submit_and_complete_lesson(
+        client,
+        lesson_key="block-0-study-log-baseline",
+        submission_type="text",
+    )
 
 
 def test_protected_routes_redirect_to_login() -> None:
@@ -371,10 +381,17 @@ def test_submission_creates_review_and_needs_revision_state() -> None:
     assert "Статус: требует доработки" in course_response.text
 
     with Session(get_engine()) as session:
-        submission = session.exec(select(TaskSubmission)).first()
-        review = session.exec(select(ReviewResult)).first()
+        submission = session.exec(
+            select(TaskSubmission).where(
+                TaskSubmission.lesson_key == "foundation-real-cli-python",
+                TaskSubmission.task_slug == "foundation-python-cli-smoke",
+            )
+        ).first()
+        assert submission is not None
+        review = session.exec(
+            select(ReviewResult).where(ReviewResult.submission_id == submission.id)
+        ).first()
 
-    assert submission is not None
     assert submission.status == "needs_revision"
     assert review is not None
     assert review.verdict == "needs_revision"
@@ -415,10 +432,17 @@ def test_approved_submission_allows_task_lesson_completion() -> None:
                 LessonProgress.lesson_key == "foundation-real-cli-python",
             )
         ).first()
-        submission = session.exec(select(TaskSubmission)).first()
-        review = session.exec(select(ReviewResult)).first()
+        submission = session.exec(
+            select(TaskSubmission).where(
+                TaskSubmission.lesson_key == "foundation-real-cli-python",
+                TaskSubmission.task_slug == "foundation-python-cli-smoke",
+            )
+        ).first()
+        assert submission is not None
+        review = session.exec(
+            select(ReviewResult).where(ReviewResult.submission_id == submission.id)
+        ).first()
 
-    assert submission is not None
     assert submission.status == "approved"
     assert review is not None
     assert review.verdict == "approved"
@@ -767,6 +791,8 @@ def test_weekly_recap_page_aggregates_clean_flow_artifacts() -> None:
     assert "Урок 0.1: Подготовка учебного workspace" in recap_response.text
     assert "Урок 0.2: Первый Python CLI smoke cycle" in recap_response.text
     assert "Урок 0.3: Базовый Git/GitHub cycle" in recap_response.text
+    assert "Урок 0.4: Weekly learning loop setup" in recap_response.text
+    assert "Урок 0.5: Базовый учебный журнал" in recap_response.text
     assert "foundation-real-cli-python" in recap_response.text
     assert "review пройден" in recap_response.text
     assert "Не хватает контекста" in recap_response.text
