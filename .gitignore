@@ -13,10 +13,9 @@ htmlcov/
 venv/
 
 # Local config
-AGENTS.md
 .env
 .codex
-.cursor
+.cursor/
 
 # Runtime data
 instance/*
@@ -30,3 +29,6 @@ instance/*
 # Node / Storybook
 node_modules/
 storybook-static/
+
+#markdown
+AGENTS.md
