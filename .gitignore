@@ -13,6 +13,7 @@ htmlcov/
 venv/
 
 # Local config
+AGENTS.md
 .env
 .codex
 

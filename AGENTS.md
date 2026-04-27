@@ -33,7 +33,34 @@ Self-hosted LMS-like платформа для обучения Python backend +
 - No browser IDE
 - No multi-tenant architecture
 
-## Codex environment policy
+## Workflow
+
+Primary workflow:
+
+1. ChatGPT Project chat:
+   - формулировка идей, задач и требований;
+   - review репозитория;
+   - UI/product review;
+   - сбор и анализ источников;
+   - подготовка задачи на исполнение.
+
+2. Cursor Agent for Windows / Cursor Web Agent:
+   - основной агент исполнения;
+   - выполняет сформулированные задачи;
+   - работает малыми проверяемыми изменениями;
+   - возвращает summary, changed files, validation.
+
+3. ChatGPT Project chat:
+   - review результата;
+   - анализ diff/summary;
+   - уточнение следующей итерации.
+
+4. User:
+   - финальный approve.
+
+Codex IDE / Codex Web remains optional secondary executor for isolated tasks or alternative implementation passes.
+
+## Agent execution policy
 
 ### Разрешённые интеграции
 
@@ -44,7 +71,7 @@ Self-hosted LMS-like платформа для обучения Python backend +
 ### Правила использования MCP
 
 - Использовать OpenAI Developer Docs MCP только когда задача связана с:
-  - OpenAI / Codex integration
+  - OpenAI / AI-agent integration
   - MCP / config / plugin behavior
   - будущим AI layer проекта
 
@@ -76,3 +103,12 @@ Self-hosted LMS-like платформа для обучения Python backend +
   - после этого собирать lessons/tasks/checkpoints в `content/`.
 - Не менять архитектуру без явного указания.
 - Не добавлять новые зависимости без необходимости.
+
+### Ограничения изменений
+
+- Не добавлять `.cursor/rules`.
+- Не менять `CONTRIBUTING.md`.
+- Не менять `README.md`.
+- Не удалять существующие стековые решения.
+- Не переписывать весь файл без необходимости.
+- Не менять продуктовые guardrails.
