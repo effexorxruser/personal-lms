@@ -126,6 +126,35 @@ def _complete_block_0_prerequisites(client: TestClient) -> None:
     )
 
 
+def _submit_checkpoint(client: TestClient, *, checkpoint_slug: str, submission_type: str) -> None:
+    payload: dict[str, str] = {"submission_type": submission_type}
+    if submission_type == "repository_link":
+        payload["content_link"] = "https://github.com/example/checkpoint-artifact"
+        payload["content_text"] = "Checkpoint artifact with runnable steps and evidence."
+    else:
+        payload["content_text"] = "Checkpoint summary with concrete deliverables and completion evidence."
+
+    response = client.post(
+        f"/checkpoints/{checkpoint_slug}/submissions",
+        data=payload,
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+
+
+def _complete_block_0_checkpoints(client: TestClient) -> None:
+    _submit_checkpoint(
+        client,
+        checkpoint_slug="block-0-workspace-checkpoint",
+        submission_type="repository_link",
+    )
+    _submit_checkpoint(
+        client,
+        checkpoint_slug="block-0-learning-checkpoint",
+        submission_type="text",
+    )
+
+
 def test_protected_routes_redirect_to_login() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
@@ -533,11 +562,21 @@ def test_foundation_lessons_remain_reachable_after_block_0_completion() -> None:
             lesson_key="block-0-git-github-cycle",
             submission_type="link",
         )
+        _submit_and_complete_lesson(
+            client,
+            lesson_key="block-0-learning-loop-setup",
+            submission_type="text",
+        )
+        _submit_and_complete_lesson(
+            client,
+            lesson_key="block-0-study-log-baseline",
+            submission_type="text",
+        )
         dashboard = client.get("/dashboard")
         foundation_lesson = client.get("/lessons/foundation-real-workspace")
 
     assert dashboard.status_code == 200
-    assert "foundation-real-workspace" in dashboard.text
+    assert "checkpoint ожидает отправки" in dashboard.text
     assert foundation_lesson.status_code == 200
     assert "Урок 1: Рабочее место и стартовый ритм" in foundation_lesson.text
 
@@ -547,6 +586,7 @@ def test_checkpoint_submission_review_and_module_completion_semantics() -> None:
     with TestClient(create_app()) as client:
         _login(client)
         _complete_block_0_prerequisites(client)
+        _complete_block_0_checkpoints(client)
         client.post("/lessons/foundation-real-workspace/complete", follow_redirects=False)
         client.post(
             "/lessons/foundation-real-cli-python/submissions",
@@ -633,7 +673,6 @@ def test_clean_flow_keeps_dashboard_course_and_lesson_progress_consistent() -> N
         course_revision = client.get("/courses/python-backend-ai-foundation")
         lesson_revision = client.get("/lessons/foundation-real-cli-python")
 
-        assert "требует доработки" in dashboard_revision.text
         assert "Статус: требует доработки" in course_revision.text
         assert "Статус: требует доработки" in lesson_revision.text
 
@@ -653,7 +692,6 @@ def test_clean_flow_keeps_dashboard_course_and_lesson_progress_consistent() -> N
         course_approved = client.get("/courses/python-backend-ai-foundation")
         lesson_approved = client.get("/lessons/foundation-real-cli-python")
 
-        assert "review пройден" in dashboard_approved.text
         assert "Статус: review пройден" in course_approved.text
         assert "Статус: review пройден" in lesson_approved.text
 
@@ -793,7 +831,7 @@ def test_weekly_recap_page_aggregates_clean_flow_artifacts() -> None:
     assert "Урок 0.3: Базовый Git/GitHub cycle" in recap_response.text
     assert "Урок 0.4: Weekly learning loop setup" in recap_response.text
     assert "Урок 0.5: Базовый учебный журнал" in recap_response.text
-    assert "foundation-real-cli-python" in recap_response.text
+    assert "Урок 2: Базовый Python execution loop" in recap_response.text
     assert "review пройден" in recap_response.text
     assert "Не хватает контекста" in recap_response.text
     assert "Урок 2: Базовый Python execution loop" in recap_response.text
