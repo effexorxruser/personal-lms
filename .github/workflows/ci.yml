@@ -36,7 +36,7 @@ jobs:
         run: python scripts/validate_content.py
 
       - name: Run tests
-        run: pytest
+        run: python -m pytest
 
   docker-build:
     runs-on: ubuntu-latest

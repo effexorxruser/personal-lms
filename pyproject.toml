@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "personal-lms"
 version = "0.1.0"
-description = "Self-hosted LMS-like platform skeleton for Python backend and AI learning."
+description = "Self-hosted execution-first LMS for Python backend and AI learning."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
