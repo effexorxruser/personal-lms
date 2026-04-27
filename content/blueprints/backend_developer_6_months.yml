@@ -1,5 +1,5 @@
 blueprint_id: backend-developer-6-months
-version: 1
+version: 2
 rules:
   generation_order:
     - generate_blueprint
@@ -8,42 +8,190 @@ rules:
   constraints:
     - AI не создает структуру
     - AI заполняет заранее заданную структуру
+    - Генерация идет только по блокам 0..6
 blocks:
   - block: 0
-    title: Onboarding
+    title: Onboarding и учебная операционная база
     modules:
-      - slug: block-0-onboarding
-        lessons: []
-        tasks: []
-        checkpoint: block-0-checkpoint
-  - block: 1
-    title: Foundation
-    modules:
-      - slug: block-1-example
-        lessons:
-          - block-1-workspace-baseline
-          - block-1-python-cli-cycle
-          - block-1-git-loop
-        tasks:
+      - slug: block-0-onboarding-workspace
+        lesson_count_range: 2-3
+        required_source_ids:
+          - python-mooc
+          - vscode-docs
+          - terminal-reference
+          - git-docs
+          - github-skills
+        expected_tasks:
           - foundation-workspace-ready
           - foundation-python-cli-smoke
           - foundation-git-github-cycle
-        checkpoint: block-1-example-checkpoint
+        checkpoint_slug: block-0-workspace-checkpoint
+        expected_artifact: Локально настроенный учебный workspace с базовым git workflow
+      - slug: block-0-learning-loop
+        lesson_count_range: 2-3
+        required_source_ids:
+          - python-mooc
+          - automate-boring-stuff
+        expected_tasks:
+          - onboarding-learning-loop-ready
+          - onboarding-study-log-baseline
+        checkpoint_slug: block-0-learning-checkpoint
+        expected_artifact: Повторяемый weekly learning loop и журнал выполнения
+
+  - block: 1
+    title: Python Foundation и developer workflow
+    modules:
+      - slug: block-1-python-core
+        lesson_count_range: 4-6
+        required_source_ids:
+          - python-mooc
+          - automate-boring-stuff
+          - python-docs
+        expected_tasks:
+          - foundation-python-types-and-flow
+          - foundation-functions-and-modules
+          - foundation-files-and-errors
+        checkpoint_slug: block-1-python-core-checkpoint
+        expected_artifact: CLI-утилиты на Python с базовой обработкой ошибок
+      - slug: block-1-tooling-and-git
+        lesson_count_range: 3-5
+        required_source_ids:
+          - vscode-docs
+          - terminal-reference
+          - git-docs
+          - github-skills
+          - github-docs
+        expected_tasks:
+          - foundation-terminal-fluency
+          - foundation-branch-and-pr-cycle
+        checkpoint_slug: block-1-tooling-checkpoint
+        expected_artifact: Репозиторий с чистым commit history и воспроизводимым запуском
+
   - block: 2
-    title: Python backend core
-    modules: []
+    title: Python Backend Core
+    modules:
+      - slug: block-2-http-and-clients
+        lesson_count_range: 3-5
+        required_source_ids:
+          - mdn-http
+          - httpx-docs
+          - python-docs
+        expected_tasks:
+          - backend-http-basics-lab
+          - backend-httpx-client-lab
+        checkpoint_slug: block-2-http-checkpoint
+        expected_artifact: CLI HTTP клиент с обработкой статусов и таймаутов
+      - slug: block-2-architecture-and-packaging
+        lesson_count_range: 3-4
+        required_source_ids:
+          - python-docs
+          - automate-boring-stuff
+          - vscode-docs
+        expected_tasks:
+          - backend-package-structure-lab
+          - backend-config-and-env-lab
+        checkpoint_slug: block-2-architecture-checkpoint
+        expected_artifact: Мини-сервисный каркас на Python с разделением слоев
+
   - block: 3
-    title: Data and SQL
-    modules: []
+    title: Data и SQL Foundation
+    modules:
+      - slug: block-3-sql-basics
+        lesson_count_range: 3-5
+        required_source_ids:
+          - sqlbolt
+          - sqlite-docs
+        expected_tasks:
+          - data-select-join-lab
+          - data-schema-basics-lab
+        checkpoint_slug: block-3-sql-checkpoint
+        expected_artifact: SQLite schema + набор запросов для учебного домена
+      - slug: block-3-python-data-access
+        lesson_count_range: 3-4
+        required_source_ids:
+          - sqlite-docs
+          - python-docs
+        expected_tasks:
+          - data-python-sqlite-integration
+          - data-repository-pattern-baseline
+        checkpoint_slug: block-3-integration-checkpoint
+        expected_artifact: Python слой доступа к данным с CRUD-операциями
+
   - block: 4
-    title: FastAPI and services
-    modules: []
+    title: FastAPI и сервисный слой
+    modules:
+      - slug: block-4-fastapi-core
+        lesson_count_range: 4-6
+        required_source_ids:
+          - fastapi-docs
+          - mdn-http
+          - python-docs
+        expected_tasks:
+          - fastapi-routing-and-validation
+          - fastapi-dependency-injection-baseline
+        checkpoint_slug: block-4-fastapi-core-checkpoint
+        expected_artifact: FastAPI приложение с валидируемыми API endpoint-ами
+      - slug: block-4-persistence-and-service
+        lesson_count_range: 3-5
+        required_source_ids:
+          - fastapi-docs
+          - sqlite-docs
+          - httpx-docs
+        expected_tasks:
+          - fastapi-sqlite-service-lab
+          - fastapi-integration-endpoint-lab
+        checkpoint_slug: block-4-service-checkpoint
+        expected_artifact: Backend сервис с API + SQLite persistence
+
   - block: 5
-    title: Reliability and delivery
-    modules: []
+    title: Quality, Reliability и Delivery
+    modules:
+      - slug: block-5-testing
+        lesson_count_range: 3-5
+        required_source_ids:
+          - pytest-docs
+          - fastapi-docs
+        expected_tasks:
+          - quality-pytest-unit-tests
+          - quality-fastapi-testclient-lab
+        checkpoint_slug: block-5-testing-checkpoint
+        expected_artifact: Набор unit/integration тестов для backend сервиса
+      - slug: block-5-observability-and-ci
+        lesson_count_range: 3-5
+        required_source_ids:
+          - python-logging-docs
+          - github-actions-docs
+          - python-debugging-guides
+        expected_tasks:
+          - reliability-logging-baseline
+          - reliability-ci-workflow-baseline
+        checkpoint_slug: block-5-reliability-checkpoint
+        expected_artifact: CI workflow + логирование + базовый debug playbook
+
   - block: 6
-    title: AI integration
-    modules: []
+    title: AI Integration Layer
+    modules:
+      - slug: block-6-openai-foundation
+        lesson_count_range: 3-5
+        required_source_ids:
+          - openai-docs
+          - openai-cookbook
+        expected_tasks:
+          - ai-openai-sdk-baseline
+          - ai-structured-output-baseline
+        checkpoint_slug: block-6-openai-checkpoint
+        expected_artifact: Python backend endpoint с безопасным вызовом LLM API
+      - slug: block-6-ai-reliability
+        lesson_count_range: 3-4
+        required_source_ids:
+          - openai-docs
+          - openai-cookbook
+          - pytest-docs
+        expected_tasks:
+          - ai-evals-baseline
+          - ai-moderation-guardrail-lab
+        checkpoint_slug: block-6-ai-reliability-checkpoint
+        expected_artifact: AI feature с eval/guardrail проверками и наблюдаемыми ограничениями
 source_registry: content/sources/source_registry.yml
 artifacts:
   - course.yml

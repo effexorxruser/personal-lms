@@ -1,12 +1,12 @@
+- id: python-mooc
+  type: core
+  language: en
+  allowed_usage: backbone
+- id: automate-boring-stuff
+  type: core
+  language: en
+  allowed_usage: backbone
 - id: python-docs
-  type: core
-  language: en
-  allowed_usage: backbone
-- id: git-docs
-  type: core
-  language: en
-  allowed_usage: backbone
-- id: github-docs
   type: core
   language: en
   allowed_usage: backbone
@@ -14,7 +14,63 @@
   type: core
   language: en
   allowed_usage: backbone
+- id: terminal-reference
+  type: core
+  language: en
+  allowed_usage: backbone
+- id: git-docs
+  type: core
+  language: en
+  allowed_usage: backbone
+- id: github-skills
+  type: core
+  language: en
+  allowed_usage: backbone
+- id: github-docs
+  type: support
+  language: en
+  allowed_usage: supplement
+- id: mdn-http
+  type: core
+  language: en
+  allowed_usage: backbone
+- id: httpx-docs
+  type: core
+  language: en
+  allowed_usage: backbone
+- id: sqlbolt
+  type: core
+  language: en
+  allowed_usage: backbone
+- id: sqlite-docs
+  type: core
+  language: en
+  allowed_usage: backbone
 - id: fastapi-docs
+  type: core
+  language: en
+  allowed_usage: backbone
+- id: pytest-docs
+  type: core
+  language: en
+  allowed_usage: backbone
+- id: python-logging-docs
+  type: core
+  language: en
+  allowed_usage: backbone
+- id: github-actions-docs
+  type: core
+  language: en
+  allowed_usage: backbone
+- id: python-debugging-guides
+  type: support
+  language: en
+  allowed_usage: supplement
+- id: openai-docs
+  type: core
+  language: en
+  allowed_usage: backbone
+- id: openai-cookbook
   type: core
   language: en
   allowed_usage: backbone
