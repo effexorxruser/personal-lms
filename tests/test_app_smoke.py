@@ -673,6 +673,7 @@ def test_clean_flow_keeps_dashboard_course_and_lesson_progress_consistent() -> N
         course_revision = client.get("/courses/python-backend-ai-foundation")
         lesson_revision = client.get("/lessons/foundation-real-cli-python")
 
+        assert dashboard_revision.status_code == 200
         assert "Статус: требует доработки" in course_revision.text
         assert "Статус: требует доработки" in lesson_revision.text
 
@@ -692,6 +693,7 @@ def test_clean_flow_keeps_dashboard_course_and_lesson_progress_consistent() -> N
         course_approved = client.get("/courses/python-backend-ai-foundation")
         lesson_approved = client.get("/lessons/foundation-real-cli-python")
 
+        assert dashboard_approved.status_code == 200
         assert "Статус: review пройден" in course_approved.text
         assert "Статус: review пройден" in lesson_approved.text
 
