@@ -42,6 +42,11 @@ jobs:
 
       - name: Docker compose smoke check
         run: |
+          cp .env.example .env
+          if ! grep -q '^PERSONAL_LMS_SESSION_SECRET_KEY=' .env; then
+            echo "PERSONAL_LMS_SESSION_SECRET_KEY=ci-test-secret-key-change-me" >> .env
+          fi
+          echo "PERSONAL_LMS_AI_HELPER_ENABLED=false" >> .env
           docker compose up --build -d
           for i in {1..20}; do
             if curl -fsS http://localhost:8000/health; then
@@ -55,4 +60,4 @@ jobs:
 
       - name: Tear down docker compose
         if: always()
-        run: docker compose down
+        run: docker compose down || true

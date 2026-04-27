@@ -9,7 +9,6 @@ checklist:
   - Пройти выбранные разделы Git Book и GitHub Hello World.
   - Сделать минимум один осмысленный commit с сообщением.
   - Отправить ссылку на commit или PR в task submission.
-task_slug: foundation-git-github-cycle
 source_ids:
   - git-docs
   - github-docs

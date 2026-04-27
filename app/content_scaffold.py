@@ -129,13 +129,20 @@ def scaffold_module(
 
     lesson_path.parent.mkdir(parents=True, exist_ok=True)
 
+    practice_lesson_key = f"{lesson_key}-practice"
     _write_yaml(
         module_manifest,
         {
             "slug": module_slug,
             "title": title.strip() or "Новый модуль",
             "description": description.strip() or "Краткое описание модуля.",
-            "lessons": [lesson_key],
+            "block": 1,
+            "objectives": [
+                "Сформировать минимальный учебный ритм по модулю.",
+                "Подготовить артефакт для checkpoint.",
+            ],
+            "lessons": [lesson_key, practice_lesson_key],
+            "checkpoint": "foundation-checkpoint",
         },
     )
 
@@ -150,11 +157,61 @@ def scaffold_module(
         "checklist:\n"
         "  - Прочитать урок\n"
         "  - Подготовить задачу\n"
+        "source_ids:\n"
+        "  - python-docs\n"
         "---\n"
         "# Новый урок\n\n"
-        "Опиши учебный контекст и следующий практический шаг.\n"
+        "## Why this matters (RU)\n"
+        "Коротко опиши, зачем нужен этот шаг в контексте модуля.\n\n"
+        "## What to read (EN source)\n"
+        "- Python Docs: https://docs.python.org/3/\n\n"
+        "## What to skip\n"
+        "Пропусти детали, которые не нужны для текущего шага.\n\n"
+        "## Action\n"
+        "Сделай минимальный проверяемый шаг и зафиксируй результат.\n\n"
+        "## Definition of Done\n"
+        "- Есть проверяемый результат.\n"
+        "- Результат можно воспроизвести.\n\n"
+        "## Technical English\n"
+        "- baseline\n"
+        "- run\n"
+        "- output\n"
     )
     lesson_path.write_text(lesson_content, encoding="utf-8")
+
+    practice_lesson_path = module_dir / "lessons" / f"{practice_lesson_key}.md"
+    practice_lesson_content = (
+        "---\n"
+        f"key: {practice_lesson_key}\n"
+        f"title: \"{(first_lesson_title.strip() or 'Новый урок')} · Практика\"\n"
+        "summary: Практический follow-up для закрепления шага.\n"
+        "objectives:\n"
+        "  - Закрепить базовый сценарий\n"
+        "  - Проверить воспроизводимость результата\n"
+        "checklist:\n"
+        "  - Повторить шаги\n"
+        "  - Зафиксировать наблюдения\n"
+        "source_ids:\n"
+        "  - python-docs\n"
+        "---\n"
+        "# Практика\n\n"
+        "## Why this matters (RU)\n"
+        "Практика закрепляет результат первого шага.\n\n"
+        "## What to read (EN source)\n"
+        "- Python Docs: https://docs.python.org/3/\n\n"
+        "## What to skip\n"
+        "Не углубляйся в расширенные темы на этом этапе.\n\n"
+        "## Action\n"
+        "Повтори сценарий и убедись, что он стабильно работает.\n\n"
+        "## Definition of Done\n"
+        "- Шаг повторён без расхождений.\n"
+        "- Есть короткий run-log.\n\n"
+        "## Technical English\n"
+        "- repeatable\n"
+        "- verification\n"
+        "- checkpoint\n"
+    )
+    practice_lesson_path.write_text(practice_lesson_content, encoding="utf-8")
 
     course_payload = _read_yaml(course_manifest)
     modules = [normalize_slug(item) for item in course_payload.get("modules", [])]
@@ -164,6 +221,7 @@ def scaffold_module(
     return {
         "module": module_manifest,
         "lesson": lesson_path,
+        "practice_lesson": practice_lesson_path,
         "course": course_manifest,
     }
 
@@ -204,10 +262,26 @@ def scaffold_lesson(
         "checklist:\n"
         "  - Прочитать материалы\n"
         "  - Подготовить результат\n"
+        "source_ids:\n"
+        "  - python-docs\n"
         f"{task_line}"
         "---\n"
         "# Заголовок урока\n\n"
-        "Сформулируй содержание урока, ориентируясь на execution-first flow.\n"
+        "## Why this matters (RU)\n"
+        "Опиши практический смысл этого урока.\n\n"
+        "## What to read (EN source)\n"
+        "- Python Docs: https://docs.python.org/3/\n\n"
+        "## What to skip\n"
+        "Не углубляйся в детали, не влияющие на текущий шаг.\n\n"
+        "## Action\n"
+        "Выполни минимальный практический шаг и зафиксируй результат.\n\n"
+        "## Definition of Done\n"
+        "- Есть проверяемый результат.\n"
+        "- Результат можно воспроизвести.\n\n"
+        "## Technical English\n"
+        "- execution\n"
+        "- input\n"
+        "- output\n"
     )
     lesson_path.write_text(lesson_content, encoding="utf-8")
 
@@ -290,9 +364,18 @@ def scaffold_checkpoint(
         "title": title.strip() or "Новый checkpoint",
         "summary": summary.strip() or "Краткое описание checkpoint.",
         "description": description.strip() or "Опиши ожидаемый итоговый артефакт.",
+        "project_description": "Короткое описание проекта и его границ для проверки.",
         "requirements": [
             "Есть проверяемый артефакт.",
             "Есть короткое описание результата.",
+        ],
+        "deliverables": [
+            "Ссылка на артефакт или репозиторий.",
+            "README с шагами запуска и проверки.",
+        ],
+        "evaluation_criteria": [
+            "Артефакт воспроизводим по инструкции.",
+            "Цели checkpoint достигнуты в рамках scope.",
         ],
         "definition_of_done": [
             "Результат можно проверить по ссылке или тексту.",

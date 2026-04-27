@@ -184,7 +184,10 @@ def _compute_snapshot(session: Session, user_id: int, course_slug: str) -> Progr
             continue
 
         if checkpoint and not checkpoint_snapshot.is_approved:
-            module_statuses[module.slug] = checkpoint_snapshot.state_label
+            if checkpoint_snapshot.state == "needs_revision":
+                module_statuses[module.slug] = "требует доработки"
+            else:
+                module_statuses[module.slug] = checkpoint_snapshot.state_label
             if next_checkpoint_slug is None:
                 next_checkpoint_slug = checkpoint.slug
                 next_checkpoint_title = checkpoint.title

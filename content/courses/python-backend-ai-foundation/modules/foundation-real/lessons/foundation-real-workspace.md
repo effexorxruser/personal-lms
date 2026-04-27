@@ -9,7 +9,6 @@ checklist:
   - Пройти указанные секции по VS Code Terminal и Python REPL.
   - Выполнить стартовые команды в своём workspace.
   - Зафиксировать результат выполнения в run-log.
-task_slug: foundation-workspace-ready
 source_ids:
   - vscode-docs
   - python-docs
