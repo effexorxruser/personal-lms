@@ -13,6 +13,7 @@ from app.services.execution_service import dashboard_execution_summary
 from app.services.progress_service import ensure_progress_initialized
 from app.services.recap_service import build_weekly_recap
 from app.services.stuck_service import reason_label
+from app.services.view_mode import is_mobile_view
 
 TEMPLATES_DIR = Path(__file__).resolve().parents[1] / "templates"
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
@@ -31,6 +32,7 @@ def dashboard(request: Request):
     course = registry.courses.get("python-backend-ai-foundation")
     if not course:
         return RedirectResponse(url="/login", status_code=303)
+    mobile_view = is_mobile_view(request)
 
     with Session(get_engine()) as session:
         snapshot = ensure_progress_initialized(session, int(user_id), course.slug)
@@ -143,6 +145,7 @@ def dashboard(request: Request):
             "reason_label": reason_label,
             "nav_course_href": course_href,
             "nav_lessons_href": lesson_href,
+            "mobile_view": mobile_view,
             **build_ai_helper_view_context(lesson_key=next_lesson_key),
         },
     )
@@ -159,6 +162,7 @@ def recap(request: Request):
     course = registry.courses.get("python-backend-ai-foundation")
     if not course:
         return RedirectResponse(url="/login", status_code=303)
+    mobile_view = is_mobile_view(request)
 
     with Session(get_engine()) as session:
         snapshot = ensure_progress_initialized(session, int(user_id), course.slug)
@@ -183,6 +187,7 @@ def recap(request: Request):
             "reason_label": reason_label,
             "nav_course_href": f"/courses/{course.slug}",
             "nav_lessons_href": lesson_href,
+            "mobile_view": mobile_view,
             **build_ai_helper_view_context(lesson_key=snapshot.next_lesson_key),
         },
     )

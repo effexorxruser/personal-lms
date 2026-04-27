@@ -13,6 +13,51 @@
 <section class="workspace-shell dashboard-workspace dashboard-workspace--resume">
   <div class="workspace-grid dashboard-resume-layout">
     <main class="workspace-pane dashboard-main dashboard-main--resume">
+      {% if mobile_view %}
+      <section class="ui-card mobile-dashboard" aria-label="Мобильная сводка обучения">
+        <p class="status-kicker">Mobile · read-only</p>
+        <h1>Мобильный режим: контроль прогресса</h1>
+        <p class="rail-card__muted">На телефоне доступны обзор, навигация и recap. Практика и отправки — на ноутбуке.</p>
+        <dl class="lms-lines">
+          <div>
+            <dt>Текущий курс</dt>
+            <dd>{{ dashboard_course_title }}</dd>
+          </div>
+          <div>
+            <dt>Текущий урок</dt>
+            <dd>{{ ns.next.body if ns.next else 'Следующий шаг не найден' }}</dd>
+          </div>
+          <div>
+            <dt>Прогресс</dt>
+            <dd>{{ dashboard_progress_pct }}%</dd>
+          </div>
+          <div>
+            <dt>Следующий шаг</dt>
+            <dd><a class="inline-link" href="{{ continue_href }}">Открыть урок</a></dd>
+          </div>
+        </dl>
+
+        <article class="mobile-dashboard__block">
+          <p class="status-kicker">Итоги недели</p>
+          <p>{{ weekly_recap.completed_count }} уроков / {{ weekly_recap.review_count }} проверки</p>
+          <p class="rail-card__muted">Отправки: {{ weekly_recap.submission_count }} · блокеры: {{ weekly_recap.stuck_count }}</p>
+          <a class="card-link" href="/recap">Открыть recap</a>
+        </article>
+
+        {% if weekly_recap.active_stuck %}
+        <article class="mobile-dashboard__block">
+          <p class="status-kicker">Активный блокер</p>
+          <p><strong>{{ reason_label(weekly_recap.active_stuck.reason_code) }}</strong></p>
+          <a class="card-link" href="/lessons/{{ weekly_recap.active_stuck.lesson_key }}?mobile=1#stuck">Открыть урок</a>
+        </article>
+        {% endif %}
+
+        <div class="dashboard-action-row">
+          <a class="btn btn--primary" href="{{ continue_href }}?mobile=1">Текущий урок</a>
+          <a class="btn btn--ghost" href="{{ nav_course_href }}?mobile=1">Курс</a>
+        </div>
+      </section>
+      {% else %}
       <div class="dashboard-ambient" aria-hidden="true"></div>
       <section class="dashboard-context-strip" aria-label="Текущий контекст обучения" style="--progress-value: {{ dashboard_progress_pct }}%;">
         <div class="dashboard-context-strip__identity">
@@ -76,6 +121,7 @@
           <a class="card-link" href="/recap">Открыть итоги</a>
         </article>
       </section>
+      {% endif %}
     </main>
   </div>
 </section>
