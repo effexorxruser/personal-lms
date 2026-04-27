@@ -223,6 +223,13 @@ source .venv/bin/activate
 pytest
 ```
 
+## CI/CD
+
+- CI запускается в GitHub Actions на `pull_request` и `push` в `master`.
+- CI проверяет `python scripts/validate_content.py`, `pytest` и сборку Docker-образа.
+- Отдельный container workflow запускается вручную (`workflow_dispatch`) и публикует образ в GHCR.
+- Деплой в PikaPods пока выполняется вручную по инструкции: `docs/deployment/PIKAPODS.md`.
+
 Ключевые наборы тестов:
 
 - `tests/test_app_smoke.py` — базовый smoke/regression сценарий;

@@ -68,3 +68,12 @@ python scripts/create_user.py
 ## Примечание про SQLite volume
 
 Для сохранения runtime state между рестартами контейнера обязательно монтировать volume/папку в `/app/instance`.
+
+## Deployable image
+
+- Deployable Docker-образ собирается через GitHub Actions workflow `.github/workflows/container.yml`.
+- Workflow публикует образ в GitHub Container Registry (GHCR):
+  - `ghcr.io/effexorxruser/personal-lms:latest`
+  - `ghcr.io/effexorxruser/personal-lms:<short-sha>`
+- Для PikaPods предпочтителен Docker/container deployment path с использованием опубликованного образа, если такой путь доступен в текущем тарифе/интерфейсе.
+- Если прямой pull из GHCR недоступен, использовать manual Docker/SFTP/documented update path (ручное обновление контейнерного артефакта по documented процессу).
