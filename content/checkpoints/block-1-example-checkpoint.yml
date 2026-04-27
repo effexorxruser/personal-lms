@@ -1,0 +1,25 @@
+slug: block-1-example-checkpoint
+module_slug: block-1-example
+title: "Block 1 checkpoint: стартовый reproducible pack"
+summary: Подтвердить, что базовый execution-first цикл работает без ручных пояснений.
+description: Собери минимальный артефакт блока 1, который можно запустить по инструкции.
+project_description: Мини-проект с одним CLI-скриптом, README и run-log для демонстрации repeatable старта.
+requirements:
+  - Есть репозиторий или ветка с итоговыми файлами блока.
+  - README содержит точный сценарий запуска.
+deliverables:
+  - scripts/hello_cli.py
+  - README.md с шагами запуска
+  - notes/foundation-log.txt
+definition_of_done:
+  - Ссылка на решение открывается.
+  - По README запуск повторяется за 2-3 минуты.
+  - Run-log подтверждает фактическое выполнение команд.
+evaluation_criteria:
+  - Воспроизводимость команд без догадок.
+  - Ясная структура и минимальный scope.
+submission_type: repository_link
+portfolio_expectations:
+  - Можно показать как первый backend foundation результат.
+hints:
+  - Не расширяй проект сверх одного скрипта.

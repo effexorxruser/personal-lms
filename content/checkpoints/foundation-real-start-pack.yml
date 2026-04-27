@@ -4,18 +4,27 @@ title: "Foundation checkpoint: start pack"
 summary: Собрать маленький демонстрируемый foundation-артефакт с reproducible запуском.
 description: >
   Объедини результаты блока в компактный артефакт: один CLI-скрипт,
-  понятный README и короткий run-log. Это контрольный шаг после
-  workspace/CLI/Git foundation без расширения в большой проект.
+  понятный README и короткий run-log.
+project_description: >
+  Мини-проект на основе foundation-уроков с повторяемым запуском
+  и зафиксированным результатом.
 requirements:
   - Есть репозиторий или ветка с итоговым набором файлов.
   - В README явно указан сценарий запуска.
   - Есть пример команды и ожидаемого вывода.
   - Есть короткое описание следующего шага обучения.
+deliverables:
+  - scripts/hello_cli.py
+  - README.md
+  - notes/foundation-log.txt
 definition_of_done:
   - Ссылка на репозиторий открывается и содержит README + scripts/hello_cli.py.
   - По README можно повторить запуск за 2-3 минуты.
   - В артефакте есть run-log или эквивалентный след выполнения.
   - Решение выглядит как маленький usable starter pack, а не как набор заметок.
+evaluation_criteria:
+  - Воспроизводимость команд и результата по README.
+  - Аккуратный scope без лишней архитектуры.
 submission_type: repository_link
 portfolio_expectations:
   - Можно показать как первый execution-first foundation результат.

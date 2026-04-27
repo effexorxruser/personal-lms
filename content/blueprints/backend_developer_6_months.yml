@@ -1,0 +1,53 @@
+blueprint_id: backend-developer-6-months
+version: 1
+rules:
+  generation_order:
+    - generate_blueprint
+    - review_blueprint
+    - generate_block_by_block
+  constraints:
+    - AI не создает структуру
+    - AI заполняет заранее заданную структуру
+blocks:
+  - block: 0
+    title: Onboarding
+    modules:
+      - slug: block-0-onboarding
+        lessons: []
+        tasks: []
+        checkpoint: block-0-checkpoint
+  - block: 1
+    title: Foundation
+    modules:
+      - slug: block-1-example
+        lessons:
+          - block-1-workspace-baseline
+          - block-1-python-cli-cycle
+          - block-1-git-loop
+        tasks:
+          - foundation-workspace-ready
+          - foundation-python-cli-smoke
+          - foundation-git-github-cycle
+        checkpoint: block-1-example-checkpoint
+  - block: 2
+    title: Python backend core
+    modules: []
+  - block: 3
+    title: Data and SQL
+    modules: []
+  - block: 4
+    title: FastAPI and services
+    modules: []
+  - block: 5
+    title: Reliability and delivery
+    modules: []
+  - block: 6
+    title: AI integration
+    modules: []
+source_registry: content/sources/source_registry.yml
+artifacts:
+  - course.yml
+  - module.yml
+  - lesson.md
+  - task.yml
+  - checkpoint.yml

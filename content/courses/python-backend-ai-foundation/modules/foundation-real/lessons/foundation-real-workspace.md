@@ -3,35 +3,39 @@ key: foundation-real-workspace
 title: "Урок 1: Рабочее место и стартовый ритм"
 summary: Подготовить воспроизводимый workspace и зафиксировать минимальный цикл «команда -> результат -> запись».
 objectives:
-  - Поднять рабочую папку и проверить базовые команды в терминале
-  - Зафиксировать понятный стартовый ритм маленькими проверяемыми шагами
+  - Поднять рабочую папку и проверить базовые команды в терминале.
+  - Зафиксировать понятный стартовый ритм маленькими проверяемыми шагами.
 checklist:
-  - Пройти указанные секции по VS Code Terminal и Python REPL
-  - Выполнить стартовые команды в своём workspace
-  - Зафиксировать результат выполнения в собственном run-log
+  - Пройти указанные секции по VS Code Terminal и Python REPL.
+  - Выполнить стартовые команды в своём workspace.
+  - Зафиксировать результат выполнения в run-log.
+task_slug: foundation-workspace-ready
+source_ids:
+  - vscode-docs
+  - python-docs
 ---
-# Зачем этот шаг в маршруте
+# Foundation Real · Workspace
 
-Это первый execution-step foundation-блока: без рабочего workspace дальше не будет стабильного прогресса ни по Python, ни по Git.
+## Why this matters (RU)
+Это первый execution-step foundation-блока: без рабочего workspace дальше не будет стабильного прогресса.
 
-## Backbone sources
+## What to read (EN source)
+- VS Code Docs: https://code.visualstudio.com/docs/terminal/getting-started
+- Python Docs: https://docs.python.org/3/tutorial/interpreter.html
 
-- VS Code Docs: [Getting started with the terminal](https://code.visualstudio.com/docs/terminal/getting-started)
-  - Пройти только разделы: `Run your first command in the terminal`, `Navigate to previous commands`, `Run commands in another shell`.
-- Python Docs: [Using the Python Interpreter](https://docs.python.org/3/tutorial/interpreter.html)
-  - Пройти секции: `2.1 Invoking the Interpreter`, `2.2 The Interpreter and Its Environment`.
+## What to skip
+Пропусти дополнительные настройки shell и расширенные сценарии терминала.
 
-## Практический шаг после чтения
+## Action
+В новом workspace выполни `pwd`, `python --version`, запусти REPL (`2 + 2`, `print("foundation")`) и зафиксируй результат в `notes/foundation-log.txt`.
 
-В папке нового учебного workspace выполни минимальный цикл:
-
-1. Открой терминал и проверь рабочую директорию (`pwd`).
-2. Проверь Python (`python --version` или `python3 --version`).
-3. Запусти REPL и выполни два выражения (`2 + 2`, `print("foundation")`).
-4. Выйди из REPL и создай файл `notes/foundation-log.txt` с 3 короткими строками: что запустил, что получил, что следующий шаг.
-
-## Что считаем done
-
+## Definition of Done
 - Есть воспроизводимый workspace-путь.
 - Python запускается из терминала.
 - Есть короткий run-log с наблюдаемым результатом и следующим шагом.
+
+## Technical English
+- working directory
+- shell
+- interpreter
+- run log
