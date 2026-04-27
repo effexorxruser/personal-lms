@@ -7,8 +7,6 @@
 - что уже реализовано в репозитории;
 - что остается целевым направлением, но еще не сделано.
 
-Актуализация: 18 апреля 2026.
-
 ## Принцип MVP
 
 MVP должен быть small and sharp.
@@ -45,7 +43,7 @@ MVP должен быть small and sharp.
 - stuck flow;
 - weekly recap;
 - lesson-scoped terminal execution surface;
-- lesson-scoped AI helper (Lain v0);
+- lesson-scoped AI helper (Lain Helper v0.5);
 - file-based authoring model: курс/модуль/урок/task/checkpoint.
 
 ## Что в MVP пока не реализовано
@@ -91,6 +89,10 @@ MVP должен быть small and sharp.
 ## Что может быть позже
 
 - Alembic migrations как обязательный путь schema changes;
-- AI layer для lesson/runtime assist;
+- расширение Lain Helper v0.5: reliability и отказоустойчивость;
+- расширение Lain Helper v0.5: evals и quality-контуры;
+- расширение Lain Helper v0.5: observability/трассировка взаимодействий;
+- расширение Lain Helper v0.5: provider hardening;
+- расширение Lain Helper v0.5: cost controls;
 - дополнительные курсы и треки;
 - production-like deployment profile.

@@ -2,7 +2,7 @@
 
 Self-hosted LMS-like платформа для обучения Python backend + AI.
 
-## Актуальный статус (на 18 апреля 2026)
+## Актуальный статус
 
 Сейчас репозиторий содержит рабочий MVP с execution-first фокусом:
 
@@ -196,7 +196,7 @@ uvicorn app.main:app --reload
 - stdout/stderr обрезаются до 12_000 символов
 - каждый запуск сохраняется как `TerminalRun`
 
-## Lain Helper v0
+## Lain Helper v0.5
 
 Lain — встроенный lesson-scoped AI-тьютор внутри LMS:
 
@@ -227,21 +227,21 @@ Lain — встроенный lesson-scoped AI-тьютор внутри LMS:
 ```bash
 source .venv/bin/activate
 python scripts/validate_content.py
-pytest
+python -m pytest
 ```
 
 ## Тесты
 
 ```bash
 source .venv/bin/activate
-pytest
+python -m pytest
 ```
 
 ## CI/CD
 
-- CI запускается в GitHub Actions на `pull_request` и `push` в `master`.
-- CI проверяет `python scripts/validate_content.py`, `pytest` и сборку Docker-образа.
-- Отдельный container workflow запускается вручную (`workflow_dispatch`) и публикует образ в GHCR.
+- CI запускается в GitHub Actions на `pull_request` и `push` в `master`/`main`.
+- CI проверяет `ruff check .`, `python scripts/check_text_integrity.py`, `python scripts/validate_content.py`, `python -m pytest` и сборку Docker-образа.
+- Отдельный release workflow запускается вручную (`workflow_dispatch`), публикует образ в GHCR и создает GitHub Release.
 - Деплой в PikaPods пока выполняется вручную по инструкции: `docs/deployment/PIKAPODS.md`.
 
 Ключевые наборы тестов:
@@ -280,3 +280,7 @@ npm run build-storybook
 - без browser IDE
 - без multi-tenant архитектуры
 - без расползания scope без явного решения
+- terminal execution surface не является полноценным shell
+- sandbox/whitelist терминала не является полноценной security boundary для untrusted/public execution
+- Lain Helper v0.5 не завершает задачи за пользователя и не выдает autopilot-решения
+- MVP не является public-ready multi-user платформой
