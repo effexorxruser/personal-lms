@@ -86,6 +86,15 @@ def test_protected_routes_redirect_to_login() -> None:
     assert lesson.headers["location"] == "/login"
 
 
+def test_health_endpoint_returns_ok() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
 def test_login_success() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
@@ -94,6 +103,41 @@ def test_login_success() -> None:
 
     assert dashboard_response.status_code == 200
     assert "Вы вошли как <strong>admin</strong>" in dashboard_response.text
+
+
+def test_dashboard_mobile_mode_renders_read_only_summary() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+        response = client.get("/dashboard?mobile=1")
+
+    assert response.status_code == 200
+    assert "Мобильный режим: контроль прогресса" in response.text
+    assert "Открыть recap" in response.text
+
+
+def test_mobile_lesson_hides_terminal_and_submission_controls() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+        response = client.get("/lessons/foundation-real-cli-python?mobile=1")
+
+    assert response.status_code == 200
+    assert "Mobile: только просмотр" in response.text
+    assert "Отправить результат" not in response.text
+    assert "Открыть терминал" not in response.text
+    assert "Run</button>" not in response.text
+
+
+def test_desktop_lesson_still_shows_submission_and_terminal_controls() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+        response = client.get("/lessons/foundation-real-cli-python")
+
+    assert response.status_code == 200
+    assert "Отправить результат" in response.text
+    assert "Открыть терминал" in response.text
 
 
 def test_login_fail() -> None:

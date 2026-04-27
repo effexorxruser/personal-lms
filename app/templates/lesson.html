@@ -83,7 +83,9 @@
           </div>
           {% endif %}
 
-          {% if not is_lesson_completed %}
+          {% if mobile_view %}
+          <p class="task-alert">В mobile-режиме отправка задач отключена. Продолжи выполнение на ноутбуке.</p>
+          {% elif not is_lesson_completed %}
           <form class="task-form" method="post" action="/lessons/{{ lesson.key }}/submissions">
             <input type="hidden" name="submission_type" value="{{ execution.task.submission_type }}">
             {% if execution.task.submission_type == 'link' %}
@@ -102,7 +104,7 @@
           {% endif %}
         </article>
 
-        {% if execution.task and execution.task.terminal and execution.task.terminal.enabled %}
+        {% if not mobile_view and execution.task and execution.task.terminal and execution.task.terminal.enabled %}
         <div class="terminal-launch-row" data-terminal-launch="lesson-terminal">
           <button type="button" class="btn btn--primary" data-terminal-open="lesson-terminal">Открыть терминал</button>
           <span>Терминал откроется под задачей и останется в потоке страницы.</span>
@@ -153,9 +155,14 @@
             {% if stuck_context.active_event.note %}
             <p class="rail-card__muted">{{ stuck_context.active_event.note }}</p>
             {% endif %}
+            {% if not mobile_view %}
             <form method="post" action="/stuck/{{ stuck_context.active_event.id }}/resolve">
               <button type="submit" class="btn btn--ghost">Снять блокер</button>
             </form>
+            {% endif %}
+            {% else %}
+            {% if mobile_view %}
+            <p class="rail-card__muted">В mobile-режиме фиксация блокера отключена. Используй ноутбук для обновления статуса.</p>
             {% else %}
             <form class="task-form" method="post" action="/lessons/{{ lesson.key }}/stuck">
               <label for="reason_code">Что мешает двигаться?</label>
@@ -168,6 +175,7 @@
               <textarea id="stuck_note" name="note" rows="5" placeholder="Коротко опиши, где застрял"></textarea>
               <button type="submit" class="btn btn--ghost">Зафиксировать блокер</button>
             </form>
+            {% endif %}
             {% endif %}
           </div>
 
@@ -199,7 +207,7 @@
           </ul>
         </details>
 
-        {% if execution.task and execution.task.terminal and execution.task.terminal.enabled %}
+        {% if not mobile_view and execution.task and execution.task.terminal and execution.task.terminal.enabled %}
         <details class="ui-card lesson-card compact-details lesson-side-panel terminal-help-panel">
           <summary>Терминал: команды</summary>
           <p class="terminal-commands-panel__hint">Разрешённые группы:</p>
@@ -229,7 +237,9 @@
         <nav id="next-action" class="ui-card lesson-nav-panel lesson-nav-panel--main" aria-label="Навигация по урокам">
           <p class="lesson-nav-title">Следующее действие</p>
           <div class="lesson-completion-action">
-            {% if is_lesson_completed %}
+            {% if mobile_view %}
+            <span class="status-chip">Mobile: только просмотр</span>
+            {% elif is_lesson_completed %}
             <span class="status-chip status-chip--success">Урок завершён</span>
             {% elif lesson.task_slug and not execution.submission_snapshot.is_approved %}
             <a class="btn btn--ghost" href="#task">Сначала выполнить задачу</a>

@@ -86,6 +86,15 @@ docs/
 - Vanilla CSS + Vanilla JS
 - Markdown + YAML для file-based контента
 
+## Deployment
+
+MVP деплой:
+
+- PikaPods
+- Docker
+- SQLite (volume)
+- без обязательного домена
+
 ## Быстрый старт
 
 ### 1. Установка

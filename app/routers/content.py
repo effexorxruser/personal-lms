@@ -29,6 +29,7 @@ from app.services.progress_service import (
 from app.services.submission_service import create_submission, submission_type_label
 from app.services.stuck_service import create_stuck_event, resolve_stuck_event, stuck_context_for_lesson
 from app.services.task_service import resolve_lesson_task
+from app.services.view_mode import is_mobile_view
 
 TEMPLATES_DIR = Path(__file__).resolve().parents[1] / "templates"
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
@@ -49,6 +50,7 @@ def course_map(request: Request, course_slug: str):
     if isinstance(auth_result, RedirectResponse):
         return auth_result
     user_id = auth_result
+    mobile_view = is_mobile_view(request)
 
     course = get_course_or_404(course_slug)
     with Session(get_engine()) as session:
@@ -76,6 +78,7 @@ def course_map(request: Request, course_slug: str):
             "progress_pct": snapshot.progress_pct,
             "nav_course_href": f"/courses/{course.slug}",
             "nav_lessons_href": first_lesson_href,
+            "mobile_view": mobile_view,
             **build_ai_helper_view_context(lesson_key=helper_lesson_key),
         },
     )
@@ -87,6 +90,7 @@ def lesson_page(request: Request, lesson_key: str):
     if isinstance(auth_result, RedirectResponse):
         return auth_result
     user_id = auth_result
+    mobile_view = is_mobile_view(request)
 
     lesson = get_lesson_or_404(lesson_key)
     prev_lesson_key, next_lesson_key = lesson_neighbors(lesson_key)
@@ -142,6 +146,7 @@ def lesson_page(request: Request, lesson_key: str):
             "next_lesson_key": next_lesson_key,
             "nav_course_href": nav_course_href,
             "nav_lessons_href": nav_lessons_href,
+            "mobile_view": mobile_view,
             **build_ai_helper_view_context(lesson_key=lesson.key),
         },
     )
