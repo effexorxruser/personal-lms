@@ -9,6 +9,7 @@ checklist:
   - Пройти секции Python Tutorial и Argparse Tutorial в заданном объёме.
   - Создать скрипт и проверить run/help/output.
   - Отправить в submission конкретный вывод команд.
+task_slug: foundation-python-cli-smoke
 source_ids:
   - python-docs
 ---
