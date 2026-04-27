@@ -16,6 +16,7 @@ venv/
 AGENTS.md
 .env
 .codex
+.cursor
 
 # Runtime data
 instance/*
