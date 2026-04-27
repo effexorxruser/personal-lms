@@ -144,7 +144,21 @@ source .venv/bin/activate
 python3 scripts/reset_password.py
 ```
 
-### 6. Запуск
+### 6. Сброс пользователей и runtime-данных (опционально)
+
+```bash
+source .venv/bin/activate
+python3 scripts/reset_users.py
+```
+
+Для non-interactive запуска (без prompt подтверждения):
+
+```bash
+source .venv/bin/activate
+python3 scripts/reset_users.py --yes
+```
+
+### 7. Запуск
 
 ```bash
 source .venv/bin/activate
