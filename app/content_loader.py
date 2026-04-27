@@ -68,6 +68,9 @@ class ModuleContent:
     slug: str
     title: str
     description: str
+    objectives: list[str]
+    block: int
+    checkpoint: str
     lesson_keys: list[str]
     lessons: list[LessonContent]
 
@@ -79,6 +82,7 @@ class CourseContent:
     description: str
     version: str
     estimated_weeks: int
+    prerequisites: list[str]
     module_order: list[str]
     modules: list[ModuleContent]
 
@@ -193,6 +197,9 @@ def load_content_index(
                     slug=module_schema.slug,
                     title=module_schema.title,
                     description=module_schema.description,
+                    objectives=list(module_schema.objectives),
+                    block=module_schema.block,
+                    checkpoint=module_schema.checkpoint,
                     lesson_keys=list(module_schema.lessons),
                     lessons=module_lessons,
                 )
@@ -204,7 +211,8 @@ def load_content_index(
             title=course_schema.title,
             description=course_schema.description,
             version=course_schema.version,
-            estimated_weeks=course_schema.estimated_weeks,
+            estimated_weeks=course_schema.effective_duration_weeks,
+            prerequisites=list(course_schema.prerequisites),
             module_order=module_order,
             modules=modules,
         )

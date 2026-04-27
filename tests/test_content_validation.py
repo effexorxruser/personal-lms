@@ -25,6 +25,7 @@ def test_missing_required_field_fails_validation(tmp_path: Path) -> None:
         content_root=tree["content_root"],
         task_root=tree["task_root"],
         checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
     )
 
     assert not report.ok
@@ -43,6 +44,7 @@ def test_invalid_enum_value_fails_validation(tmp_path: Path) -> None:
         content_root=tree["content_root"],
         task_root=tree["task_root"],
         checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
     )
 
     assert not report.ok
@@ -71,6 +73,7 @@ def test_empty_lesson_body_fails_validation(tmp_path: Path) -> None:
         content_root=tree["content_root"],
         task_root=tree["task_root"],
         checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
     )
 
     assert not report.ok
@@ -94,6 +97,7 @@ def test_invalid_task_terminal_config_fails_validation(tmp_path: Path) -> None:
         content_root=tree["content_root"],
         task_root=tree["task_root"],
         checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
     )
 
     assert not report.ok
@@ -107,9 +111,10 @@ def test_loader_contract_uses_the_same_validated_bundle(tmp_path: Path) -> None:
         content_root=tree["content_root"],
         task_root=tree["task_root"],
         checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
         raise_on_error=True,
     )
 
     assert bundle.report.ok
     assert bundle.report.stats.courses == 1
-    assert bundle.report.stats.lessons == 1
+    assert bundle.report.stats.lessons == 2

@@ -1,26 +1,25 @@
-slug: foundation-real-start-pack
-module_slug: foundation-real
-title: "Foundation checkpoint: start pack"
-summary: Собрать маленький демонстрируемый foundation-артефакт с reproducible запуском.
-description: >
-  Объедини результаты блока в компактный артефакт: один CLI-скрипт,
-  понятный README и короткий run-log. Это контрольный шаг после
-  workspace/CLI/Git foundation без расширения в большой проект.
+slug: block-1-example-checkpoint
+module_slug: block-1-example
+title: "Block 1 checkpoint: стартовый reproducible pack"
+summary: Подтвердить, что базовый execution-first цикл работает без ручных пояснений.
+description: Собери минимальный артефакт блока 1, который можно запустить по инструкции.
+project_description: Мини-проект с одним CLI-скриптом, README и run-log для демонстрации repeatable старта.
 requirements:
-  - Есть репозиторий или ветка с итоговым набором файлов.
-  - В README явно указан сценарий запуска.
-  - Есть пример команды и ожидаемого вывода.
-  - Есть короткое описание следующего шага обучения.
+  - Есть репозиторий или ветка с итоговыми файлами блока.
+  - README содержит точный сценарий запуска.
+deliverables:
+  - scripts/hello_cli.py
+  - README.md с шагами запуска
+  - notes/foundation-log.txt
 definition_of_done:
-  - Ссылка на репозиторий открывается и содержит README + scripts/hello_cli.py.
-  - По README можно повторить запуск за 2-3 минуты.
-  - В артефакте есть run-log или эквивалентный след выполнения.
-  - Решение выглядит как маленький usable starter pack, а не как набор заметок.
+  - Ссылка на решение открывается.
+  - По README запуск повторяется за 2-3 минуты.
+  - Run-log подтверждает фактическое выполнение команд.
+evaluation_criteria:
+  - Воспроизводимость команд без догадок.
+  - Ясная структура и минимальный scope.
 submission_type: repository_link
 portfolio_expectations:
-  - Можно показать как первый execution-first foundation результат.
-  - Есть понятная демонстрация навыков CLI, Python script и Git workflow.
-  - Артефакт готов как база для следующего backend-модуля.
+  - Можно показать как первый backend foundation результат.
 hints:
-  - "Держи scope маленьким: один скрипт и один сценарий запуска."
-  - Сначала добейся воспроизводимости, потом улучшай формулировки README.
+  - Не расширяй проект сверх одного скрипта.

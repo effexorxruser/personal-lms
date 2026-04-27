@@ -1,0 +1,12 @@
+slug: block-1-example
+title: Block 1 Example — Workspace and Python CLI
+description: Референсный блок для AI-генерации с проверяемой структурой и минимальным scope.
+block: 1
+objectives:
+  - Подготовить рабочую среду и первый reproducible запуск.
+  - Закрепить цикл действие → результат → фиксация.
+lessons:
+  - block-1-workspace-baseline
+  - block-1-python-cli-cycle
+  - block-1-git-loop
+checkpoint: block-1-example-checkpoint

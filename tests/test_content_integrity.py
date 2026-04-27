@@ -27,6 +27,7 @@ def test_duplicate_lesson_key_fails_validation(tmp_path: Path) -> None:
         content_root=tree["content_root"],
         task_root=tree["task_root"],
         checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
     )
 
     assert not report.ok
@@ -43,6 +44,7 @@ def test_broken_task_reference_fails_validation(tmp_path: Path) -> None:
         content_root=tree["content_root"],
         task_root=tree["task_root"],
         checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
     )
 
     assert not report.ok
@@ -61,6 +63,7 @@ def test_broken_checkpoint_module_reference_fails_validation(tmp_path: Path) -> 
         content_root=tree["content_root"],
         task_root=tree["task_root"],
         checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
     )
 
     assert not report.ok
@@ -79,6 +82,7 @@ def test_missing_lesson_file_from_module_list_fails_validation(tmp_path: Path) -
         content_root=tree["content_root"],
         task_root=tree["task_root"],
         checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
     )
 
     assert not report.ok
@@ -100,6 +104,7 @@ def test_orphan_lesson_file_is_detected(tmp_path: Path) -> None:
         content_root=tree["content_root"],
         task_root=tree["task_root"],
         checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
     )
 
     assert not report.ok
@@ -123,6 +128,7 @@ def test_empty_module_or_course_is_detected(tmp_path: Path) -> None:
         content_root=tree["content_root"],
         task_root=tree["task_root"],
         checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
     )
 
     assert not report.ok

@@ -11,12 +11,15 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CONTENT_ROOT = PROJECT_ROOT / "content" / "courses"
 TASK_ROOT = PROJECT_ROOT / "content" / "tasks"
 CHECKPOINT_ROOT = PROJECT_ROOT / "content" / "checkpoints"
+SOURCE_ROOT = PROJECT_ROOT / "content" / "sources"
+BLUEPRINT_ROOT = PROJECT_ROOT / "content" / "blueprints"
 
 DEFAULT_TERMINAL_ALLOWED_COMMANDS = ["help", "pwd", "tree", "python", "pytest", "show"]
 TASK_SUBMISSION_TYPES = {"text", "link", "command_output"}
 CHECKPOINT_SUBMISSION_TYPES = {"text", "link", "repository_link", "command_output"}
 TASK_REVIEW_MODES = {"deterministic", "manual"}
 SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+MIN_LESSONS_PER_MODULE = 2
 
 
 @dataclass(frozen=True)
@@ -61,9 +64,11 @@ class CourseSchema(_SchemaBase):
     slug: str
     title: str
     description: str
-    version: str
-    estimated_weeks: int
+    version: str = "1.0.0"
+    duration_weeks: int | None = None
+    estimated_weeks: int | None = None
     modules: list[str]
+    prerequisites: list[str] = Field(default_factory=list)
 
     @field_validator("slug")
     @classmethod
@@ -79,9 +84,11 @@ class CourseSchema(_SchemaBase):
             raise ValueError("не может быть пустым")
         return value
 
-    @field_validator("estimated_weeks")
+    @field_validator("duration_weeks", "estimated_weeks")
     @classmethod
-    def validate_estimated_weeks(cls, value: int) -> int:
+    def validate_estimated_weeks(cls, value: int | None) -> int | None:
+        if value is None:
+            return value
         if value < 1 or value > 260:
             raise ValueError("должен быть целым числом в диапазоне 1..260")
         return value
@@ -98,12 +105,30 @@ class CourseSchema(_SchemaBase):
             normalized.append(slug)
         return normalized
 
+    @field_validator("prerequisites")
+    @classmethod
+    def validate_prerequisites(cls, value: list[str]) -> list[str]:
+        cleaned: list[str] = []
+        for item in value:
+            text = str(item).strip()
+            if not text:
+                raise ValueError("список не должен содержать пустые элементы")
+            cleaned.append(text)
+        return cleaned
+
+    @property
+    def effective_duration_weeks(self) -> int:
+        return self.duration_weeks if self.duration_weeks is not None else int(self.estimated_weeks or 0)
+
 
 class ModuleSchema(_SchemaBase):
     slug: str
     title: str
     description: str
+    block: int
+    objectives: list[str]
     lessons: list[str]
+    checkpoint: str
 
     @field_validator("slug")
     @classmethod
@@ -119,6 +144,13 @@ class ModuleSchema(_SchemaBase):
             raise ValueError("не может быть пустым")
         return value
 
+    @field_validator("block")
+    @classmethod
+    def validate_block(cls, value: int) -> int:
+        if value < 0 or value > 6:
+            raise ValueError("должен быть целым числом в диапазоне 0..6")
+        return value
+
     @field_validator("lessons")
     @classmethod
     def validate_lessons(cls, value: list[str]) -> list[str]:
@@ -131,6 +163,26 @@ class ModuleSchema(_SchemaBase):
             normalized.append(key)
         return normalized
 
+    @field_validator("objectives")
+    @classmethod
+    def validate_objectives(cls, value: list[str]) -> list[str]:
+        if not value:
+            raise ValueError("должен содержать хотя бы одну objective")
+        cleaned: list[str] = []
+        for item in value:
+            text = str(item).strip()
+            if not text:
+                raise ValueError("список не должен содержать пустые элементы")
+            cleaned.append(text)
+        return cleaned
+
+    @field_validator("checkpoint")
+    @classmethod
+    def validate_checkpoint(cls, value: str) -> str:
+        if not SLUG_PATTERN.fullmatch(value):
+            raise ValueError("должен быть slug в lower-kebab-case")
+        return value
+
 
 class LessonFrontMatterSchema(_SchemaBase):
     key: str
@@ -139,6 +191,7 @@ class LessonFrontMatterSchema(_SchemaBase):
     objectives: list[str] = Field(default_factory=list)
     checklist: list[str] = Field(default_factory=list)
     task_slug: str | None = None
+    source_ids: list[str] = Field(default_factory=list)
 
     @field_validator("key")
     @classmethod
@@ -174,6 +227,19 @@ class LessonFrontMatterSchema(_SchemaBase):
             if not text:
                 raise ValueError("список не должен содержать пустые элементы")
             cleaned.append(text)
+        return cleaned
+
+    @field_validator("source_ids")
+    @classmethod
+    def validate_source_ids(cls, value: list[str]) -> list[str]:
+        cleaned: list[str] = []
+        for item in value:
+            source_id = str(item).strip()
+            if not source_id:
+                raise ValueError("список не должен содержать пустые source_ids")
+            if not SLUG_PATTERN.fullmatch(source_id):
+                raise ValueError(f"некорректный source_id: {source_id}")
+            cleaned.append(source_id)
         return cleaned
 
 
@@ -287,7 +353,10 @@ class CheckpointSchema(_SchemaBase):
     summary: str
     module_slug: str
     description: str
+    project_description: str | None = None
     requirements: list[str] = Field(default_factory=list)
+    deliverables: list[str] = Field(default_factory=list)
+    evaluation_criteria: list[str] = Field(default_factory=list)
     definition_of_done: list[str]
     submission_type: str
     portfolio_expectations: list[str] = Field(default_factory=list)
@@ -303,6 +372,15 @@ class CheckpointSchema(_SchemaBase):
     @field_validator("title", "summary", "description")
     @classmethod
     def validate_required_text(cls, value: str) -> str:
+        if not value:
+            raise ValueError("не может быть пустым")
+        return value
+
+    @field_validator("project_description")
+    @classmethod
+    def validate_project_description(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
         if not value:
             raise ValueError("не может быть пустым")
         return value
@@ -328,7 +406,7 @@ class CheckpointSchema(_SchemaBase):
             cleaned.append(text)
         return cleaned
 
-    @field_validator("requirements", "portfolio_expectations", "hints")
+    @field_validator("requirements", "portfolio_expectations", "hints", "deliverables", "evaluation_criteria")
     @classmethod
     def validate_string_list(cls, value: list[str]) -> list[str]:
         cleaned: list[str] = []
@@ -339,6 +417,26 @@ class CheckpointSchema(_SchemaBase):
             cleaned.append(text)
         return cleaned
 
+
+class SourceRegistryEntrySchema(_SchemaBase):
+    id: str
+    type: str
+    language: str
+    allowed_usage: str
+
+    @field_validator("id")
+    @classmethod
+    def validate_id(cls, value: str) -> str:
+        if not SLUG_PATTERN.fullmatch(value):
+            raise ValueError("должен быть slug в lower-kebab-case")
+        return value
+
+    @field_validator("type", "language", "allowed_usage")
+    @classmethod
+    def validate_text(cls, value: str) -> str:
+        if not value:
+            raise ValueError("не может быть пустым")
+        return value
 
 @dataclass(frozen=True)
 class ParsedTask:
@@ -503,14 +601,70 @@ def _find_duplicates(values: list[str]) -> set[str]:
     return duplicates
 
 
+def _has_markdown_section(body_markdown: str, heading: str) -> bool:
+    pattern = rf"(?im)^##\s+{re.escape(heading)}\s*$"
+    return re.search(pattern, body_markdown) is not None
+
+
+def _read_source_registry(source_root: Path, state: _BuildState) -> dict[str, SourceRegistryEntrySchema]:
+    registry_path = source_root / "source_registry.yml"
+    try:
+        payload = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        state.add_error(_path_label(registry_path), "source_registry.yml не найден")
+        return {}
+    except yaml.YAMLError as exc:
+        state.add_error(_path_label(registry_path), f"ошибка YAML: {exc}")
+        return {}
+
+    if not isinstance(payload, list):
+        state.add_error(_path_label(registry_path), "ожидался YAML-список источников")
+        return {}
+
+    entries: dict[str, SourceRegistryEntrySchema] = {}
+    for index, row in enumerate(payload):
+        if not isinstance(row, dict):
+            state.add_error(_path_label(registry_path), f"элемент #{index + 1}: ожидался YAML-объект")
+            continue
+        try:
+            entry = SourceRegistryEntrySchema.model_validate(row)
+        except ValidationError as exc:
+            for item in exc.errors():
+                location = ".".join(str(part) for part in item.get("loc", ()))
+                message = str(item.get("msg", "некорректное значение"))
+                marker = f"[{index + 1}]"
+                details = f"{marker}.{location}: {message}" if location else f"{marker}: {message}"
+                state.add_error(_path_label(registry_path), details)
+            continue
+        if entry.id in entries:
+            state.add_error(_path_label(registry_path), f"duplicate source id: {entry.id}")
+            continue
+        entries[entry.id] = entry
+    return entries
+
+
 def load_content_bundle(
     *,
     content_root: Path = CONTENT_ROOT,
     task_root: Path = TASK_ROOT,
     checkpoint_root: Path = CHECKPOINT_ROOT,
+    source_root: Path = SOURCE_ROOT,
     raise_on_error: bool = True,
 ) -> ContentBundle:
     state = _BuildState()
+    source_registry = _read_source_registry(source_root, state)
+    blueprint_path = BLUEPRINT_ROOT / "backend_developer_6_months.yml"
+    try:
+        blueprint_payload = yaml.safe_load(blueprint_path.read_text(encoding="utf-8"))
+        if not isinstance(blueprint_payload, dict):
+            state.add_error(_path_label(blueprint_path), "blueprint должен быть YAML-объектом")
+        else:
+            if "blocks" not in blueprint_payload:
+                state.add_error(_path_label(blueprint_path), "blueprint должен содержать blocks")
+    except FileNotFoundError:
+        state.add_error(_path_label(blueprint_path), "blueprint не найден")
+    except yaml.YAMLError as exc:
+        state.add_error(_path_label(blueprint_path), f"ошибка YAML: {exc}")
 
     parsed_tasks: dict[str, ParsedTask] = {}
     for task_path in sorted(task_root.glob("*.yml")):
@@ -602,6 +756,12 @@ def load_content_bundle(
                     f"duplicate lesson key в module.lessons: {duplicate_key}",
                 )
 
+            if len(listed_lesson_keys) < MIN_LESSONS_PER_MODULE:
+                state.add_error(
+                    _path_label(module_manifest_path),
+                    f"module.lessons должен содержать минимум {MIN_LESSONS_PER_MODULE} урока(ов)",
+                )
+
             listed_set = set(listed_lesson_keys)
             actual_stems = set(parsed_lessons_by_stem.keys())
 
@@ -651,6 +811,14 @@ def load_content_bundle(
                     _path_label(orphan_path),
                     f"orphan module file: {orphan_module} не указан в course.modules",
                 )
+
+            for module in modules_by_folder.values():
+                checkpoint_slug = module.schema.checkpoint
+                if checkpoint_slug not in parsed_checkpoints:
+                    state.add_error(
+                        _path_label(module.path),
+                        f"checkpoint ссылается на отсутствующий checkpoint: {checkpoint_slug}",
+                    )
 
             parsed_courses.append(
                 ParsedCourse(
@@ -707,6 +875,29 @@ def load_content_bundle(
                 _path_label(lesson_doc.path),
                 f"task_slug ссылается на отсутствующий task: {task_slug}",
             )
+        if not lesson_doc.schema.source_ids:
+            state.add_error(_path_label(lesson_doc.path), "lesson должен содержать хотя бы один source_id")
+        for source_id in lesson_doc.schema.source_ids:
+            if source_id not in source_registry:
+                state.add_error(
+                    _path_label(lesson_doc.path),
+                    f"source_id не найден в source_registry: {source_id}",
+                )
+
+        required_sections = [
+            "Why this matters (RU)",
+            "What to read (EN source)",
+            "What to skip",
+            "Action",
+            "Definition of Done",
+            "Technical English",
+        ]
+        for section in required_sections:
+            if not _has_markdown_section(lesson_doc.body_markdown, section):
+                state.add_error(_path_label(lesson_doc.path), f"missing section: {section}")
+
+        if "## Action" not in lesson_doc.body_markdown:
+            state.add_error(_path_label(lesson_doc.path), "anti-tutorial hell: lesson должен содержать действие (Action)")
 
     for checkpoint in parsed_checkpoints.values():
         module_slug = checkpoint.schema.module_slug
@@ -714,6 +905,38 @@ def load_content_bundle(
             state.add_error(
                 _path_label(checkpoint.path),
                 f"module_slug ссылается на отсутствующий модуль: {module_slug}",
+            )
+        if checkpoint.schema.project_description is None:
+            state.add_error(
+                _path_label(checkpoint.path),
+                "checkpoint должен содержать project_description",
+            )
+        if not checkpoint.schema.deliverables:
+            state.add_error(
+                _path_label(checkpoint.path),
+                "checkpoint должен содержать deliverables",
+            )
+        if not checkpoint.schema.evaluation_criteria:
+            state.add_error(
+                _path_label(checkpoint.path),
+                "checkpoint должен содержать evaluation_criteria",
+            )
+
+    referenced_task_slugs = {lesson.schema.task_slug for lesson in parsed_lessons_by_key.values() if lesson.schema.task_slug}
+    for task_slug, task in parsed_tasks.items():
+        if task_slug not in referenced_task_slugs:
+            state.add_error(_path_label(task.path), f"orphan task: {task_slug} не используется ни в одном lesson")
+
+    referenced_checkpoint_slugs = {
+        module.schema.checkpoint
+        for course in parsed_courses
+        for module in course.modules_by_folder.values()
+    }
+    for checkpoint_slug, checkpoint in parsed_checkpoints.items():
+        if checkpoint_slug not in referenced_checkpoint_slugs:
+            state.add_error(
+                _path_label(checkpoint.path),
+                f"orphan checkpoint: {checkpoint_slug} не используется ни в одном module.yml",
             )
 
     report = ContentValidationReport(
@@ -747,10 +970,12 @@ def validate_content(
     content_root: Path = CONTENT_ROOT,
     task_root: Path = TASK_ROOT,
     checkpoint_root: Path = CHECKPOINT_ROOT,
+    source_root: Path = SOURCE_ROOT,
 ) -> ContentValidationReport:
     return load_content_bundle(
         content_root=content_root,
         task_root=task_root,
         checkpoint_root=checkpoint_root,
+        source_root=source_root,
         raise_on_error=False,
     ).report

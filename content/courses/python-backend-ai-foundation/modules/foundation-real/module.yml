@@ -1,7 +1,0 @@
-slug: foundation-real
-title: "Foundation Real: Workspace, CLI, Python, Git"
-description: Реальный foundation-модуль с опорой на официальные источники и проверяемые шаги выполнения.
-lessons:
-  - foundation-real-workspace
-  - foundation-real-cli-python
-  - foundation-real-git-loop
