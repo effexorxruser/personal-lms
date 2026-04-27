@@ -1,23 +1,37 @@
-name: Container Publish
+name: Release
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (example: v0.2.0)'
+        required: true
+        type: string
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
-  build-and-push:
+  release:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set short SHA
+      - name: Validate version format
+        run: |
+          if ! echo "${{ inputs.version }}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Version must match vMAJOR.MINOR.PATCH"
+            exit 1
+          fi
+
+      - name: Set metadata
         id: vars
-        run: echo "short_sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "short_sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "image=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -32,5 +46,17 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/effexorxruser/personal-lms:latest
-            ghcr.io/effexorxruser/personal-lms:${{ steps.vars.outputs.short_sha }}
+            ${{ steps.vars.outputs.image }}:latest
+            ${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.short_sha }}
+            ${{ steps.vars.outputs.image }}:${{ inputs.version }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.version }}
+          generate_release_notes: true
+          body: |
+            Container image tags:
+            - `${{ steps.vars.outputs.image }}:latest`
+            - `${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.short_sha }}`
+            - `${{ steps.vars.outputs.image }}:${{ inputs.version }}`

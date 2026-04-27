@@ -55,25 +55,58 @@ python scripts/create_user.py
 - пользователь не создаётся автоматически;
 - логин/пароль не хардкодятся в коде.
 
-## Проверка mobile UI
-
-Быстрая проверка mobile read-only режима:
-
-- `http://localhost:8000/dashboard?mobile=1`
-- `http://localhost:8000/courses/python-backend-ai-foundation?mobile=1`
-- `http://localhost:8000/lessons/foundation-real-workspace?mobile=1`
-
-Также можно открыть обычный `/dashboard` и проверить адаптацию через browser devtools (`max-width: 768px`).
-
 ## Примечание про SQLite volume
 
 Для сохранения runtime state между рестартами контейнера обязательно монтировать volume/папку в `/app/instance`.
 
 ## Deployable image
 
-- Deployable Docker-образ собирается через GitHub Actions workflow `.github/workflows/container.yml`.
+- Релизный Docker-образ собирается через GitHub Actions workflow `.github/workflows/container.yml` (manual release).
 - Workflow публикует образ в GitHub Container Registry (GHCR):
   - `ghcr.io/effexorxruser/personal-lms:latest`
   - `ghcr.io/effexorxruser/personal-lms:<short-sha>`
-- Для PikaPods предпочтителен Docker/container deployment path с использованием опубликованного образа, если такой путь доступен в текущем тарифе/интерфейсе.
-- Если прямой pull из GHCR недоступен, использовать manual Docker/SFTP/documented update path (ручное обновление контейнерного артефакта по documented процессу).
+  - `ghcr.io/effexorxruser/personal-lms:<version>`
+
+## Deployment checklist (PikaPods)
+
+### 1) Backup перед обновлением
+
+- Убедиться, что есть доступ к текущему контейнеру.
+- Сделать копию runtime-данных (минимум `instance/lms.db`).
+- Сохранить backup вне контейнера (локально или в безопасное хранилище).
+
+Пример локального бэкапа:
+
+```bash
+cp instance/lms.db instance/lms.db.bak-$(date +%Y%m%d-%H%M%S)
+```
+
+### 2) Deploy новой версии
+
+- Выбрать нужный релизный тег `vX.Y.Z`.
+- В PikaPods обновить Docker image на:
+  - `ghcr.io/effexorxruser/personal-lms:vX.Y.Z`
+- Проверить, что volume по-прежнему смонтирован в `/app/instance`.
+- Перезапустить контейнер.
+
+### 3) Post-deploy health check
+
+- Проверить endpoint:
+
+```bash
+curl -fsS https://<your-domain>/health
+```
+
+- Проверить логин админом и открытие dashboard.
+- Проверить, что курсы и прогресс читаются из текущей БД.
+
+### 4) Rollback procedure
+
+Если после деплоя есть регресс:
+
+1. В PikaPods вернуть предыдущий стабильный image tag (`vX.Y.Z` -> `vX.Y.(Z-1)` или конкретный `<short-sha>`).
+2. Перезапустить контейнер.
+3. Если проблема в данных, восстановить `instance/lms.db` из последнего backup.
+4. Снова проверить `/health`, логин и основные user flows.
+
+Rollback считается завершённым, когда healthcheck зелёный и ключевые пользовательские сценарии проходят.
