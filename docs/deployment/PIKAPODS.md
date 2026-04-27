@@ -1,5 +1,7 @@
 # PikaPods deployment (MVP)
 
+**Примечание:** контур PikaPods/VPS **временно заморожен**; для ежедневной работы используйте локальный запуск из WSL: `bash scripts/start_local.sh` (см. `README.md`). Этот документ и Docker-артефакты сохранены для будущего возобновления деплоя.
+
 PikaPods — простой managed-хостинг для self-hosted приложений в Docker-контейнерах. Для `personal-lms` в MVP достаточно одного контейнера с volume для `instance/`.
 
 ## Что деплоим
