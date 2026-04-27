@@ -834,7 +834,6 @@ def test_weekly_recap_page_aggregates_clean_flow_artifacts() -> None:
     assert "Урок 2: Базовый Python execution loop" in recap_response.text
     assert "review пройден" in recap_response.text
     assert "Не хватает контекста" in recap_response.text
-    assert "Урок 2: Базовый Python execution loop" in recap_response.text
 
 
 
