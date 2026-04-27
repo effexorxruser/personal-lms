@@ -6,6 +6,14 @@
   type: core
   language: en
   allowed_usage: backbone
+- id: github-docs
+  type: core
+  language: en
+  allowed_usage: backbone
+- id: vscode-docs
+  type: core
+  language: en
+  allowed_usage: backbone
 - id: fastapi-docs
   type: core
   language: en

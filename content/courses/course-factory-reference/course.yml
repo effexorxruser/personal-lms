@@ -1,0 +1,9 @@
+slug: course-factory-reference
+title: Course Factory Reference Fixtures
+description: Изолированные reference fixtures для AI-authoring workflow. Не активный учебный трек runtime.
+version: 1.0.0
+duration_weeks: 1
+modules:
+  - block-1-example
+prerequisites:
+  - Для авторов контента

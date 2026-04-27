@@ -672,6 +672,11 @@ def load_content_bundle(
         if task_schema is None:
             continue
         assert isinstance(task_schema, TaskSchema)
+        if task_path.stem != task_schema.slug:
+            state.add_error(
+                _path_label(task_path),
+                f"имя файла ({task_path.stem}.yml) должно совпадать с task.slug ({task_schema.slug})",
+            )
         if task_schema.slug in parsed_tasks:
             original = parsed_tasks[task_schema.slug].path
             state.add_error(_path_label(task_path), f"duplicate task.slug: {task_schema.slug} (уже есть в {_path_label(original)})")
@@ -684,6 +689,11 @@ def load_content_bundle(
         if checkpoint_schema is None:
             continue
         assert isinstance(checkpoint_schema, CheckpointSchema)
+        if checkpoint_path.stem != checkpoint_schema.slug:
+            state.add_error(
+                _path_label(checkpoint_path),
+                f"имя файла ({checkpoint_path.stem}.yml) должно совпадать с checkpoint.slug ({checkpoint_schema.slug})",
+            )
         if checkpoint_schema.slug in parsed_checkpoints:
             original = parsed_checkpoints[checkpoint_schema.slug].path
             state.add_error(
