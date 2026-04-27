@@ -1,0 +1,11 @@
+slug: block-0-learning-loop
+title: "Block 0: Учебный цикл и система прогресса"
+description: Формирование повторяемого weekly learning loop и понятной системы фиксации прогресса.
+block: 0
+objectives:
+  - Настроить личный weekly learning loop с реалистичной нагрузкой.
+  - Вести структурированный учебный журнал с критериями завершения.
+lessons:
+  - block-0-learning-loop-setup
+  - block-0-study-log-baseline
+checkpoint: block-0-learning-checkpoint

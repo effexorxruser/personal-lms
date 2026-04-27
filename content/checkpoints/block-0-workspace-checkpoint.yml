@@ -1,0 +1,27 @@
+slug: block-0-workspace-checkpoint
+module_slug: block-0-onboarding-workspace
+title: "Block 0 checkpoint: workspace operational baseline"
+summary: Подтвердить, что workspace, Python CLI и GitHub цикл работают как единый воспроизводимый контур.
+description: Итоговая проверка операционной готовности к дальнейшим блокам курса.
+project_description: Собери стартовый артефакт блока 0 с локальным workspace, минимальным CLI-скриптом и опубликованным GitHub результатом.
+requirements:
+  - Подготовлен локальный workspace с папками notes/ и scripts/.
+  - Есть рабочий CLI-скрипт с параметром `--name`.
+  - Есть GitHub commit или PR с артефактами блока.
+deliverables:
+  - notes/foundation-log.txt
+  - scripts/hello_cli.py
+  - ссылка на commit или pull request
+definition_of_done:
+  - Workspace разворачивается и запускается по описанию без дополнительных пояснений.
+  - CLI-скрипт воспроизводимо запускается минимум в двух сценариях.
+  - GitHub-ссылка открывается и показывает релевантные изменения блока 0.
+evaluation_criteria:
+  - Воспроизводимость шагов запуска и проверки.
+  - Ясность структуры файлов и логов.
+  - Наличие подтверждаемого внешнего артефакта в GitHub.
+submission_type: repository_link
+portfolio_expectations:
+  - Можно показать как стартовый proof of execution discipline для backend-трека.
+hints:
+  - "Не расширяй scope beyond baseline: нужен минимальный, но завершённый набор."

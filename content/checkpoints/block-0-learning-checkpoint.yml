@@ -1,0 +1,27 @@
+slug: block-0-learning-checkpoint
+module_slug: block-0-learning-loop
+title: "Block 0 checkpoint: learning loop readiness"
+summary: Подтвердить, что weekly learning loop и study log позволяют поддерживать стабильный учебный прогресс.
+description: Проверка готовности учебной операционной системы перед переходом в foundation-модуль.
+project_description: Подготовь комплект из weekly learning plan и study log, чтобы следующую неделю можно было пройти без потери ритма.
+requirements:
+  - Есть weekly learning loop минимум на 1 неделю вперёд.
+  - Есть study log минимум с тремя структурированными записями.
+  - Для пропусков описан recovery/fallback сценарий.
+deliverables:
+  - notes/weekly-learning-loop.md
+  - notes/study-log.md
+  - короткий recap (3-5 предложений) о том, что работает и что нужно улучшить
+definition_of_done:
+  - Weekly loop содержит конкретные дни, длительность и фокус каждой сессии.
+  - Study log содержит фактические результаты, blocker и следующий шаг.
+  - Recap показывает осознанное управление ритмом, а не формальное заполнение шаблона.
+evaluation_criteria:
+  - Практичность и реалистичность плана.
+  - Проверяемость записей по критерию «есть факт выполнения».
+  - Готовность продолжать обучение в устойчивом режиме.
+submission_type: text
+portfolio_expectations:
+  - Можно показать как evidence учебной дисциплины и self-management навыков.
+hints:
+  - Сфокусируйся на устойчивости процесса, а не на красивом оформлении заметок.

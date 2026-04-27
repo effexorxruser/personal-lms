@@ -1,0 +1,12 @@
+slug: block-0-onboarding-workspace
+title: "Block 0: Onboarding и workspace запуск"
+description: Сборка учебного окружения и базового рабочего цикла в терминале, Python и GitHub.
+block: 0
+objectives:
+  - Подготовить воспроизводимый локальный workspace для обучения.
+  - "Закрыть первый end-to-end цикл: терминал -> Python CLI -> GitHub."
+lessons:
+  - block-0-workspace-baseline
+  - block-0-python-cli-smoke
+  - block-0-git-github-cycle
+checkpoint: block-0-workspace-checkpoint
