@@ -12,7 +12,7 @@ from app.content_pipeline import validate_content
 def main() -> int:
     report = validate_content()
 
-    print(f"Blocks: 7")
+    print("Blocks: 7")
     print(f"Modules: {report.stats.modules}")
     print(f"Lessons: {report.stats.lessons}")
     print(f"Tasks: {report.stats.tasks}")

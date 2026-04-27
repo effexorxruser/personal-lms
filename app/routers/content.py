@@ -252,7 +252,7 @@ def submit_checkpoint(
         except ValueError:
             session.rollback()
             return RedirectResponse(
-                url=f"/dashboard?checkpoint_error=invalid_submission",
+                url="/dashboard?checkpoint_error=invalid_submission",
                 status_code=303,
             )
         ensure_progress_initialized(session, user_id, course_slug)
