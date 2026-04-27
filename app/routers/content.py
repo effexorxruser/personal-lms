@@ -302,5 +302,3 @@ def resolve_stuck(request: Request, event_id: int):
         session.commit()
 
     return RedirectResponse(url=redirect_to, status_code=303)
-    mobile_view = is_mobile_view(request)
-    mobile_view = is_mobile_view(request)
