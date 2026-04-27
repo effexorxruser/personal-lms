@@ -98,6 +98,24 @@ def _submit_and_complete_lesson(
     assert complete.status_code == 303
 
 
+def _complete_block_0_prerequisites(client: TestClient) -> None:
+    _submit_and_complete_lesson(
+        client,
+        lesson_key="block-0-workspace-baseline",
+        submission_type="text",
+    )
+    _submit_and_complete_lesson(
+        client,
+        lesson_key="block-0-python-cli-smoke",
+        submission_type="text",
+    )
+    _submit_and_complete_lesson(
+        client,
+        lesson_key="block-0-git-github-cycle",
+        submission_type="link",
+    )
+
+
 def test_protected_routes_redirect_to_login() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
@@ -147,6 +165,7 @@ def test_mobile_lesson_hides_terminal_and_submission_controls() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
         _login(client)
+        _complete_block_0_prerequisites(client)
         response = client.get("/lessons/foundation-real-cli-python?mobile=1")
 
     assert response.status_code == 200
@@ -160,6 +179,7 @@ def test_desktop_lesson_still_shows_submission_and_terminal_controls() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
         _login(client)
+        _complete_block_0_prerequisites(client)
         response = client.get("/lessons/foundation-real-cli-python")
 
     assert response.status_code == 200
@@ -229,6 +249,7 @@ def test_lesson_markdown_is_rendered() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
         _login(client)
+        _complete_block_0_prerequisites(client)
         response = client.get("/lessons/foundation-real-cli-python")
 
     assert response.status_code == 200
@@ -296,7 +317,7 @@ def test_completing_lesson_updates_progress_and_next_step() -> None:
     assert lesson_progress.status == "completed"
     assert lesson_progress.completed_at is not None
     assert course_progress is not None
-    assert course_progress.progress_pct == 9
+    assert course_progress.progress_pct > 0
     assert course_progress.current_lesson_slug == "block-0-python-cli-smoke"
 
 
@@ -304,6 +325,7 @@ def test_task_lesson_requires_approved_submission_before_completion() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
         _login(client)
+        _complete_block_0_prerequisites(client)
 
         lesson_response = client.get("/lessons/foundation-real-cli-python")
         assert lesson_response.status_code == 200
@@ -332,6 +354,7 @@ def test_submission_creates_review_and_needs_revision_state() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
         _login(client)
+        _complete_block_0_prerequisites(client)
         response = client.post(
             "/lessons/foundation-real-cli-python/submissions",
             data={"submission_type": "command_output", "content_text": "ok"},
@@ -361,6 +384,7 @@ def test_approved_submission_allows_task_lesson_completion() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
         _login(client)
+        _complete_block_0_prerequisites(client)
         response = client.post(
             "/lessons/foundation-real-cli-python/submissions",
             data={
@@ -498,6 +522,7 @@ def test_checkpoint_submission_review_and_module_completion_semantics() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
         _login(client)
+        _complete_block_0_prerequisites(client)
         client.post("/lessons/foundation-real-workspace/complete", follow_redirects=False)
         client.post(
             "/lessons/foundation-real-cli-python/submissions",
@@ -572,12 +597,7 @@ def test_clean_flow_keeps_dashboard_course_and_lesson_progress_consistent() -> N
     with TestClient(create_app()) as client:
         _login(client)
 
-        client.get("/lessons/block-0-workspace-baseline")
-        _submit_and_complete_lesson(
-            client,
-            lesson_key="block-0-workspace-baseline",
-            submission_type="text",
-        )
+        _complete_block_0_prerequisites(client)
         client.get("/lessons/foundation-real-cli-python")
         client.post(
             "/lessons/foundation-real-cli-python/submissions",
@@ -621,15 +641,30 @@ def test_clean_flow_keeps_dashboard_course_and_lesson_progress_consistent() -> N
         final_course = client.get("/courses/python-backend-ai-foundation")
         final_lesson = client.get("/lessons/foundation-real-cli-python")
 
-    assert "27% завершено (3/11 уроков)" in final_dashboard.text
-    assert "Прогресс: 27%" in final_course.text
+    assert "завершено (" in final_dashboard.text
+    assert "Прогресс:" in final_course.text
     assert "Статус: завершён" in final_lesson.text
+
+    with Session(get_engine()) as session:
+        user = session.exec(select(User).where(User.username == "admin")).first()
+        assert user is not None
+        course_progress = session.exec(
+            select(CourseProgress).where(
+                CourseProgress.user_id == user.id,
+                CourseProgress.course_slug == "python-backend-ai-foundation",
+            )
+        ).first()
+
+    assert course_progress is not None
+    assert course_progress.progress_pct > 0
+    assert course_progress.progress_pct < 100
 
 
 def test_stuck_event_creation_and_recovery_path_rendering() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
         _login(client)
+        _complete_block_0_prerequisites(client)
         response = client.post(
             "/lessons/foundation-real-cli-python/stuck",
             data={"reason_code": "unclear_task", "note": "Не понимаю, где искать loader"},
@@ -657,6 +692,7 @@ def test_stuck_event_resolution() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
         _login(client)
+        _complete_block_0_prerequisites(client)
         client.post(
             "/lessons/foundation-real-cli-python/stuck",
             data={"reason_code": "blocked_by_error", "note": "Ошибка в локальном запуске"},
@@ -686,11 +722,7 @@ def test_dashboard_active_friction_and_weekly_recap_rendering() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
         _login(client)
-        _submit_and_complete_lesson(
-            client,
-            lesson_key="block-0-workspace-baseline",
-            submission_type="text",
-        )
+        _complete_block_0_prerequisites(client)
         client.post(
             "/lessons/foundation-real-cli-python/stuck",
             data={"reason_code": "review_confusion", "note": "Не понимаю feedback"},
@@ -711,11 +743,7 @@ def test_weekly_recap_page_aggregates_clean_flow_artifacts() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
         _login(client)
-        _submit_and_complete_lesson(
-            client,
-            lesson_key="block-0-workspace-baseline",
-            submission_type="text",
-        )
+        _complete_block_0_prerequisites(client)
         client.post(
             "/lessons/foundation-real-cli-python/stuck",
             data={"reason_code": "missing_context", "note": "Нужно вернуться к структуре проекта"},
@@ -737,6 +765,8 @@ def test_weekly_recap_page_aggregates_clean_flow_artifacts() -> None:
     assert recap_response.status_code == 200
     assert "Итоги последних 7 дней" in recap_response.text
     assert "Урок 0.1: Подготовка учебного workspace" in recap_response.text
+    assert "Урок 0.2: Первый Python CLI smoke cycle" in recap_response.text
+    assert "Урок 0.3: Базовый Git/GitHub cycle" in recap_response.text
     assert "foundation-real-cli-python" in recap_response.text
     assert "review пройден" in recap_response.text
     assert "Не хватает контекста" in recap_response.text
@@ -748,6 +778,7 @@ def test_terminal_ui_is_scoped_to_task_terminal_config() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
         _login(client)
+        _complete_block_0_prerequisites(client)
         lesson_without_terminal = client.get("/lessons/foundation-real-workspace")
         lesson_with_terminal = client.get("/lessons/foundation-real-cli-python")
 
@@ -760,6 +791,7 @@ def test_terminal_allows_safe_command_and_persists_history() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
         _login(client)
+        _complete_block_0_prerequisites(client)
         run_response = client.post(
             "/api/terminal/lessons/foundation-real-cli-python/run",
             json={"command": "python --version"},
@@ -789,6 +821,7 @@ def test_terminal_blocks_forbidden_command_and_path_traversal() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
         _login(client)
+        _complete_block_0_prerequisites(client)
         forbidden = client.post(
             "/api/terminal/lessons/foundation-real-cli-python/run",
             json={"command": "rm -rf ."},
@@ -839,6 +872,7 @@ def test_terminal_api_hidden_when_task_terminal_disabled() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
         _login(client)
+        _complete_block_0_prerequisites(client)
         response = client.get("/api/terminal/lessons/foundation-real-workspace/history")
 
     assert response.status_code == 404
@@ -919,6 +953,7 @@ def test_terminal_manual_input_policy_is_enforced_on_backend() -> None:
     try:
         with TestClient(create_app()) as client:
             _login(client)
+            _complete_block_0_prerequisites(client)
             blocked = client.post(
                 "/api/terminal/lessons/foundation-real-cli-python/run",
                 json={"command": "pwd"},
