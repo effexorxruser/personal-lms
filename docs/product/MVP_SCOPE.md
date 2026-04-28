@@ -43,9 +43,10 @@ MVP должен быть small and sharp.
 - stuck flow;
 - weekly recap;
 - lesson-scoped terminal execution surface;
-- lesson-scoped AI helper (Lain Helper v0.5);
+- context-scoped AI helper (Lain Helper v1.0);
 - file-based authoring model: курс/модуль/урок/task/checkpoint.
-- клиентский UI customization: выбор 3 theme preset (`dark/light/lain`) и glass on/off (без изменения SSR-архитектуры).
+- клиентский UI customization: выбор 3 theme preset (`vanilla-dark/vanilla-light/lain`) и glass on/off (без изменения SSR-архитектуры).
+- default runtime theme: `lain` (можно переключить через UI settings).
 
 ## Что в MVP пока не реализовано
 
@@ -90,10 +91,10 @@ MVP должен быть small and sharp.
 ## Что может быть позже
 
 - Alembic migrations как обязательный путь schema changes;
-- расширение Lain Helper v0.5: reliability и отказоустойчивость;
-- расширение Lain Helper v0.5: evals и quality-контуры;
-- расширение Lain Helper v0.5: observability/трассировка взаимодействий;
-- расширение Lain Helper v0.5: provider hardening;
-- расширение Lain Helper v0.5: cost controls;
+- расширение Lain Helper v1.0: reliability и отказоустойчивость;
+- расширение Lain Helper v1.0: evals и quality-контуры;
+- расширение Lain Helper v1.0: observability/трассировка взаимодействий;
+- расширение Lain Helper v1.0: provider hardening;
+- расширение Lain Helper v1.0: cost controls;
 - дополнительные курсы и треки;
 - production-like deployment profile.

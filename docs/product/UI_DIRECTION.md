@@ -120,7 +120,7 @@ Lain — это subtle emotional presence, а не основной фон и н
 
 ## Принятый UI baseline
 
-Текущий dark-only UI после финального matte glass cleanup pass считается принятой опорной визуальной системой проекта.
+Текущий dark-first UI (default `lain`) после финального matte glass cleanup pass считается принятой опорной визуальной системой проекта.
 
 Канонический baseline описан в [`UI_BASELINE.md`](UI_BASELINE.md).
 

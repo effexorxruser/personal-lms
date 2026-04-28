@@ -12,7 +12,7 @@ Self-hosted LMS-like платформа для обучения Python backend +
 - страница урока (`/lessons/{lesson_key}`): чтение, задача, submission, review, stuck flow;
 - recap страница (`/recap`) с weekly summary;
 - lesson-scoped учебный терминал через API (`/api/terminal/...`) с sandbox-ограничениями;
-- встроенный Lain Helper v0.5: floating launcher + mini-chat lesson-aware AI-тьютора с recent history;
+- встроенный Lain Helper v1.0: floating capsule launcher + context-scoped mini-chat AI-тьютора с history/clear/socratic toggle;
 - content authoring pipeline: схемы, graph validation и scaffold scripts для новых курсов;
 - persistence runtime state в SQLite через SQLModel.
 
@@ -209,8 +209,9 @@ uvicorn app.main:app --reload
 - `GET /recap`
 - `GET /api/terminal/lessons/{lesson_key}/history`
 - `POST /api/terminal/lessons/{lesson_key}/run`
-- `POST /api/ai/helper`
-- `GET /api/ai/helper/history`
+- `POST /api/ai-helper/history`
+- `POST /api/ai-helper/chat`
+- `POST /api/ai-helper/clear`
 
 ## Учебный терминал (MVP)
 
@@ -223,17 +224,17 @@ uvicorn app.main:app --reload
 - stdout/stderr обрезаются до 12_000 символов
 - каждый запуск сохраняется как `TerminalRun`
 
-## Lain Helper v0.5
+## Lain Helper v1.0
 
-Lain — встроенный lesson-scoped AI-тьютор внутри LMS:
+Lain — встроенный context-scoped AI-тьютор внутри LMS:
 
-- floating launcher внизу справа на внутренних страницах;
-- mini-chat panel с quick actions (`Объясни текущий урок`, `Помоги начать`, `Я застрял`, `Проверь мой ответ`);
-- endpoint-ы: `POST /api/ai/helper`, `GET /api/ai/helper/history`;
-- ответы ограничены контекстом текущего урока и guardrails-логикой;
-- при первом открытии panel подгружается недавняя история для текущего урока;
-- provider transport вынесен в отдельный слой `app/services/lain_provider.py`;
-- interaction log сохраняется в `LainHelperInteraction`.
+- floating launcher/capsule внизу справа на внутренних страницах;
+- mini-chat panel с compact quick actions, `online/thinking` индикатором и отдельным toggle сократического режима;
+- endpoint-ы: `POST /api/ai-helper/history`, `POST /api/ai-helper/chat`, `POST /api/ai-helper/clear`;
+- ответы ограничены текущим учебным контекстом (урок/курс/страница) и guardrails-логикой;
+- история чата хранится по `context_key` и очищается отдельно для текущего контекста;
+- evidence-слой учитывает недавние lesson-scoped terminal runs, если они есть;
+- interaction log сохраняется в `AIHelperMessage`.
 
 ## Content Pipeline (authoring readiness)
 
@@ -309,5 +310,5 @@ npm run build-storybook
 - без расползания scope без явного решения
 - terminal execution surface не является полноценным shell
 - sandbox/whitelist терминала не является полноценной security boundary для untrusted/public execution
-- Lain Helper v0.5 не завершает задачи за пользователя и не выдает autopilot-решения
+- Lain Helper v1.0 не завершает задачи за пользователя и не выдает autopilot-решения
 - MVP не является public-ready multi-user платформой
