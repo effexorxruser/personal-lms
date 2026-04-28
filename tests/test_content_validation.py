@@ -13,6 +13,37 @@ def test_current_content_snapshot_is_valid() -> None:
     assert report.ok
 
 
+def test_active_block0_course_excludes_foundation_real_module() -> None:
+    from app.content_registry import get_content_registry
+
+    get_content_registry.cache_clear()
+    registry = get_content_registry()
+    course = registry.courses["python-backend-ai-foundation"]
+    assert [m.slug for m in course.modules] == [
+        "block-0-onboarding-workspace",
+        "block-0-learning-loop",
+    ]
+
+
+def test_block0_cli_lesson_uses_blueprint_canonical_task_slug() -> None:
+    from app.content_registry import get_content_registry
+
+    get_content_registry.cache_clear()
+    registry = get_content_registry()
+    lesson = registry.lessons["block-0-python-cli-smoke"]
+    assert lesson.task_slug == "foundation-python-cli-smoke"
+
+
+def test_foundation_real_module_lives_in_draft_course() -> None:
+    from app.content_registry import get_content_registry
+
+    get_content_registry.cache_clear()
+    registry = get_content_registry()
+    draft = registry.courses["python-backend-ai-foundation-block1-draft"]
+    assert [m.slug for m in draft.modules] == ["foundation-real"]
+    assert registry.lessons["foundation-real-workspace"].course_slug == "python-backend-ai-foundation-block1-draft"
+
+
 def test_missing_required_field_fails_validation(tmp_path: Path) -> None:
     tree = create_valid_content_tree(tmp_path)
 

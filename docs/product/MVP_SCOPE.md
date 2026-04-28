@@ -45,6 +45,7 @@ MVP должен быть small and sharp.
 - lesson-scoped terminal execution surface;
 - lesson-scoped AI helper (Lain Helper v0.5);
 - file-based authoring model: курс/модуль/урок/task/checkpoint.
+- клиентский UI customization: выбор 3 theme preset (`dark/light/lain`) и glass on/off (без изменения SSR-архитектуры).
 
 ## Что в MVP пока не реализовано
 

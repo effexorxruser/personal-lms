@@ -59,14 +59,23 @@
       </section>
       {% else %}
       <div class="dashboard-ambient" aria-hidden="true"></div>
+      <div class="dashboard-lain-ambient" aria-hidden="true"></div>
+      <section class="dashboard-hero ui-card" aria-label="Фокус сессии">
+        <p class="status-kicker">Фокус сессии</p>
+        <h1>{{ ns.next.body if ns.next else 'Продолжай учебный ритм сегодня' }}</h1>
+        <p class="dashboard-hero__quote">{{ dashboard_session_quote }}</p>
+        <div class="dashboard-action-row">
+          <a class="btn btn--primary" href="{{ continue_href }}">Продолжить обучение</a>
+          <a class="btn btn--ghost" href="{{ nav_course_href }}">Открыть карту курса</a>
+        </div>
+      </section>
       <section class="dashboard-context-strip" aria-label="Текущий контекст обучения" style="--progress-value: {{ dashboard_progress_pct }}%;">
         <div class="dashboard-context-strip__identity">
           <span class="dashboard-context-strip__user">Вы вошли как <strong>{{ username }}</strong></span>
           <span>{{ dashboard_course_title }}</span>
         </div>
         <div class="dashboard-context-strip__state">
-          <span>Модуль: {{ dashboard_module_title }}</span>
-          <span>Checkpoint: {% if dashboard_checkpoint_title %}{{ dashboard_checkpoint_title }} · {% endif %}{{ dashboard_checkpoint_label }}</span>
+          <span>Текущий фокус: {{ ns.next.body if ns.next else 'Следующий шаг не найден' }}</span>
         </div>
         <div class="dashboard-context-strip__progress" aria-label="Прогресс курса {{ dashboard_progress_pct }}%">
           <span class="progress-line" aria-hidden="true"><span></span></span>

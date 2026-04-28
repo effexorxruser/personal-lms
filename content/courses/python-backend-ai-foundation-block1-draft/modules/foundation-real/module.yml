@@ -1,6 +1,8 @@
 slug: foundation-real
 title: "Foundation Real: Workspace, CLI, Python, Git"
-description: Реальный foundation-модуль с опорой на официальные источники и проверяемые шаги выполнения.
+description: >
+  Draft-модуль под будущий Block 1 (см. blueprint). Семантически пересекается с Block 0, но остаётся
+  эталоном структуры уроков; основной learner path — python-backend-ai-foundation (только Block 0).
 block: 1
 objectives:
   - Подготовить воспроизводимый workspace и стартовый execution-ритм.

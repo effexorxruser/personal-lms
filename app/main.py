@@ -24,6 +24,11 @@ def create_app() -> FastAPI:
         StaticFiles(directory=BASE_DIR / "static"),
         name="static",
     )
+    application.mount(
+        "/assets",
+        StaticFiles(directory=BASE_DIR.parent / "assets"),
+        name="assets",
+    )
     configure_middleware(application)
     application.include_router(auth_router)
     application.include_router(content_router)

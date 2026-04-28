@@ -27,6 +27,7 @@
 - HTML templates (SSR)
 - кастомный CSS (`app/static/css/app.css`)
 - ванильный JS (`app/static/js/app.js`)
+- runtime UI customization panel (theme + glass toggle + accent overrides) на клиенте через `localStorage`
 
 ### Content layer
 

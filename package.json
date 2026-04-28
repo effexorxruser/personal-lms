@@ -6,6 +6,7 @@
   "devDependencies": {
     "@storybook/addon-essentials": "^8.6.18",
     "@storybook/html-vite": "^8.6.18",
+    "@types/node": "^25.6.0",
     "storybook": "^8.6.18",
     "typescript": "^5.8.3"
   }

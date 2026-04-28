@@ -9,7 +9,7 @@ checklist:
   - Создан файл `scripts/hello_cli.py`.
   - Выполнены минимум два запуска с разными `--name`.
   - В лог добавлен вывод `--help`.
-task_slug: block-0-python-cli-smoke
+task_slug: foundation-python-cli-smoke
 source_ids:
   - python-mooc
   - automate-boring-stuff

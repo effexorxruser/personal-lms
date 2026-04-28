@@ -97,9 +97,26 @@ Lain — это subtle emotional presence, а не основной фон и н
 
 ## Темизация
 
-Текущее направление UI зафиксировано вокруг стабильного dark mode.
+Текущее направление поддерживает theme customization без смены архитектуры SSR.
 
-Поддержка дополнительных тем не является целью, пока не появится отдельное решение.
+Базовые пользовательские темы:
+
+- `vanilla-dark`
+- `vanilla-light`
+- `lain`
+
+Также поддерживается системный переключатель glass-material:
+
+- `glass on`
+- `glass off`
+
+## Liquid glass implementation track
+
+Для текущего этапа принят `hybrid_canvas` подход:
+
+- основа: CSS token-based glass (fill/edge/specular/blur);
+- enhancement: легкий Canvas ambient только для hero/background зон;
+- перф-контур: отключение при `prefers-reduced-motion` и fallback без Canvas.
 
 ## Принятый UI baseline
 
@@ -109,12 +126,12 @@ Lain — это subtle emotional presence, а не основной фон и н
 
 Все будущие UI-изменения должны:
 
-- сохранять dark-only режим;
+- сохранять linux-like / anime Lain / hacker-workstation mood в default-настройке;
 - использовать существующую token-based систему в `app/static/css/app.css`;
 - сохранять linux-like / anime Lain / hacker-workstation mood;
 - развивать текущий matte glass terminal-window material, а не заменять его новым стилем;
 - не возвращать generic SaaS LMS styling;
-- не возвращать theme switcher или light theme без отдельного product/design решения;
+- не превращать тему в нечитабельный декоративный режим;
 - не ухудшать читаемость markdown body и long-form lesson content.
 
 Текущий dashboard right-side rail считается допустимой зоной для небольших supporting modules. Он не должен превращаться в отдельную платформенную панель или расширять scope MVP.

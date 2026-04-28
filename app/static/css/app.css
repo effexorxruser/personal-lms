@@ -1,3 +1,7 @@
+/* personal-lms UI — Focus theme v1 (readability-first, dark)
+   Sections: Foundation tokens → Dark tokens → Component tokens → Base typography
+   → Layout/background → Components → Pages → Lesson → Terminal → Lain → Responsive */
+
 /* =====================
    Foundation tokens
 ===================== */
@@ -17,19 +21,20 @@
   --radius-shell: 8px;
   --radius-pill: 999px;
 
-  --font-size-xs: 0.72rem;
-  --font-size-sm: 0.82rem;
-  --font-size-md: 0.9rem;
-  --font-size-lg: 0.96rem;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 0.95rem;
+  --font-size-lg: 1.05rem;
   --font-size-hero: clamp(1.36rem, 2.1vw, 1.88rem);
-  --font-size-lesson-hero: clamp(1.18rem, 1.85vw, 1.54rem);
+  --font-size-lesson-hero: clamp(1.22rem, 1.9vw, 1.58rem);
 
   --line-tight: 1.2;
-  --line-copy: 1.5;
-  --line-reading: 1.68;
+  --line-copy: 1.55;
+  --line-reading: 1.75;
 
-  --blur-glass: blur(18px) saturate(1.08);
-  --blur-glass-soft: blur(10px) saturate(1.04);
+  /* Focus theme: lighter blur, less “frosted” noise */
+  --blur-glass: blur(10px) saturate(1.03);
+  --blur-glass-soft: blur(6px) saturate(1.02);
 }
 
 /* =====================
@@ -56,9 +61,9 @@
   --surface-page: linear-gradient(145deg, var(--color-bg-0), var(--color-bg-1) 56%, var(--color-bg-2));
   --surface-page-alt: rgba(3, 4, 5, 0.82);
   --surface-card: rgba(19, 23, 27, 0.34);
-  --surface-reading: rgba(10, 12, 16, 0.92);
-  --surface-glass: rgba(18, 22, 26, 0.3);
-  --surface-glass-strong: rgba(24, 28, 32, 0.42);
+  --surface-reading: rgba(12, 14, 18, 0.97);
+  --surface-glass: rgba(18, 22, 26, 0.45);
+  --surface-glass-strong: rgba(24, 28, 32, 0.55);
   --surface-row: rgba(245, 248, 244, 0.052);
   --surface-control: rgba(245, 248, 244, 0.086);
 
@@ -79,15 +84,14 @@
   --danger-primary: var(--color-danger-0);
   --danger-soft: rgba(164, 61, 61, 0.2);
 
-  --shadow-panel: 0 22px 58px rgba(0, 0, 0, 0.44), 0 2px 10px rgba(0, 0, 0, 0.28);
-  --shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.32);
-  --glass-shine: rgba(248, 250, 247, 0.28);
+  --shadow-panel: 0 8px 28px rgba(0, 0, 0, 0.35);
+  --shadow-soft: 0 4px 18px rgba(0, 0, 0, 0.22);
+  --glass-shine: rgba(248, 250, 247, 0.14);
   --glass-inner:
-    inset 0 1px 0 rgba(248, 250, 247, 0.24),
-    inset 0 -1px 0 rgba(114, 167, 199, 0.055),
-    inset 1px 0 0 rgba(248, 250, 247, 0.06);
+    inset 0 1px 0 rgba(248, 250, 247, 0.1),
+    inset 0 -1px 0 rgba(114, 167, 199, 0.04);
   --glass-specular:
-    linear-gradient(135deg, rgba(248, 250, 247, 0.08), rgba(248, 250, 247, 0.025) 18%, transparent 34%);
+    linear-gradient(135deg, rgba(248, 250, 247, 0.04), transparent 42%);
   --glass-window-bar: rgba(47, 54, 61, 0.34);
   --glass-corner-light:
     radial-gradient(circle at 0% 0%, rgba(248, 250, 247, 0.1), transparent 22%),
@@ -95,14 +99,14 @@
   --glass-edge-light:
     inset 1px 1px 0 rgba(248, 250, 247, 0.18),
     inset -1px -1px 0 rgba(114, 167, 199, 0.06);
-  --text-shadow-crisp: 0 1px 1px rgba(0, 0, 0, 0.78), 0 0 10px rgba(0, 0, 0, 0.34);
-  --button-hover-shadow: var(--glass-inner), 0 0 0 1px var(--accent-primary-soft), 0 12px 28px rgba(0, 0, 0, 0.28);
+  --text-shadow-crisp: none;
+  --button-hover-shadow: var(--glass-inner), 0 0 0 1px var(--accent-primary-soft), 0 6px 16px rgba(0, 0, 0, 0.22);
 
   --overlay-hero-readable: linear-gradient(90deg, rgba(3, 4, 5, 0.84) 0%, rgba(7, 9, 12, 0.52) 46%, rgba(7, 9, 12, 0.1) 100%);
-  --overlay-page-glow: radial-gradient(circle at 78% -10%, rgba(114, 167, 199, 0.13), transparent 48%), radial-gradient(circle at 12% 102%, rgba(196, 170, 99, 0.07), transparent 42%);
-  --overlay-hero-glow: radial-gradient(circle at 82% 16%, rgba(248, 250, 247, 0.06), transparent 42%), radial-gradient(circle at 74% 28%, rgba(114, 167, 199, 0.08), transparent 58%);
-  --overlay-hero-texture: repeating-linear-gradient(0deg, rgba(242, 244, 247, 0.014) 0, rgba(242, 244, 247, 0.014) 1px, transparent 1px, transparent 5px);
-  --overlay-grid: repeating-linear-gradient(90deg, rgba(242, 244, 247, 0.018) 0, rgba(242, 244, 247, 0.018) 1px, transparent 1px, transparent 24px);
+  --overlay-page-glow: radial-gradient(circle at 78% -10%, rgba(114, 167, 199, 0.055), transparent 50%), radial-gradient(circle at 12% 102%, rgba(196, 170, 99, 0.03), transparent 46%);
+  --overlay-hero-glow: radial-gradient(circle at 82% 16%, rgba(248, 250, 247, 0.03), transparent 44%), radial-gradient(circle at 74% 28%, rgba(114, 167, 199, 0.04), transparent 58%);
+  --overlay-hero-texture: repeating-linear-gradient(0deg, rgba(242, 244, 247, 0.006) 0, rgba(242, 244, 247, 0.006) 1px, transparent 1px, transparent 5px);
+  --overlay-grid: repeating-linear-gradient(90deg, rgba(242, 244, 247, 0.008) 0, rgba(242, 244, 247, 0.008) 1px, transparent 1px, transparent 24px);
   --overlay-hero-tint: rgba(7, 10, 14, 0.04);
   --overlay-ghost-edge: rgba(0, 0, 0, 0.04);
   --overlay-ghost-edge-soft: rgba(0, 0, 0, 0.1);
@@ -112,10 +116,10 @@
   --bg-image-course: url('/static/img/backgrounds/course/course-topology-1.png');
   --bg-image-lesson: url('/static/img/backgrounds/lesson/lesson-minimal-1.png');
   --bg-image-lain: url('/static/img/illustrations/lain/lain-wired-room.jpg');
-  --bg-image-opacity: 0.5;
-  --bg-image-filter: grayscale(100%) contrast(112%) brightness(0.52);
-  --lain-opacity-dashboard: 0.5;
-  --lain-opacity-lesson: 0.24;
+  --bg-image-opacity: 0.22;
+  --bg-image-filter: grayscale(100%) contrast(102%) brightness(0.4);
+  --lain-opacity-dashboard: 0.28;
+  --lain-opacity-lesson: 0.12;
   --lain-blend-mode: screen;
   --lain-filter: grayscale(100%) contrast(120%) brightness(1.04);
 }
@@ -124,19 +128,19 @@
    Component tokens
 ===================== */
 :root {
-  --topbar-surface: var(--glass-specular), rgba(8, 10, 13, 0.62);
-  --nav-active-surface: var(--glass-specular), rgba(42, 48, 54, 0.38);
-  --button-surface: var(--glass-specular), rgba(42, 48, 54, 0.34);
-  --button-primary-surface: var(--glass-specular), rgba(74, 82, 72, 0.38);
-  --chip-surface: var(--glass-specular), rgba(42, 48, 54, 0.3);
-  --pill-surface: var(--glass-specular), rgba(42, 48, 54, 0.3);
-  --hero-surface: var(--glass-specular), var(--surface-glass);
+  --topbar-surface: var(--glass-specular), rgba(10, 12, 16, 0.94);
+  --nav-active-surface: var(--glass-specular), rgba(38, 44, 52, 0.92);
+  --button-surface: var(--glass-specular), rgba(36, 42, 48, 0.9);
+  --button-primary-surface: var(--glass-specular), rgba(56, 68, 54, 0.92);
+  --chip-surface: var(--glass-specular), rgba(34, 40, 46, 0.88);
+  --pill-surface: var(--glass-specular), rgba(34, 40, 46, 0.88);
+  --hero-surface: var(--glass-specular), rgba(20, 24, 28, 0.72);
   --hero-layer: var(--overlay-hero-readable), var(--overlay-hero-glow), var(--overlay-hero-texture), var(--hero-image);
-  --hero-state-panel-surface: var(--glass-specular), rgba(28, 33, 38, 0.4);
-  --compact-card-surface: var(--glass-specular), rgba(24, 29, 34, 0.38);
-  --clock-node-surface: rgba(7, 9, 12, 0.28);
-  --module-card-surface: var(--glass-specular), rgba(24, 29, 34, 0.42);
-  --lesson-nav-surface: var(--glass-specular), rgba(24, 29, 34, 0.42);
+  --hero-state-panel-surface: var(--glass-specular), rgba(28, 33, 38, 0.82);
+  --compact-card-surface: var(--glass-specular), rgba(22, 26, 32, 0.88);
+  --clock-node-surface: rgba(12, 14, 18, 0.55);
+  --module-card-surface: var(--glass-specular), rgba(22, 26, 32, 0.9);
+  --lesson-nav-surface: var(--glass-specular), rgba(20, 24, 30, 0.88);
 }
 
 /* =====================
@@ -154,10 +158,26 @@ html {
 body {
   margin: 0;
   color: var(--text-primary);
-  font-family: "JetBrains Mono", "Ubuntu Mono", "SF Mono", "Cascadia Mono", "Fira Code", "Noto Sans Mono", monospace;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background: var(--surface-page);
-  font-feature-settings: "kern", "liga", "calt";
-  text-rendering: geometricPrecision;
+  font-feature-settings: "kern", "liga";
+  text-rendering: optimizeLegibility;
+}
+
+/* Monospace: code paths, terminal, brand wordmark only */
+code,
+kbd,
+samp,
+pre,
+.markdown-body pre,
+.markdown-body code,
+.terminal-panel,
+.terminal-output,
+.terminal-prompt,
+.terminal-form__label,
+.lesson-page--simple .terminal-status,
+.brand {
+  font-family: "JetBrains Mono", "SF Mono", "Cascadia Mono", "Segoe UI Mono", ui-monospace, monospace;
 }
 
 a { color: inherit; }
@@ -203,7 +223,7 @@ dl { margin-top: 0; }
 
 .overlay-dark { box-shadow: inset 0 0 0 999px var(--overlay-hero-tint); }
 .overlay-soft { opacity: 1; }
-.overlay-grid { opacity: 0.08; }
+.overlay-grid { opacity: 0.028; }
 
 .page-shell {
   width: min(var(--shell-max-width), calc(100% - 28px));
@@ -276,9 +296,9 @@ dl { margin-top: 0; }
   z-index: 40;
   border-bottom: 1px solid var(--border-soft);
   background: var(--topbar-surface);
-  backdrop-filter: var(--blur-glass);
-  -webkit-backdrop-filter: var(--blur-glass);
-  box-shadow: var(--shadow-soft), var(--glass-inner);
+  backdrop-filter: var(--blur-glass-soft);
+  -webkit-backdrop-filter: var(--blur-glass-soft);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
 }
 
 .topbar::before {
@@ -302,7 +322,6 @@ dl { margin-top: 0; }
 
 .brand {
   color: var(--text-primary);
-  font-family: "JetBrains Mono", "Ubuntu Mono", "SF Mono", "Cascadia Mono", "Fira Code", monospace;
   text-decoration: none;
   font-size: var(--font-size-sm);
   font-weight: 700;
@@ -321,10 +340,8 @@ dl { margin-top: 0; }
   border: 1px solid transparent;
   border-radius: var(--radius-control);
   color: var(--text-secondary);
-  font-family: "JetBrains Mono", "Ubuntu Mono", "SF Mono", "Cascadia Mono", "Fira Code", monospace;
   font-size: var(--font-size-md);
   text-decoration: none;
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .nav-link:hover,
@@ -335,6 +352,11 @@ dl { margin-top: 0; }
   box-shadow: var(--glass-inner);
   backdrop-filter: var(--blur-glass-soft);
   -webkit-backdrop-filter: var(--blur-glass-soft);
+}
+
+.nav-link:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 }
 
 .topbar__actions {
@@ -381,10 +403,9 @@ dl { margin-top: 0; }
 .eyebrow {
   margin: 0 0 var(--space-2);
   color: var(--accent-primary);
-  font-family: "JetBrains Mono", "Ubuntu Mono", "SF Mono", "Cascadia Mono", "Fira Code", monospace;
   font-size: var(--font-size-xs);
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
@@ -393,7 +414,6 @@ dl { margin-top: 0; }
   align-items: center;
   gap: 8px;
   color: var(--text-muted);
-  font-family: "JetBrains Mono", "Ubuntu Mono", "SF Mono", "Cascadia Mono", "Fira Code", monospace;
   font-size: var(--font-size-sm);
 }
 
@@ -411,9 +431,9 @@ dl { margin-top: 0; }
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-shell);
   background: var(--hero-surface);
-  backdrop-filter: var(--blur-glass);
-  -webkit-backdrop-filter: var(--blur-glass);
-  box-shadow: var(--shadow-panel), var(--glass-inner), var(--glass-edge-light);
+  backdrop-filter: var(--blur-glass-soft);
+  -webkit-backdrop-filter: var(--blur-glass-soft);
+  box-shadow: var(--shadow-soft), var(--glass-inner);
 }
 
 .hero::before {
@@ -422,7 +442,7 @@ dl { margin-top: 0; }
   inset: 0 0 auto;
   height: 25px;
   background: var(--glass-window-bar);
-  opacity: 0.8;
+  opacity: 0.42;
   pointer-events: none;
   content: "";
   z-index: 1;
@@ -433,7 +453,7 @@ dl { margin-top: 0; }
   inset: 0;
   border: 1px solid var(--glass-shine);
   border-radius: inherit;
-  opacity: 0.5;
+  opacity: 0.22;
   pointer-events: none;
   content: "";
 }
@@ -500,7 +520,6 @@ dl { margin-top: 0; }
   font-weight: 780;
   line-height: var(--line-tight);
   letter-spacing: 0;
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .hero-copy {
@@ -508,7 +527,6 @@ dl { margin-top: 0; }
   max-width: 760px;
   color: var(--text-secondary);
   line-height: var(--line-copy);
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .hero-actions {
@@ -532,12 +550,11 @@ dl { margin-top: 0; }
   border-radius: var(--radius-pill);
   background: var(--pill-surface);
   color: var(--text-secondary);
-  font-family: "JetBrains Mono", "Ubuntu Mono", "SF Mono", "Cascadia Mono", "Fira Code", monospace;
+  font-family: "JetBrains Mono", "SF Mono", "Cascadia Mono", ui-monospace, monospace;
   font-size: var(--font-size-sm);
   backdrop-filter: var(--blur-glass-soft);
   -webkit-backdrop-filter: var(--blur-glass-soft);
   box-shadow: var(--glass-inner);
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .ui-card {
@@ -546,9 +563,9 @@ dl { margin-top: 0; }
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-panel);
   background: var(--surface-card);
-  backdrop-filter: var(--blur-glass);
-  -webkit-backdrop-filter: var(--blur-glass);
-  box-shadow: var(--shadow-panel), var(--glass-inner), var(--glass-edge-light);
+  backdrop-filter: var(--blur-glass-soft);
+  -webkit-backdrop-filter: var(--blur-glass-soft);
+  box-shadow: var(--shadow-soft), var(--glass-inner);
 }
 
 .ui-card::before {
@@ -557,7 +574,7 @@ dl { margin-top: 0; }
   inset: 0 0 auto;
   height: 23px;
   background: var(--glass-window-bar);
-  opacity: 0.76;
+  opacity: 0.38;
   pointer-events: none;
   content: "";
   z-index: 0;
@@ -573,7 +590,7 @@ dl { margin-top: 0; }
   inset: 0;
   border: 1px solid var(--glass-shine);
   border-radius: inherit;
-  opacity: 0.42;
+  opacity: 0.18;
   pointer-events: none;
   content: "";
 }
@@ -587,7 +604,6 @@ dl { margin-top: 0; }
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-control);
   color: var(--text-primary);
-  font-family: "JetBrains Mono", "Ubuntu Mono", "SF Mono", "Cascadia Mono", "Fira Code", monospace;
   text-decoration: none;
   font-size: var(--font-size-md);
   font-weight: 600;
@@ -596,16 +612,19 @@ dl { margin-top: 0; }
   box-shadow: var(--glass-inner);
   backdrop-filter: var(--blur-glass-soft);
   -webkit-backdrop-filter: var(--blur-glass-soft);
-  text-shadow: var(--text-shadow-crisp);
-  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
 }
 
-.btn:hover,
+.btn:hover {
+  border-color: var(--accent-primary);
+  box-shadow: var(--button-hover-shadow);
+}
+
 .btn:focus-visible {
   border-color: var(--accent-primary);
-  outline: none;
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
   box-shadow: var(--button-hover-shadow);
-  transform: translateY(-1px);
 }
 
 .btn--primary { background: var(--button-primary-surface); }
@@ -628,13 +647,12 @@ dl { margin-top: 0; }
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
   color: var(--text-muted);
-  font-family: "JetBrains Mono", "Ubuntu Mono", "SF Mono", "Cascadia Mono", "Fira Code", monospace;
+  font-family: "JetBrains Mono", "SF Mono", "Cascadia Mono", ui-monospace, monospace;
   font-size: var(--font-size-xs);
   background: var(--chip-surface);
   box-shadow: var(--glass-inner);
   backdrop-filter: var(--blur-glass-soft);
   -webkit-backdrop-filter: var(--blur-glass-soft);
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .status-chip--active {
@@ -718,11 +736,10 @@ dl { margin-top: 0; }
 .node-panel__title {
   margin-bottom: var(--space-3);
   color: var(--accent-secondary);
-  font-family: "JetBrains Mono", "Ubuntu Mono", "SF Mono", "Cascadia Mono", "Fira Code", monospace;
+  font-family: "JetBrains Mono", "SF Mono", "Cascadia Mono", ui-monospace, monospace;
   font-size: var(--font-size-sm);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .node-grid {
@@ -799,7 +816,6 @@ dl { margin-top: 0; }
   font-size: 0.98rem;
   font-weight: 760;
   line-height: var(--line-tight);
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .world-clock__date {
@@ -822,9 +838,9 @@ dl { margin-top: 0; }
 .status-kicker {
   margin-bottom: 10px;
   color: var(--text-muted);
-  font-family: "JetBrains Mono", "Ubuntu Mono", "SF Mono", "Cascadia Mono", "Fira Code", monospace;
   font-size: var(--font-size-xs);
-  letter-spacing: 0.11em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -832,7 +848,6 @@ dl { margin-top: 0; }
   margin-bottom: 0;
   color: var(--text-secondary);
   line-height: var(--line-copy);
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .status-card--focus {
@@ -911,7 +926,6 @@ dl { margin-top: 0; }
 .module-head p {
   margin-bottom: 0;
   color: var(--text-secondary);
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .lesson-list {
@@ -957,7 +971,6 @@ dl { margin-top: 0; }
 .checkpoint-panel h3,
 .checkpoint-panel h4 {
   margin-bottom: 0;
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .checkpoint-panel p,
@@ -1043,22 +1056,56 @@ dl { margin-top: 0; }
 
 .markdown-body {
   margin: 0;
-  padding: 20px;
+  padding: 22px 24px;
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-panel);
   background: var(--surface-reading);
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.18);
+  max-width: min(70ch, 100%);
 }
 
 .markdown-body p,
 .markdown-body li {
   color: var(--text-secondary);
+  font-size: 1.02rem;
   line-height: var(--line-reading);
 }
 
 .markdown-body h1,
 .markdown-body h2,
-.markdown-body h3 { color: var(--text-primary); }
+.markdown-body h3 {
+  color: var(--text-primary);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.28;
+}
+
+.markdown-body h2 { margin-top: 1.65rem; }
+
+.markdown-body h3 { margin-top: 1.25rem; }
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 1.35em;
+}
+
+.markdown-body li + li {
+  margin-top: 0.4em;
+}
+
+.markdown-body pre {
+  padding: 12px 14px;
+  overflow-x: auto;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-control);
+  background: rgba(0, 0, 0, 0.35);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+}
+
+.markdown-body code {
+  font-size: 0.92em;
+}
 
 .lesson-side {
   display: grid;
@@ -1114,7 +1161,6 @@ dl { margin-top: 0; }
 .lesson-card h2 {
   margin-bottom: 10px;
   font-size: var(--font-size-lg);
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .compact-details summary {
@@ -1122,7 +1168,6 @@ dl { margin-top: 0; }
   color: var(--text-primary);
   font-size: var(--font-size-lg);
   font-weight: 700;
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .compact-details summary::marker {
@@ -1174,6 +1219,7 @@ dl { margin-top: 0; }
 .task-panel p {
   color: var(--text-secondary);
   line-height: var(--line-copy);
+  font-size: 1rem;
 }
 
 .task-meta {
@@ -1304,9 +1350,9 @@ dl { margin-top: 0; }
 .lesson-nav-title {
   margin-bottom: 10px;
   color: var(--accent-secondary);
-  font-family: "JetBrains Mono", "Ubuntu Mono", "SF Mono", "Cascadia Mono", "Fira Code", monospace;
   font-size: var(--font-size-sm);
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -1853,7 +1899,6 @@ body {
   max-width: 780px;
   font-size: clamp(1.34rem, 2.4vw, 2rem);
   line-height: var(--line-tight);
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .resume-card .hero-copy {
@@ -1868,7 +1913,11 @@ body {
 
 .lms-summary-card {
   padding: 14px;
-  background: var(--compact-card-surface);
+  background:
+    linear-gradient(160deg, rgba(245, 248, 244, 0.06), rgba(245, 248, 244, 0.01)),
+    rgba(12, 15, 20, 0.48);
+  backdrop-filter: blur(12px) saturate(1.08);
+  -webkit-backdrop-filter: blur(12px) saturate(1.08);
 }
 
 .lms-summary-card p {
@@ -1888,7 +1937,7 @@ body {
   padding: 8px 10px;
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-panel);
-  background: var(--clock-node-surface);
+  background: rgba(12, 15, 20, 0.42);
   box-shadow: var(--glass-inner);
 }
 
@@ -1938,7 +1987,6 @@ body {
   margin-bottom: 0;
   font-size: clamp(1.12rem, 1.8vw, 1.5rem);
   line-height: var(--line-tight);
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .course-summary-strip .hero-copy,
@@ -1959,7 +2007,6 @@ body {
   margin-bottom: var(--space-1);
   font-size: var(--font-size-lesson-hero);
   line-height: var(--line-tight);
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .lesson-context-actions {
@@ -2035,7 +2082,6 @@ body {
 .dashboard-context-strip__user {
   color: var(--text-primary);
   font-weight: 700;
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .dashboard-context-strip__state {
@@ -2145,9 +2191,11 @@ body {
   padding: 8px 12px;
   border-color: var(--border-soft);
   background:
-    linear-gradient(90deg, rgba(8, 10, 13, 0.68), rgba(8, 10, 13, 0.48) 62%, rgba(8, 10, 13, 0.22)),
-    rgba(8, 10, 13, 0.24);
+    linear-gradient(90deg, rgba(8, 10, 13, 0.56), rgba(8, 10, 13, 0.36) 62%, rgba(8, 10, 13, 0.14)),
+    rgba(8, 10, 13, 0.16);
   box-shadow: var(--glass-inner);
+  backdrop-filter: blur(14px) saturate(1.08);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
 }
 
 .dashboard-context-strip__lain {
@@ -2171,7 +2219,6 @@ body {
   margin-bottom: 8px;
   font-size: clamp(1rem, 1.45vw, 1.24rem);
   line-height: var(--line-tight);
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .dashboard-action-row {
@@ -2252,12 +2299,14 @@ body {
    Cross-workspace ambient alignment
 ===================== */
 .dashboard-context-strip {
-  grid-template-columns: minmax(0, 0.9fr) minmax(280px, 1.45fr) minmax(220px, 0.46fr);
+  grid-template-columns: minmax(0, 0.86fr) minmax(280px, 1.52fr) minmax(220px, 0.42fr);
 }
 
 .dashboard-context-strip__state span {
-  white-space: normal;
-  line-height: var(--line-tight);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: var(--line-copy);
 }
 
 .dashboard-ambient {
@@ -2265,11 +2314,11 @@ body {
   right: 12%;
   width: min(52%, 720px);
   height: min(72vh, 640px);
-  opacity: 0.42;
+  opacity: 0.36;
   background:
     linear-gradient(90deg, transparent 0%, rgba(3, 4, 5, 0.04) 22%, rgba(3, 4, 5, 0.14) 100%),
     var(--bg-image-lain) center 40% / cover no-repeat;
-  filter: grayscale(100%) contrast(120%) brightness(0.98);
+  filter: grayscale(100%) contrast(118%) brightness(0.9);
 }
 
 .course-pane,
@@ -2603,7 +2652,6 @@ body {
   color: var(--text-primary);
   font-size: clamp(1.1rem, 1.7vw, 1.45rem);
   line-height: var(--line-tight);
-  text-shadow: var(--text-shadow-crisp);
 }
 
 .terminal-panel__body {
@@ -2926,7 +2974,7 @@ body {
 
 .lesson-page__layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
   gap: var(--space-4);
   align-items: start;
 }
@@ -2934,12 +2982,14 @@ body {
 .lesson-page__main {
   min-width: 0;
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 
 .lesson-page__body {
   margin: 0;
-  padding: 20px;
+  padding: 22px 24px;
+  width: 100%;
+  max-width: 100%;
   max-height: none;
   overflow: visible;
 }
@@ -2959,13 +3009,21 @@ body {
   margin-bottom: var(--space-3);
 }
 
+.lesson-page__module-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
 .lesson-page__task-stack {
   display: grid;
   gap: var(--space-3);
 }
 
 .lesson-page__task-stack .task-panel {
+  border: 1px solid rgba(220, 228, 222, 0.12);
   background: var(--lesson-nav-surface);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
 }
 
 .lesson-page--simple .task-panel h3 {
@@ -3175,13 +3233,16 @@ body {
 
 .lesson-page--simple .lesson-side {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--space-3);
   align-content: start;
 }
 
 .lesson-page--simple .lesson-side-panel {
   padding: 12px;
-  background: rgba(8, 10, 13, 0.26);
+  border: 1px solid rgba(220, 228, 222, 0.12);
+  background: rgba(14, 16, 20, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .lesson-page--simple .lesson-side-panel summary {
@@ -3189,7 +3250,7 @@ body {
 }
 
 .lesson-page--simple .lesson-side-panel:not([open]) {
-  opacity: 0.8;
+  opacity: 0.88;
 }
 
 .lesson-page--simple .stuck-recovery {
@@ -3206,8 +3267,10 @@ body {
 }
 
 .lesson-page--simple .lesson-nav-panel--main {
-  padding: 14px;
+  padding: 16px;
+  border: 1px solid rgba(220, 228, 222, 0.14);
   background: var(--lesson-nav-surface);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.14);
 }
 
 @media (max-width: 1080px) {
@@ -3237,6 +3300,87 @@ body {
 }
 
 /* =====================
+   iOS glass material tokens v1
+===================== */
+:root {
+  --glass-ios-fill-soft: rgba(236, 244, 255, 0.05);
+  --glass-ios-fill-mid: rgba(236, 244, 255, 0.09);
+  --glass-ios-fill-strong: rgba(236, 244, 255, 0.13);
+  --glass-ios-edge-light: rgba(246, 251, 255, 0.28);
+  --glass-ios-edge-dark: rgba(10, 14, 20, 0.46);
+  --glass-ios-shadow: 0 16px 38px rgba(0, 0, 0, 0.3);
+  --glass-ios-inset:
+    inset 0 1px 0 rgba(250, 252, 255, 0.3),
+    inset 0 -1px 0 rgba(133, 169, 206, 0.2);
+}
+
+.dashboard-context-strip,
+.lms-summary-card,
+.lesson-page--simple .lesson-side-panel,
+.lesson-page--simple .lesson-nav-panel--main,
+.lesson-page__task-stack .task-panel {
+  position: relative;
+  overflow: hidden;
+  border-color: var(--glass-ios-edge-light);
+  background:
+    linear-gradient(145deg, var(--glass-ios-fill-strong), var(--glass-ios-fill-soft) 48%, rgba(8, 12, 18, 0.34)),
+    rgba(10, 14, 20, 0.38);
+  backdrop-filter: blur(16px) saturate(1.14);
+  -webkit-backdrop-filter: blur(16px) saturate(1.14);
+  box-shadow: var(--glass-ios-shadow), var(--glass-ios-inset);
+}
+
+.dashboard-context-strip::before,
+.lms-summary-card::before,
+.lesson-page--simple .lesson-side-panel::before,
+.lesson-page--simple .lesson-nav-panel--main::before,
+.lesson-page__task-stack .task-panel::before {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(246, 251, 255, 0.1);
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 14% 0%, rgba(246, 251, 255, 0.12), transparent 32%),
+    linear-gradient(180deg, rgba(246, 251, 255, 0.1), transparent 34%);
+  pointer-events: none;
+  content: "";
+}
+
+.dashboard-context-strip::after,
+.lms-summary-card::after,
+.lesson-page--simple .lesson-side-panel::after,
+.lesson-page--simple .lesson-nav-panel--main::after,
+.lesson-page__task-stack .task-panel::after {
+  position: absolute;
+  inset: auto 0 0;
+  height: 30%;
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
+  background: linear-gradient(180deg, transparent, rgba(7, 10, 14, 0.36));
+  pointer-events: none;
+  content: "";
+}
+
+.dashboard-action-row .btn,
+.lesson-page--simple .terminal-shortcuts .btn,
+.lesson-page--simple .lesson-nav .btn {
+  border-color: var(--glass-ios-edge-light);
+  background:
+    linear-gradient(180deg, rgba(246, 251, 255, 0.16), rgba(246, 251, 255, 0.04) 52%, rgba(10, 14, 20, 0.42)),
+    rgba(12, 18, 24, 0.42);
+  box-shadow: var(--glass-ios-inset), 0 10px 24px rgba(0, 0, 0, 0.25);
+}
+
+.dashboard-action-row .btn:hover,
+.lesson-page--simple .terminal-shortcuts .btn:hover,
+.lesson-page--simple .lesson-nav .btn:hover {
+  border-color: rgba(246, 251, 255, 0.38);
+  background:
+    linear-gradient(180deg, rgba(246, 251, 255, 0.24), rgba(246, 251, 255, 0.08) 52%, rgba(10, 14, 20, 0.4)),
+    rgba(16, 22, 30, 0.46);
+}
+
+/* =====================
    Lain helper v0
 ===================== */
 .lain-helper {
@@ -3255,21 +3399,25 @@ body {
   gap: 8px;
   height: 42px;
   padding: 0 14px;
-  border: 1px solid rgba(232, 238, 232, 0.34);
+  border: 1px solid rgba(232, 238, 232, 0.28);
   border-radius: 999px;
   color: var(--text-primary);
   font: inherit;
   font-size: var(--font-size-sm);
   font-weight: 700;
   cursor: pointer;
-  background: rgba(10, 12, 16, 0.9);
-  box-shadow: var(--shadow-soft), var(--glass-inner);
+  background: rgba(14, 16, 20, 0.94);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.28);
 }
 
-.lain-helper__launcher:hover,
+.lain-helper__launcher:hover {
+  border-color: rgba(146, 185, 138, 0.65);
+}
+
 .lain-helper__launcher:focus-visible {
   border-color: rgba(146, 185, 138, 0.72);
-  outline: none;
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 }
 
 .lain-helper__signal {
@@ -3285,8 +3433,11 @@ body {
   max-height: min(72vh, 620px);
   padding: 12px;
   overflow: hidden;
-  border-color: rgba(232, 238, 232, 0.34);
-  background: rgba(8, 10, 13, 0.94);
+  border-color: rgba(232, 238, 232, 0.26);
+  background: rgba(12, 14, 18, 0.96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
 }
 
 .lain-chat__header {
@@ -3472,4 +3623,526 @@ body {
     flex-direction: column;
     align-items: stretch;
   }
+}
+
+/* =====================
+   Final UI closure — material + layout + motion primitives
+===================== */
+:root {
+  --glass-level-1-fill:
+    linear-gradient(160deg, rgba(245, 250, 255, 0.14), rgba(245, 250, 255, 0.04) 46%, rgba(7, 11, 16, 0.42)),
+    rgba(8, 12, 18, 0.3);
+  --glass-level-2-fill:
+    linear-gradient(160deg, rgba(245, 250, 255, 0.12), rgba(245, 250, 255, 0.035) 48%, rgba(7, 11, 16, 0.5)),
+    rgba(8, 12, 18, 0.36);
+  --glass-level-3-fill:
+    linear-gradient(160deg, rgba(245, 250, 255, 0.17), rgba(245, 250, 255, 0.05) 44%, rgba(7, 11, 16, 0.48)),
+    rgba(8, 12, 18, 0.34);
+  --glass-level-edge-light: rgba(246, 251, 255, 0.27);
+  --glass-level-edge-dark: rgba(8, 12, 18, 0.48);
+  --glass-level-shadow: 0 16px 34px rgba(0, 0, 0, 0.3);
+  --glass-level-inset:
+    inset 0 1px 0 rgba(250, 252, 255, 0.32),
+    inset 0 -1px 0 rgba(116, 158, 197, 0.2);
+}
+
+.dashboard-context-strip,
+.course-summary-strip,
+.lesson-context-strip,
+.recap-summary-strip {
+  border-color: var(--glass-level-edge-light);
+  background: var(--glass-level-1-fill);
+  backdrop-filter: blur(15px) saturate(1.12);
+  -webkit-backdrop-filter: blur(15px) saturate(1.12);
+  box-shadow: var(--glass-level-shadow), var(--glass-level-inset);
+}
+
+.lms-summary-card,
+.module-card,
+.lesson-page__body,
+.lesson-page__task-stack .task-panel,
+.lesson-page--simple .lesson-side-panel,
+.recap-card {
+  border-color: rgba(246, 251, 255, 0.22);
+  background: var(--glass-level-2-fill);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  box-shadow: var(--glass-level-shadow), var(--glass-level-inset);
+}
+
+.lesson-page--simple .lesson-nav-panel--main,
+.checkpoint-panel,
+.status-card--focus {
+  border-color: rgba(246, 251, 255, 0.3);
+  background: var(--glass-level-3-fill);
+  backdrop-filter: blur(16px) saturate(1.14);
+  -webkit-backdrop-filter: blur(16px) saturate(1.14);
+  box-shadow: var(--glass-level-shadow), var(--glass-level-inset);
+}
+
+.dashboard-context-strip::before,
+.lms-summary-card::before,
+.module-card::before,
+.lesson-page__body::before,
+.lesson-page__task-stack .task-panel::before,
+.lesson-page--simple .lesson-side-panel::before,
+.lesson-page--simple .lesson-nav-panel--main::before,
+.recap-card::before {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(246, 251, 255, 0.1);
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(246, 251, 255, 0.14), transparent 34%),
+    linear-gradient(180deg, rgba(246, 251, 255, 0.08), transparent 30%);
+  pointer-events: none;
+  content: "";
+}
+
+.dashboard-context-strip > *,
+.lms-summary-card > *,
+.module-card > *,
+.lesson-page__body > *,
+.lesson-page__task-stack .task-panel > *,
+.lesson-page--simple .lesson-side-panel > *,
+.lesson-page--simple .lesson-nav-panel--main > *,
+.recap-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard-action-row .btn,
+.lesson-page--simple .lesson-nav .btn,
+.lesson-page--simple .terminal-shortcuts .btn,
+.topbar .btn {
+  border-color: rgba(246, 251, 255, 0.28);
+  background:
+    linear-gradient(180deg, rgba(246, 251, 255, 0.18), rgba(246, 251, 255, 0.04) 52%, rgba(10, 14, 20, 0.44)),
+    rgba(11, 17, 24, 0.4);
+  box-shadow: var(--glass-level-inset), 0 10px 24px rgba(0, 0, 0, 0.24);
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.dashboard-action-row .btn:hover,
+.lesson-page--simple .lesson-nav .btn:hover,
+.lesson-page--simple .terminal-shortcuts .btn:hover,
+.topbar .btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(246, 251, 255, 0.42);
+  background:
+    linear-gradient(180deg, rgba(246, 251, 255, 0.24), rgba(246, 251, 255, 0.08) 50%, rgba(10, 14, 20, 0.4)),
+    rgba(13, 20, 28, 0.46);
+}
+
+.dashboard-main--resume,
+.course-pane,
+.lesson-page__main,
+.recap-pane {
+  position: relative;
+  isolation: isolate;
+}
+
+.ui-card,
+.module-card,
+.lesson-page__body,
+.lesson-page__task-stack .task-panel,
+.lesson-page--simple .lesson-side-panel,
+.lesson-page--simple .lesson-nav-panel--main {
+  transition:
+    transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 240ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.ui-card:hover,
+.module-card:hover,
+.lesson-page__task-stack .task-panel:hover,
+.lesson-page--simple .lesson-side-panel:hover,
+.lesson-page--simple .lesson-nav-panel--main:hover {
+  transform: translateY(-2px);
+  border-color: rgba(246, 251, 255, 0.34);
+  box-shadow: 0 20px 44px rgba(0, 0, 0, 0.32), var(--glass-level-inset);
+}
+
+.lesson-page__layout {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
+  gap: var(--space-4);
+}
+
+.lesson-page__body {
+  width: 100%;
+  max-width: 100%;
+}
+
+.lesson-page--simple .lesson-side {
+  gap: var(--space-3);
+}
+
+@media (max-width: 1200px) {
+  .lesson-page__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 300px);
+  }
+}
+
+@media (max-width: 980px) {
+  .ui-card:hover,
+  .module-card:hover,
+  .lesson-page__task-stack .task-panel:hover,
+  .lesson-page--simple .lesson-side-panel:hover,
+  .lesson-page--simple .lesson-nav-panel--main:hover,
+  .dashboard-action-row .btn:hover,
+  .lesson-page--simple .lesson-nav .btn:hover,
+  .lesson-page--simple .terminal-shortcuts .btn:hover,
+  .topbar .btn:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-card,
+  .module-card,
+  .lesson-page__body,
+  .lesson-page__task-stack .task-panel,
+  .lesson-page--simple .lesson-side-panel,
+  .lesson-page--simple .lesson-nav-panel--main,
+  .dashboard-action-row .btn,
+  .lesson-page--simple .lesson-nav .btn,
+  .lesson-page--simple .terminal-shortcuts .btn,
+  .topbar .btn {
+    transition: none;
+  }
+}
+
+.ambient-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.9;
+  mix-blend-mode: screen;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 88%);
+}
+
+.dashboard-main--resume > *,
+.course-pane > *,
+.lesson-page__main > *,
+.recap-pane > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* =====================
+   Theme customization runtime (3 themes)
+===================== */
+html[data-theme="vanilla-dark"] {
+  --accent-primary: #0be357;
+  --accent-primary-strong: #12f062;
+  --accent-link: #c0e1eb;
+  --accent-secondary: #f5f7f6;
+  --accent-secondary-strong: #d4d9d7;
+  --text-primary: #f5f7f6;
+  --text-secondary: #c0e1eb;
+  --text-muted: #8b8c8b;
+  --bg-image-shell: url('/assets/design-references/SHELL BACKGROUND-1.png');
+  --bg-image-dashboard: url('/assets/design-references/SHELL BACKGROUND-1.png');
+  --bg-texture-course: url('/assets/design-references/COURSE HERO (industrial topology)-1.png');
+  --bg-texture-lesson: none;
+  --bg-texture-recap: url('/assets/design-references/DASHBOARD HERO (terminal  linux hybrid)-2.png');
+  --bg-image-opacity: 0.32;
+  --bg-image-filter: grayscale(84%) contrast(118%) brightness(0.58);
+}
+
+html[data-theme="vanilla-light"] {
+  --color-bg-0: #eef5ff;
+  --color-bg-1: #e5f0ff;
+  --color-bg-2: #d9e9ff;
+  --color-panel-0: #ffffff;
+  --color-text-0: #000000;
+  --color-text-1: #364042;
+  --color-text-2: #364042;
+  --text-primary: #000000;
+  --text-secondary: #1f2b2e;
+  --text-muted: #364042;
+  --surface-card: rgba(255, 255, 255, 0.94);
+  --surface-reading: rgba(255, 255, 255, 0.98);
+  --surface-glass: rgba(255, 255, 255, 0.9);
+  --surface-glass-strong: rgba(255, 255, 255, 0.95);
+  --border-soft: rgba(54, 64, 66, 0.22);
+  --border-strong: rgba(54, 64, 66, 0.32);
+  --accent-primary: #cf4f00;
+  --accent-primary-strong: #b24500;
+  --accent-link: #2f9dd8;
+  --accent-secondary: #364042;
+  --accent-secondary-strong: #20282b;
+  --bg-image-shell: url('/assets/design-references/SHELL BACKGROUND-2.png');
+  --bg-image-dashboard: url('/assets/design-references/SHELL BACKGROUND-2.png');
+  --bg-texture-course: url('/assets/design-references/COURSE HERO (system map  backend structure)-1.png');
+  --bg-texture-lesson: none;
+  --bg-texture-recap: url('/assets/design-references/SHELL BACKGROUND (ALT — linux workspace)-2.png');
+  --bg-image-opacity: 0.07;
+  --bg-image-filter: grayscale(36%) contrast(112%) brightness(0.72);
+  --overlay-hero-readable: linear-gradient(90deg, rgba(248, 252, 255, 0.94) 0%, rgba(243, 249, 255, 0.68) 46%, rgba(243, 249, 255, 0.36) 100%);
+}
+
+html[data-theme="lain"] {
+  --accent-primary: #b9a7ff;
+  --accent-primary-strong: #9a84ee;
+  --accent-link: #8eb8ff;
+  --accent-secondary: #ceb7ff;
+  --accent-secondary-strong: #a88ad6;
+  --bg-image-shell: url('/assets/design-references/SHELL BACKGROUND-2.png');
+  --bg-image-dashboard: url('/assets/design-references/SHELL BACKGROUND-2.png');
+  --bg-texture-course: url('/assets/design-references/COURSE HERO (industrial topology)-2.png');
+  --bg-texture-lesson: none;
+  --bg-texture-recap: url('/assets/design-references/SHELL BACKGROUND (ALT — linux workspace)-1.png');
+  --bg-image-lain: url('/assets/design-references/lain-image-4.jpg');
+  --bg-image-lain-alt: url('/assets/design-references/lain-image-1.jpg');
+  --bg-image-opacity: 0.3;
+  --bg-image-filter: grayscale(74%) contrast(120%) brightness(0.7);
+}
+
+html[data-glass="off"] {
+  --blur-glass: blur(0px) saturate(1);
+  --blur-glass-soft: blur(0px) saturate(1);
+  --surface-card: rgba(18, 22, 28, 0.9);
+  --surface-reading: rgba(10, 13, 18, 0.98);
+  --surface-glass: rgba(18, 22, 28, 0.94);
+  --surface-glass-strong: rgba(18, 22, 28, 0.98);
+  --glass-shine: rgba(0, 0, 0, 0);
+  --glass-inner: none;
+  --glass-specular: none;
+  --glass-window-bar: rgba(0, 0, 0, 0);
+}
+
+html[data-glass="off"] .ui-card,
+html[data-glass="off"] .dashboard-context-strip,
+html[data-glass="off"] .lms-summary-card,
+html[data-glass="off"] .dashboard-hero,
+html[data-glass="off"] .lesson-page__body,
+html[data-glass="off"] .lesson-page__task-stack .task-panel,
+html[data-glass="off"] .lesson-page--simple .lesson-side-panel,
+html[data-glass="off"] .lesson-page--simple .lesson-nav-panel--main,
+html[data-glass="off"] .module-card,
+html[data-glass="off"] .recap-card {
+  background: rgba(12, 16, 24, 0.94) !important;
+  border-color: rgba(200, 210, 220, 0.2) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06), 0 8px 18px rgba(0, 0, 0, 0.26) !important;
+}
+
+html[data-glass="off"] .ui-card::before,
+html[data-glass="off"] .ui-card::after,
+html[data-glass="off"] .dashboard-context-strip::before,
+html[data-glass="off"] .dashboard-context-strip::after,
+html[data-glass="off"] .lms-summary-card::before,
+html[data-glass="off"] .lms-summary-card::after {
+  display: none !important;
+}
+
+.ui-customizer {
+  position: fixed;
+  top: 74px;
+  right: 14px;
+  z-index: 95;
+  width: min(320px, calc(100vw - 22px));
+  padding: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-glass-strong);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+}
+
+.ui-customizer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.ui-customizer__body {
+  display: grid;
+  gap: 8px;
+}
+
+.ui-customizer label {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.ui-customizer select {
+  width: 100%;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-reading);
+  color: var(--text-primary);
+}
+
+.ui-customizer select { height: 36px; padding: 0 8px; }
+
+.ui-customizer__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 900px) {
+  .ui-customizer {
+    top: auto;
+    right: 10px;
+    bottom: 10px;
+    z-index: 85;
+  }
+}
+
+/* =====================
+   Dashboard quality rollback (crisp pass)
+===================== */
+.dashboard-main--resume::before {
+  display: none !important;
+}
+
+.dashboard-main--resume {
+  gap: var(--space-2);
+  padding-top: 0;
+  align-content: start;
+}
+
+.dashboard-ambient {
+  top: 54px;
+  right: 12%;
+  width: min(34%, 440px);
+  height: min(24vh, 220px);
+  opacity: 0.07;
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(3, 4, 5, 0.04) 24%, rgba(3, 4, 5, 0.12) 100%),
+    var(--bg-image-dashboard) center 38% / cover no-repeat;
+  filter: grayscale(100%) contrast(108%) brightness(0.72);
+}
+
+.dashboard-lain-ambient {
+  display: none;
+}
+
+.dashboard-hero {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid rgba(246, 251, 255, 0.3);
+  background:
+    linear-gradient(160deg, rgba(245, 250, 255, 0.14), rgba(245, 250, 255, 0.05) 48%, rgba(7, 11, 16, 0.46)),
+    rgba(8, 12, 18, 0.52);
+  min-height: 112px;
+}
+
+.dashboard-hero h1 {
+  margin: 0;
+  font-size: clamp(1.02rem, 1.35vw, 1.24rem);
+  line-height: 1.3;
+}
+
+.dashboard-hero__quote {
+  margin: 0;
+  color: rgba(226, 235, 248, 0.96);
+  line-height: 1.45;
+  font-size: 0.98rem;
+  max-width: 92ch;
+}
+
+html[data-theme="vanilla-light"] .topbar,
+html[data-theme="vanilla-light"] .nav-link,
+html[data-theme="vanilla-light"] .btn,
+html[data-theme="vanilla-light"] .ui-card,
+html[data-theme="vanilla-light"] .dashboard-context-strip,
+html[data-theme="vanilla-light"] .lms-summary-card,
+html[data-theme="vanilla-light"] .lesson-page__body {
+  color: #000000;
+}
+
+html[data-theme="vanilla-light"] .lms-summary-card p,
+html[data-theme="vanilla-light"] .dashboard-context-strip__state,
+html[data-theme="vanilla-light"] .lms-lines dt {
+  color: #2a383b;
+}
+
+html[data-theme="vanilla-light"] .dashboard-hero__quote {
+  color: #222f35;
+}
+
+html[data-theme="lain"] .dashboard-main--resume::after,
+html[data-theme="lain"] .course-pane::after,
+html[data-theme="lain"] .lesson-page__main::after,
+html[data-theme="lain"] .recap-pane::after {
+  position: absolute;
+  inset: 34px 8% auto auto;
+  z-index: 0;
+  width: min(34%, 360px);
+  height: min(28vh, 260px);
+  pointer-events: none;
+  opacity: 0.24;
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(8, 10, 16, 0.08) 24%, rgba(8, 10, 16, 0.2) 100%),
+    var(--bg-image-lain) center 42% / cover no-repeat,
+    var(--bg-image-lain-alt) center 40% / cover no-repeat;
+  mix-blend-mode: screen;
+  filter: grayscale(48%) contrast(116%) brightness(0.96);
+  mask-image: linear-gradient(90deg, transparent 0%, black 18%, black 80%, transparent 100%);
+  content: "";
+}
+
+html[data-theme="lain"] .dashboard-lain-ambient {
+  display: block;
+  position: absolute;
+  top: 52px;
+  right: 8%;
+  z-index: 0;
+  width: min(30%, 360px);
+  height: min(34vh, 320px);
+  pointer-events: none;
+  opacity: 0.22;
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(8, 10, 16, 0.12) 24%, rgba(8, 10, 16, 0.26) 100%),
+    var(--bg-image-lain) center 38% / cover no-repeat,
+    var(--bg-image-lain-alt) center 44% / cover no-repeat;
+  mix-blend-mode: screen;
+  filter: grayscale(42%) contrast(118%) brightness(0.98);
+  mask-image: linear-gradient(90deg, transparent 0%, black 18%, black 82%, transparent 100%);
+}
+
+.dashboard-context-strip,
+.lms-summary-card {
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+}
+
+.dashboard-context-strip,
+.lms-summary-card {
+  border-color: rgba(246, 251, 255, 0.31);
+}
+
+.dashboard-context-strip {
+  color: rgba(230, 238, 250, 0.94);
+}
+
+.dashboard-context-strip__state,
+.lms-summary-card p,
+.lms-lines dt {
+  color: rgba(205, 218, 238, 0.9);
+}
+
+.lms-lines dd,
+.lms-summary-card h2,
+.dashboard-context-strip__user {
+  color: rgba(244, 248, 255, 0.98);
+}
+
+.dashboard-ambient {
+  opacity: 0.14;
 }

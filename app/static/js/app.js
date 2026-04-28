@@ -452,6 +452,231 @@
     });
   }
 
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  function setupMotionPolish() {
+    var disableMotion = prefersReducedMotion() || window.innerWidth < 980;
+    if (disableMotion) return;
+
+    var interactiveCards = document.querySelectorAll(
+      ".dashboard-context-strip, .lms-summary-card, .module-card, .lesson-page__task-stack .task-panel, .lesson-page--simple .lesson-side-panel, .lesson-page--simple .lesson-nav-panel--main"
+    );
+
+    interactiveCards.forEach(function (card) {
+      card.addEventListener("mousemove", function (event) {
+        var rect = card.getBoundingClientRect();
+        var relativeX = (event.clientX - rect.left) / rect.width - 0.5;
+        var relativeY = (event.clientY - rect.top) / rect.height - 0.5;
+        card.style.setProperty("--mx", relativeX.toFixed(3));
+        card.style.setProperty("--my", relativeY.toFixed(3));
+        card.style.transform = "translateY(-1px)";
+      });
+
+      card.addEventListener("mouseleave", function () {
+        card.style.transform = "";
+        card.style.removeProperty("--mx");
+        card.style.removeProperty("--my");
+      });
+    });
+  }
+
+  function setupAmbientCanvas() {
+    if (prefersReducedMotion() || window.innerWidth < 1100) return;
+    if (!window.HTMLCanvasElement) return;
+
+    var host =
+      document.querySelector(".course-pane") ||
+      document.querySelector(".lesson-page__main") ||
+      document.querySelector(".recap-pane");
+
+    if (!host) return;
+
+    var canvas = document.createElement("canvas");
+    canvas.className = "ambient-canvas";
+    canvas.setAttribute("aria-hidden", "true");
+    host.prepend(canvas);
+
+    var context = canvas.getContext("2d", { alpha: true });
+    if (!context) {
+      canvas.remove();
+      return;
+    }
+
+    var particles = [];
+    var maxParticles = 16;
+    var rafId = null;
+    var resizeObserver = null;
+    var running = true;
+
+    function makeParticle(width, height) {
+      var speed = 0.04 + Math.random() * 0.14;
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: 36 + Math.random() * 78,
+        dx: speed,
+        dy: speed * (Math.random() > 0.5 ? 1 : -1) * 0.35,
+        alpha: 0.02 + Math.random() * 0.05,
+      };
+    }
+
+    function syncSize() {
+      var rect = host.getBoundingClientRect();
+      var dpr = Math.min(window.devicePixelRatio || 1, 1.7);
+      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+      canvas.style.width = Math.floor(rect.width) + "px";
+      canvas.style.height = Math.floor(rect.height) + "px";
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      particles = [];
+      var areaFactor = Math.max(1, Math.floor((rect.width * rect.height) / 180000));
+      var count = Math.min(maxParticles, 8 + areaFactor * 2);
+      for (var i = 0; i < count; i += 1) {
+        particles.push(makeParticle(rect.width, rect.height));
+      }
+    }
+
+    function draw() {
+      if (!running) return;
+      var width = canvas.width / Math.min(window.devicePixelRatio || 1, 1.7);
+      var height = canvas.height / Math.min(window.devicePixelRatio || 1, 1.7);
+      context.clearRect(0, 0, width, height);
+
+      particles.forEach(function (particle) {
+        particle.x += particle.dx;
+        particle.y += particle.dy;
+
+        if (particle.x > width + particle.r) particle.x = -particle.r;
+        if (particle.y > height + particle.r) particle.y = -particle.r;
+        if (particle.y < -particle.r) particle.y = height + particle.r;
+
+        var gradient = context.createRadialGradient(
+          particle.x,
+          particle.y,
+          0,
+          particle.x,
+          particle.y,
+          particle.r
+        );
+        gradient.addColorStop(0, "rgba(198, 228, 255, " + particle.alpha.toFixed(3) + ")");
+        gradient.addColorStop(1, "rgba(198, 228, 255, 0)");
+
+        context.fillStyle = gradient;
+        context.beginPath();
+        context.arc(particle.x, particle.y, particle.r, 0, Math.PI * 2);
+        context.fill();
+      });
+
+      rafId = window.requestAnimationFrame(draw);
+    }
+
+    function teardown() {
+      running = false;
+      if (rafId) window.cancelAnimationFrame(rafId);
+      if (resizeObserver) resizeObserver.disconnect();
+      window.removeEventListener("beforeunload", teardown);
+    }
+
+    if (window.ResizeObserver) {
+      resizeObserver = new ResizeObserver(syncSize);
+      resizeObserver.observe(host);
+    } else {
+      window.addEventListener("resize", syncSize);
+    }
+
+    window.addEventListener("beforeunload", teardown);
+    syncSize();
+    draw();
+  }
+
+  function setupThemeCustomizer() {
+    var panel = document.querySelector("[data-theme-panel]");
+    var openButton = document.querySelector("[data-theme-open]");
+    var closeButton = document.querySelector("[data-theme-close]");
+    var themeSelect = document.querySelector("[data-theme-select]");
+    var glassToggle = document.querySelector("[data-glass-toggle]");
+    var resetButton = document.querySelector("[data-theme-reset]");
+    if (!panel || !openButton || !themeSelect || !glassToggle || !resetButton) return;
+
+    var storageKeys = {
+      theme: "personalLms.ui.theme",
+      glass: "personalLms.ui.glass",
+    };
+    var allowedThemes = ["vanilla-dark", "vanilla-light", "lain"];
+
+    function applyState(state) {
+      var root = document.documentElement;
+      root.dataset.theme = allowedThemes.indexOf(state.theme) >= 0 ? state.theme : "vanilla-dark";
+      root.dataset.glass = state.glass ? "on" : "off";
+    }
+
+    function loadState() {
+      var storedTheme = localStorage.getItem(storageKeys.theme) || "vanilla-dark";
+      return {
+        theme: allowedThemes.indexOf(storedTheme) >= 0 ? storedTheme : "vanilla-dark",
+        glass: (localStorage.getItem(storageKeys.glass) || "on") === "on",
+      };
+    }
+
+    function saveState(state) {
+      localStorage.setItem(storageKeys.theme, state.theme);
+      localStorage.setItem(storageKeys.glass, state.glass ? "on" : "off");
+    }
+
+    function syncControls(state) {
+      themeSelect.value = state.theme;
+      glassToggle.checked = state.glass;
+      glassToggle.nextElementSibling.textContent = state.glass ? "Glass: включен" : "Glass: выключен";
+    }
+
+    var state = loadState();
+    applyState(state);
+    syncControls(state);
+
+    function persistAndApply() {
+      applyState(state);
+      saveState(state);
+      syncControls(state);
+    }
+
+    openButton.addEventListener("click", function () {
+      panel.hidden = false;
+      panel.classList.add("is-open");
+    });
+
+    closeButton.addEventListener("click", function () {
+      panel.classList.remove("is-open");
+      panel.hidden = true;
+    });
+
+    themeSelect.addEventListener("change", function () {
+      state.theme = themeSelect.value;
+      persistAndApply();
+    });
+
+    glassToggle.addEventListener("change", function () {
+      state.glass = glassToggle.checked;
+      persistAndApply();
+    });
+
+    resetButton.addEventListener("click", function () {
+      state = {
+        theme: "vanilla-dark",
+        glass: true,
+      };
+      persistAndApply();
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape" || panel.hidden) return;
+      panel.classList.remove("is-open");
+      panel.hidden = true;
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     document.documentElement.dataset.appReady = "true";
     updateWorldClocks();
@@ -460,6 +685,9 @@
     setupTerminalLaunchers();
     setupLessonTerminals();
     setupAIHelper();
+    setupMotionPolish();
+    setupAmbientCanvas();
+    setupThemeCustomizer();
     window.setInterval(updateWorldClocks, 30000);
   });
 })();

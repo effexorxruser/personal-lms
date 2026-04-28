@@ -1,9 +1,10 @@
 slug: python-backend-ai-foundation
-title: Python Backend + AI — Foundation Real Pass
-description: Первый реальный source-backed foundation block для execution-first старта.
+title: Python Backend + AI — Block 0 (Onboarding & Learning Loop)
+description: >
+  Активный стартовый маршрут: два модуля Block 0 по blueprint (workspace + learning loop).
+  Расширенный pass foundation-real вынесен в отдельный draft-курс для будущего Block 1.
 version: 1.0.0
-estimated_weeks: 3
+estimated_weeks: 2
 modules:
   - block-0-onboarding-workspace
   - block-0-learning-loop
-  - foundation-real

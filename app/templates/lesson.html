@@ -16,18 +16,12 @@
     <main class="lesson-page__main">
       <article class="markdown-body lesson-page__body" aria-labelledby="lesson-title">
         <header class="lesson-page__header">
-          <p class="eyebrow">Режим урока</p>
           <h1 id="lesson-title">{{ lesson.title }}</h1>
           <p>{{ lesson.summary }}</p>
           <div class="meta-row">
             <span class="meta-pill">Статус: {{ lesson_status_label }}</span>
-            <span class="meta-pill">Раздел: {{ module_title }}</span>
-            {% if execution.task %}
-            <span class="meta-pill">Задача: {{ execution.task.title }}</span>
-            {% elif execution.missing_task_slug %}
-            <span class="meta-pill">Задача не найдена: {{ execution.missing_task_slug }}</span>
-            {% endif %}
           </div>
+          <p class="lesson-page__module-note">Раздел курса: {{ module_title }}</p>
         </header>
         {{ lesson.body_html | safe }}
       </article>

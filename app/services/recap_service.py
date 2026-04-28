@@ -119,7 +119,6 @@ def build_weekly_recap(
         select(StuckEvent)
         .where(
             StuckEvent.user_id == user_id,
-            StuckEvent.course_slug == course_slug,
             StuckEvent.created_at >= since,
         )
         .order_by(StuckEvent.created_at.desc(), StuckEvent.id.desc())
@@ -161,5 +160,5 @@ def build_weekly_recap(
         stuck_events=stuck_events,
         next_focus_title=next_focus_title,
         next_focus_href=next_focus_href,
-        active_stuck=latest_open_stuck_event(session, user_id, course_slug),
+        active_stuck=latest_open_stuck_event(session, user_id, None),
     )

@@ -26,6 +26,7 @@
           <a href="/recap" class="nav-link {% if request.url.path == '/recap' %}is-active{% endif %}">Итоги</a>
         </nav>
         <div class="topbar__actions">
+          <button type="button" class="btn btn--ghost btn--sm" data-theme-open aria-label="Открыть настройки интерфейса">UI</button>
           <div class="topbar-clock" aria-label="Мировое время">
             <div class="topbar-clock__node" data-clock-zone="Europe/Moscow">
               <span>MOW</span>
@@ -58,6 +59,30 @@
       </div>
     </main>
 
+    {% if not disable_topbar %}
+    <section class="ui-customizer ui-card" data-theme-panel hidden aria-label="Настройки интерфейса">
+      <header class="ui-customizer__header">
+        <strong>Настройки интерфейса</strong>
+        <button type="button" class="btn btn--ghost btn--sm" data-theme-close>Закрыть</button>
+      </header>
+      <div class="ui-customizer__body">
+        <label for="ui-theme-select">Тема</label>
+        <select id="ui-theme-select" data-theme-select>
+          <option value="vanilla-dark">Vanilla Dark</option>
+          <option value="vanilla-light">Vanilla Light</option>
+          <option value="lain">Lain Theme</option>
+        </select>
+
+        <label class="ui-customizer__toggle">
+          <input type="checkbox" data-glass-toggle checked>
+          <span>Glass: включен</span>
+        </label>
+
+        <button type="button" class="btn btn--ghost btn--sm" data-theme-reset>Сбросить настройки</button>
+      </div>
+    </section>
+    {% endif %}
+
     {% set helper_enabled = ai_helper_enabled | default(false) %}
     {% if request.session.get('user_id') and helper_enabled %}
     <div
@@ -76,7 +101,7 @@
         <header class="lain-chat__header">
           <div class="lain-chat__identity">
             <span class="lain-chat__avatar" aria-hidden="true">
-              <img class="lain-chat__avatar-image" src="{{ url_for('static', path='/img/illustrations/lain/lain-image-6.png') }}" alt="Lain avatar">
+              <img class="lain-chat__avatar-image" src="/assets/design-references/lain-image-6.png" alt="Lain avatar">
             </span>
             <div>
               <strong>Lain</strong>

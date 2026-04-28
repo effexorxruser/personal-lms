@@ -29,6 +29,9 @@ from app.services.terminal_service import lesson_sandbox_dir, run_terminal_comma
 
 DB_PATH = Path("instance/test_auth.db")
 
+ACTIVE_COURSE_SLUG = "python-backend-ai-foundation"
+DRAFT_BLOCK1_COURSE_SLUG = "python-backend-ai-foundation-block1-draft"
+
 
 def _prepare_db() -> None:
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -107,7 +110,7 @@ def _complete_block_0_prerequisites(client: TestClient) -> None:
     _submit_and_complete_lesson(
         client,
         lesson_key="block-0-python-cli-smoke",
-        submission_type="text",
+        submission_type="command_output",
     )
     _submit_and_complete_lesson(
         client,
@@ -402,7 +405,7 @@ def test_submission_creates_review_and_needs_revision_state() -> None:
         assert response.status_code == 303
 
         lesson_response = client.get("/lessons/foundation-real-cli-python")
-        course_response = client.get("/courses/python-backend-ai-foundation")
+        course_response = client.get(f"/courses/{DRAFT_BLOCK1_COURSE_SLUG}")
 
     assert "Submission слишком короткий" in lesson_response.text
     assert "требует доработки" in lesson_response.text
@@ -492,7 +495,7 @@ def test_dashboard_shows_current_task_execution_state() -> None:
 
     assert dashboard_response.status_code == 200
     assert "Выполнение" in dashboard_response.text
-    assert "Block 0: Первый Python CLI smoke запуск" in dashboard_response.text
+    assert "Собрать и прогнать hello CLI script" in dashboard_response.text
     assert "ожидает submission" in dashboard_response.text
 
 
@@ -501,7 +504,7 @@ def test_course_map_displays_supported_execution_states() -> None:
     with TestClient(create_app()) as client:
         _login(client)
 
-        initial_course = client.get("/courses/python-backend-ai-foundation")
+        initial_course = client.get(f"/courses/{ACTIVE_COURSE_SLUG}")
         assert "Статус: доступен" in initial_course.text
 
         _submit_and_complete_lesson(
@@ -510,7 +513,7 @@ def test_course_map_displays_supported_execution_states() -> None:
             submission_type="text",
         )
         client.get("/lessons/block-0-python-cli-smoke")
-        in_progress_course = client.get("/courses/python-backend-ai-foundation")
+        in_progress_course = client.get(f"/courses/{ACTIVE_COURSE_SLUG}")
         assert "Урок 0.1: Подготовка учебного workspace" in in_progress_course.text
         assert "Статус: завершён" in in_progress_course.text
         assert "Урок 0.2: Первый Python CLI smoke cycle" in in_progress_course.text
@@ -518,16 +521,16 @@ def test_course_map_displays_supported_execution_states() -> None:
 
         client.post(
             "/lessons/block-0-python-cli-smoke/submissions",
-            data={"submission_type": "text", "content_text": "ok"},
+            data={"submission_type": "command_output", "content_text": "ok"},
             follow_redirects=False,
         )
-        revision_course = client.get("/courses/python-backend-ai-foundation")
+        revision_course = client.get(f"/courses/{ACTIVE_COURSE_SLUG}")
         assert "Статус: требует доработки" in revision_course.text
 
         client.post(
             "/lessons/block-0-python-cli-smoke/submissions",
             data={
-                "submission_type": "text",
+                "submission_type": "command_output",
                 "content_text": (
                     "CLI script выполнен, два запуска с разными --name, "
                     "вывод --help сохранен в run-log."
@@ -535,11 +538,11 @@ def test_course_map_displays_supported_execution_states() -> None:
             },
             follow_redirects=False,
         )
-        approved_course = client.get("/courses/python-backend-ai-foundation")
+        approved_course = client.get(f"/courses/{ACTIVE_COURSE_SLUG}")
         assert "Статус: review пройден" in approved_course.text
 
         client.post("/lessons/block-0-python-cli-smoke/complete", follow_redirects=False)
-        completed_course = client.get("/courses/python-backend-ai-foundation")
+        completed_course = client.get(f"/courses/{ACTIVE_COURSE_SLUG}")
         assert "Статус: завершён" in completed_course.text
 
 
@@ -555,7 +558,7 @@ def test_foundation_lessons_remain_reachable_after_block_0_completion() -> None:
         _submit_and_complete_lesson(
             client,
             lesson_key="block-0-python-cli-smoke",
-            submission_type="text",
+            submission_type="command_output",
         )
         _submit_and_complete_lesson(
             client,
@@ -602,13 +605,17 @@ def test_checkpoint_submission_review_and_module_completion_semantics() -> None:
         client.post("/lessons/foundation-real-cli-python/complete", follow_redirects=False)
         client.post("/lessons/foundation-real-git-loop/complete", follow_redirects=False)
 
-        course_without_checkpoint = client.get("/courses/python-backend-ai-foundation")
+        course_draft = client.get(f"/courses/{DRAFT_BLOCK1_COURSE_SLUG}")
         dashboard_without_checkpoint = client.get("/dashboard")
 
-        assert "Checkpoint artifact" in course_without_checkpoint.text
-        assert "checkpoint ожидает отправки" in course_without_checkpoint.text
-        assert "Модуль:" in course_without_checkpoint.text
-        assert "Foundation checkpoint: start pack" in dashboard_without_checkpoint.text
+        assert "Checkpoint artifact" in course_draft.text
+        assert "checkpoint ожидает отправки" in course_draft.text
+        assert "Модуль:" in course_draft.text
+        assert dashboard_without_checkpoint.status_code == 200
+        assert (
+            "Курс завершён" in dashboard_without_checkpoint.text
+            or "100%" in dashboard_without_checkpoint.text
+        )
 
         bad_checkpoint = client.post(
             "/checkpoints/foundation-real-start-pack/submissions",
@@ -621,7 +628,7 @@ def test_checkpoint_submission_review_and_module_completion_semantics() -> None:
         )
         assert bad_checkpoint.status_code == 303
 
-        revision_course = client.get("/courses/python-backend-ai-foundation")
+        revision_course = client.get(f"/courses/{DRAFT_BLOCK1_COURSE_SLUG}")
         assert "Ссылка на checkpoint должна начинаться" in revision_course.text
         assert "Модуль: требует доработки" in revision_course.text
 
@@ -636,7 +643,7 @@ def test_checkpoint_submission_review_and_module_completion_semantics() -> None:
         )
         assert approved_checkpoint.status_code == 303
 
-        approved_course = client.get("/courses/python-backend-ai-foundation")
+        approved_course = client.get(f"/courses/{DRAFT_BLOCK1_COURSE_SLUG}")
 
     assert "Checkpoint принят" in approved_course.text
     assert "checkpoint пройден" in approved_course.text
@@ -670,7 +677,7 @@ def test_clean_flow_keeps_dashboard_course_and_lesson_progress_consistent() -> N
         )
 
         dashboard_revision = client.get("/dashboard")
-        course_revision = client.get("/courses/python-backend-ai-foundation")
+        course_revision = client.get(f"/courses/{DRAFT_BLOCK1_COURSE_SLUG}")
         lesson_revision = client.get("/lessons/foundation-real-cli-python")
 
         assert dashboard_revision.status_code == 200
@@ -690,7 +697,7 @@ def test_clean_flow_keeps_dashboard_course_and_lesson_progress_consistent() -> N
         )
 
         dashboard_approved = client.get("/dashboard")
-        course_approved = client.get("/courses/python-backend-ai-foundation")
+        course_approved = client.get(f"/courses/{DRAFT_BLOCK1_COURSE_SLUG}")
         lesson_approved = client.get("/lessons/foundation-real-cli-python")
 
         assert dashboard_approved.status_code == 200
@@ -718,10 +725,17 @@ def test_clean_flow_keeps_dashboard_course_and_lesson_progress_consistent() -> N
                 CourseProgress.course_slug == "python-backend-ai-foundation",
             )
         ).first()
+        draft_progress = session.exec(
+            select(CourseProgress).where(
+                CourseProgress.user_id == user.id,
+                CourseProgress.course_slug == DRAFT_BLOCK1_COURSE_SLUG,
+            )
+        ).first()
 
     assert course_progress is not None
-    assert course_progress.progress_pct > 0
-    assert course_progress.progress_pct < 100
+    assert course_progress.progress_pct == 100
+    assert draft_progress is not None
+    assert draft_progress.progress_pct < 100
 
 
 def test_stuck_event_creation_and_recovery_path_rendering() -> None:
