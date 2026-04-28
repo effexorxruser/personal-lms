@@ -5,6 +5,7 @@ from pathlib import Path
 import yaml
 
 from app.content_pipeline import validate_content
+from app.content_registry import get_content_registry
 from tests.content_test_utils import create_valid_content_tree, write_lesson, write_yaml
 
 
@@ -49,6 +50,28 @@ def test_broken_task_reference_fails_validation(tmp_path: Path) -> None:
 
     assert not report.ok
     assert any("task_slug" in issue.message and "missing-task" in issue.message for issue in report.errors)
+
+
+def test_blueprint_expected_tasks_match_generated_course_modules() -> None:
+    blueprint_path = Path("content/blueprints/backend_developer_6_months.yml")
+    blueprint = yaml.safe_load(blueprint_path.read_text(encoding="utf-8"))
+    registry = get_content_registry()
+    course = registry.courses["python-backend-ai-foundation"]
+    generated_modules = {module.slug: module for module in course.modules}
+    checked_modules: list[str] = []
+
+    for block in blueprint["blocks"]:
+        for blueprint_module in block.get("modules", []):
+            module = generated_modules.get(blueprint_module.get("slug"))
+            expected_tasks = blueprint_module.get("expected_tasks")
+            if module is None or not isinstance(expected_tasks, list):
+                continue
+
+            actual_tasks = [lesson.task_slug for lesson in module.lessons if lesson.task_slug]
+            assert actual_tasks == expected_tasks
+            checked_modules.append(module.slug)
+
+    assert checked_modules
 
 
 def test_broken_checkpoint_module_reference_fails_validation(tmp_path: Path) -> None:

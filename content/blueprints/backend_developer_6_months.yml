@@ -23,7 +23,7 @@ blocks:
           - github-skills
         expected_tasks:
           - foundation-workspace-ready
-          - foundation-python-cli-smoke
+          - block-0-python-cli-smoke
           - foundation-git-github-cycle
         checkpoint_slug: block-0-workspace-checkpoint
         expected_artifact: Локально настроенный учебный workspace с базовым git workflow
