@@ -106,6 +106,9 @@ def test_build_lesson_prompt_contains_knowledge_unit_requirements(tmp_path: Path
     assert "## Частые ошибки" in prompt_text
     assert "## Как это связано с задачей" in prompt_text
     assert "optional deep-dive" in prompt_text
+    assert "tiny example -> explanation -> slightly larger example -> task bridge" in prompt_text
+    assert "do not use type hints in the first explanation example" in prompt_text
+    assert "Markdown code fences must be valid" in prompt_text
 
 
 def test_validate_prompt_enforces_no_manual_hunting_policy(tmp_path: Path) -> None:
@@ -119,3 +122,19 @@ def test_validate_prompt_enforces_no_manual_hunting_policy(tmp_path: Path) -> No
 
     assert "No instruction that forces manual source hunting." in validate_text
     assert "`What to read (EN source)` is optional deep dive" in validate_text
+    assert "Markdown fences in lesson code blocks are valid and renderable." in validate_text
+
+
+def test_draft_output_contract_includes_beginner_and_markdown_policies(tmp_path: Path) -> None:
+    pack_dir = build_prompt_pack(
+        block=1,
+        module_slug="block-1-python-core",
+        output_root=tmp_path / "content_drafts",
+        cache_manifest_path=None,
+    )
+    payload = yaml.safe_load((pack_dir / "prompt_pack.yml").read_text(encoding="utf-8"))
+    lesson_contract = payload["inputs"]["draft_output_contract"]["lesson"]
+
+    assert lesson_contract["micro_step_policy"]["early_modules_first_example_minimal"] is True
+    assert lesson_contract["micro_step_policy"]["early_modules_no_type_hints_in_first_example"] is True
+    assert lesson_contract["markdown_code_fence_policy"]["opening_fence_has_language_marker"] is True

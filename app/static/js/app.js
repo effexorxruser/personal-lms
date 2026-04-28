@@ -345,14 +345,14 @@
 
     function applyState(state) {
       var root = document.documentElement;
-      root.dataset.theme = allowedThemes.indexOf(state.theme) >= 0 ? state.theme : "vanilla-dark";
+      root.dataset.theme = allowedThemes.indexOf(state.theme) >= 0 ? state.theme : "lain";
       root.dataset.glass = state.glass ? "on" : "off";
     }
 
     function loadState() {
-      var storedTheme = localStorage.getItem(storageKeys.theme) || "vanilla-dark";
+      var storedTheme = localStorage.getItem(storageKeys.theme) || "lain";
       return {
-        theme: allowedThemes.indexOf(storedTheme) >= 0 ? storedTheme : "vanilla-dark",
+        theme: allowedThemes.indexOf(storedTheme) >= 0 ? storedTheme : "lain",
         glass: (localStorage.getItem(storageKeys.glass) || "on") === "on",
       };
     }
@@ -400,7 +400,7 @@
 
     resetButton.addEventListener("click", function () {
       state = {
-        theme: "vanilla-dark",
+        theme: "lain",
         glass: true,
       };
       persistAndApply();
