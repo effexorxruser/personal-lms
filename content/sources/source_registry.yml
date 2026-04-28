@@ -1,76 +1,321 @@
 - id: python-mooc
+  title: Python MOOC.fi
   type: core
   language: en
   allowed_usage: backbone
+  canonical_url: https://programming-26.mooc.fi/
+  retrieval:
+    mode: web
+    priority: high
+    direct_access: true
+    preferred_sections:
+      - https://programming-26.mooc.fi/part-1
+      - https://programming-26.mooc.fi/part-2
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+    license: Follow mooc.fi terms; quote only short fragments.
+  notes: Primary practice-driven backbone for beginner-to-intermediate Python learning steps.
 - id: automate-boring-stuff
+  title: Automate the Boring Stuff with Python
   type: core
   language: en
   allowed_usage: backbone
+  canonical_url: https://automatetheboringstuff.com/
+  retrieval:
+    mode: web
+    priority: medium
+    direct_access: true
+    preferred_sections:
+      - https://automatetheboringstuff.com/2e/chapter0/
+      - https://automatetheboringstuff.com/2e/chapter1/
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+  notes: Practical scripting-oriented explanations used to reinforce execution-first tasks.
 - id: python-docs
+  title: Python Official Documentation
   type: core
   language: en
   allowed_usage: backbone
+  canonical_url: https://docs.python.org/3/
+  retrieval:
+    mode: web
+    priority: high
+    direct_access: true
+    preferred_sections:
+      - https://docs.python.org/3/tutorial/interpreter.html
+      - https://docs.python.org/3/tutorial/introduction.html
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+    license: PSF docs license; keep excerpts minimal.
+  notes: Canonical reference for Python syntax, stdlib behavior, and terminology.
 - id: vscode-docs
+  title: Visual Studio Code Documentation
   type: core
   language: en
   allowed_usage: backbone
+  canonical_url: https://code.visualstudio.com/docs
+  retrieval:
+    mode: web
+    priority: medium
+    direct_access: true
+    preferred_sections:
+      - https://code.visualstudio.com/docs/getstarted/getting-started
+      - https://code.visualstudio.com/docs/editor/integrated-terminal
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+  notes: Editor workflow and terminal usage baseline for local development setup.
 - id: terminal-reference
+  title: Linux Command Line Reference
   type: core
   language: en
   allowed_usage: backbone
+  canonical_url: https://www.gnu.org/software/bash/manual/
+  retrieval:
+    mode: web
+    priority: high
+    direct_access: true
+    preferred_sections:
+      - https://www.gnu.org/software/bash/manual/html_node/Basic-Shell-Features.html
+      - https://www.gnu.org/software/bash/manual/html_node/Shell-Commands.html
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+  notes: Canonical shell behavior and command semantics used in CLI training tasks.
 - id: git-docs
+  title: Git Documentation
   type: core
   language: en
   allowed_usage: backbone
+  canonical_url: https://git-scm.com/docs
+  retrieval:
+    mode: web
+    priority: high
+    direct_access: true
+    preferred_sections:
+      - https://git-scm.com/docs/gittutorial
+      - https://git-scm.com/docs/git-branch
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+  notes: Canonical source for git command behavior and collaboration workflows.
 - id: github-skills
+  title: GitHub Skills
   type: core
   language: en
   allowed_usage: backbone
+  canonical_url: https://skills.github.com/
+  retrieval:
+    mode: web
+    priority: medium
+    direct_access: true
+    preferred_sections:
+      - https://skills.github.com/#first-day-on-github
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+  notes: Guided practice tracks for pull requests and collaboration basics.
 - id: github-docs
+  title: GitHub Docs
   type: support
   language: en
   allowed_usage: supplement
+  canonical_url: https://docs.github.com/
+  retrieval:
+    mode: web
+    priority: medium
+    direct_access: true
+    preferred_sections:
+      - https://docs.github.com/en/get-started
+      - https://docs.github.com/en/pull-requests
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+  notes: Supplemental reference for repository settings, pull requests, and CI usage.
 - id: mdn-http
+  title: MDN HTTP Documentation
   type: core
   language: en
   allowed_usage: backbone
+  canonical_url: https://developer.mozilla.org/en-US/docs/Web/HTTP
+  retrieval:
+    mode: web
+    priority: high
+    direct_access: true
+    preferred_sections:
+      - https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview
+      - https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+  notes: Canonical HTTP concepts for backend API behavior and status semantics.
 - id: httpx-docs
+  title: HTTPX Documentation
   type: core
   language: en
   allowed_usage: backbone
+  canonical_url: https://www.python-httpx.org/
+  retrieval:
+    mode: web
+    priority: high
+    direct_access: true
+    preferred_sections:
+      - https://www.python-httpx.org/quickstart/
+      - https://www.python-httpx.org/advanced/timeouts/
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+  notes: Canonical Python HTTP client reference for outbound API calls.
 - id: sqlbolt
+  title: SQLBolt Interactive Lessons
   type: core
   language: en
   allowed_usage: backbone
+  canonical_url: https://sqlbolt.com/
+  retrieval:
+    mode: web
+    priority: medium
+    direct_access: true
+    preferred_sections:
+      - https://sqlbolt.com/lesson/select_queries_introduction
+      - https://sqlbolt.com/lesson/filtering_sorting_query_results
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+  notes: Interactive SQL practice used as an execution-first primer before deeper docs.
 - id: sqlite-docs
+  title: SQLite Documentation
   type: core
   language: en
   allowed_usage: backbone
+  canonical_url: https://www.sqlite.org/docs.html
+  retrieval:
+    mode: web
+    priority: high
+    direct_access: true
+    preferred_sections:
+      - https://www.sqlite.org/lang.html
+      - https://www.sqlite.org/quickstart.html
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+  notes: Canonical SQLite behavior and SQL dialect reference for data layer tasks.
 - id: fastapi-docs
+  title: FastAPI Documentation
   type: core
   language: en
   allowed_usage: backbone
+  canonical_url: https://fastapi.tiangolo.com/
+  retrieval:
+    mode: web
+    priority: high
+    direct_access: true
+    preferred_sections:
+      - https://fastapi.tiangolo.com/tutorial/first-steps/
+      - https://fastapi.tiangolo.com/tutorial/path-params/
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+  notes: Primary framework reference for API routing, validation, and dependency patterns.
 - id: pytest-docs
+  title: pytest Documentation
   type: core
   language: en
   allowed_usage: backbone
+  canonical_url: https://docs.pytest.org/en/stable/
+  retrieval:
+    mode: web
+    priority: high
+    direct_access: true
+    preferred_sections:
+      - https://docs.pytest.org/en/stable/getting-started.html
+      - https://docs.pytest.org/en/stable/how-to/assert.html
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+  notes: Canonical testing framework reference for unit and integration quality loops.
 - id: python-logging-docs
+  title: Python Logging Documentation
   type: core
   language: en
   allowed_usage: backbone
+  canonical_url: https://docs.python.org/3/library/logging.html
+  retrieval:
+    mode: web
+    priority: medium
+    direct_access: true
+    preferred_sections:
+      - https://docs.python.org/3/howto/logging.html
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+  notes: Canonical source for logging configuration and runtime diagnostics in Python apps.
 - id: github-actions-docs
+  title: GitHub Actions Documentation
   type: core
   language: en
   allowed_usage: backbone
+  canonical_url: https://docs.github.com/en/actions
+  retrieval:
+    mode: web
+    priority: medium
+    direct_access: true
+    preferred_sections:
+      - https://docs.github.com/en/actions/quickstart
+      - https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+  notes: Canonical CI workflow semantics for reliability and delivery module work.
 - id: python-debugging-guides
+  title: Python Debugging Guides
   type: support
   language: en
   allowed_usage: supplement
+  canonical_url: https://docs.python.org/3/library/pdb.html
+  retrieval:
+    mode: web
+    priority: low
+    direct_access: true
+    preferred_sections:
+      - https://docs.python.org/3/library/pdb.html
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+  notes: Supplemental debugging references for troubleshooting workflows.
 - id: openai-docs
+  title: OpenAI Developer Documentation
   type: core
   language: en
   allowed_usage: backbone
+  canonical_url: https://platform.openai.com/docs/overview
+  retrieval:
+    mode: mcp
+    priority: high
+    direct_access: true
+    preferred_sections:
+      - https://platform.openai.com/docs/guides/text
+      - https://platform.openai.com/docs/guides/structured-outputs
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+  notes: Canonical OpenAI API and safety guidance for AI integration block tasks.
 - id: openai-cookbook
+  title: OpenAI Cookbook
   type: core
   language: en
   allowed_usage: backbone
+  canonical_url: https://cookbook.openai.com/
+  retrieval:
+    mode: web
+    priority: medium
+    direct_access: true
+    preferred_sections:
+      - https://cookbook.openai.com/examples/
+  usage_policy:
+    summarize_only: true
+    quote_limit: short
+  notes: Practical implementation examples that complement official OpenAI API docs.

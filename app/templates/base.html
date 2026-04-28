@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-theme="lain" data-glass="on">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}personal-lms{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}">
-    <script src="{{ url_for('static', path='/js/app.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}?v=20260428-11">
+    <script src="{{ url_for('static', path='/js/app.js') }}?v=20260428-11" defer></script>
   </head>
   <body>
     <div class="page-bg bg-shell" aria-hidden="true">
@@ -18,15 +18,22 @@
     {% if not disable_topbar %}
     <header class="topbar">
       <div class="topbar__inner">
-        <a href="/dashboard" class="brand">personal-lms</a>
-        <nav class="topbar__nav" aria-label="Основная навигация">
-          <a href="/dashboard" class="nav-link {% if request.url.path == '/dashboard' %}is-active{% endif %}">Главная</a>
-          <a href="{{ nav_course_href if nav_course_href is defined else '/courses/python-backend-ai-foundation' }}" class="nav-link {% if request.url.path.startswith('/courses/') %}is-active{% endif %}">Курс</a>
-          <a href="{{ nav_lessons_href if nav_lessons_href is defined else '/lessons/foundation-real-workspace' }}" class="nav-link {% if request.url.path.startswith('/lessons/') %}is-active{% endif %}">Уроки</a>
-          <a href="/recap" class="nav-link {% if request.url.path == '/recap' %}is-active{% endif %}">Итоги</a>
-        </nav>
-        <div class="topbar__actions">
-          <button type="button" class="btn btn--ghost btn--sm" data-theme-open aria-label="Открыть настройки интерфейса">UI</button>
+        <div class="topbar__start">
+          <a href="/dashboard" class="brand brand--app" aria-label="Personal LMS — на главную">
+            <span class="brand__mark" aria-hidden="true">P</span>
+            <span class="brand__wordmark">
+              <span class="brand__title">Personal LMS</span>
+              <span class="brand__subtitle">учебная платформа</span>
+            </span>
+          </a>
+          <nav class="topbar__nav" aria-label="Основная навигация">
+            <a href="/dashboard" class="nav-link {% if request.url.path == '/dashboard' %}is-active{% endif %}">Главная</a>
+            <a href="{{ nav_course_href if nav_course_href is defined else '/courses/python-backend-ai-foundation' }}" class="nav-link {% if request.url.path.startswith('/courses/') %}is-active{% endif %}">Курс</a>
+            <a href="{{ nav_lessons_href if nav_lessons_href is defined else '/lessons/foundation-real-workspace' }}" class="nav-link {% if request.url.path.startswith('/lessons/') %}is-active{% endif %}">Уроки</a>
+            <a href="/recap" class="nav-link {% if request.url.path == '/recap' %}is-active{% endif %}">Итоги</a>
+          </nav>
+        </div>
+        <div class="topbar__center">
           <div class="topbar-clock" aria-label="Мировое время">
             <div class="topbar-clock__node" data-clock-zone="Europe/Moscow">
               <span>MOW</span>
@@ -41,6 +48,9 @@
               <time data-clock-time>--:--</time>
             </div>
           </div>
+        </div>
+        <div class="topbar__end">
+          <button type="button" class="btn btn--ghost btn--sm" data-theme-open aria-label="Открыть настройки интерфейса">UI</button>
           {% if request.session.get('user_id') %}
           <form method="post" action="/logout">
             <button type="submit" class="btn btn--ghost btn--sm">Выход</button>
@@ -81,54 +91,44 @@
         <button type="button" class="btn btn--ghost btn--sm" data-theme-reset>Сбросить настройки</button>
       </div>
     </section>
-    {% endif %}
 
-    {% set helper_enabled = ai_helper_enabled | default(false) %}
-    {% if request.session.get('user_id') and helper_enabled %}
-    <div
-      class="lain-helper"
-      data-ai-helper
-      data-ai-endpoint="/api/ai/helper"
-      data-ai-history-endpoint="{{ ai_helper_history_endpoint | default('/api/ai/helper/history') }}"
-      data-ai-lesson="{{ ai_helper_lesson_key | default('') }}"
-    >
-      <button type="button" class="lain-helper__launcher" data-ai-launcher aria-label="Открыть Lain helper">
-        <span class="lain-helper__signal" aria-hidden="true"></span>
-        <span>Lain</span>
+    {% if request.session.get('user_id') %}
+    <section class="lain-helper" data-ai-helper data-ai-path="{{ request.url.path }}">
+      <button type="button" class="lain-helper__launcher" data-ai-launcher aria-expanded="false" aria-controls="lain-helper-panel" aria-label="Открыть Lain AI">
+        <img class="lain-helper__launcher-avatar" src="/assets/design-references/lain-image-6.png" alt="">
+        <span class="lain-helper__launcher-label">Lain AI</span>
+        <span class="lain-helper__dot" data-ai-dot aria-hidden="true"></span>
       </button>
-
-      <section class="ui-card lain-chat" data-ai-panel hidden aria-label="Lain helper">
-        <header class="lain-chat__header">
-          <div class="lain-chat__identity">
-            <span class="lain-chat__avatar" aria-hidden="true">
-              <img class="lain-chat__avatar-image" src="/assets/design-references/lain-image-6.png" alt="Lain avatar">
-            </span>
-            <div>
-              <strong>Lain</strong>
-              <p>AI helper текущего урока</p>
-            </div>
+      <section id="lain-helper-panel" class="lain-helper__panel ui-card" data-ai-panel hidden aria-live="polite">
+        <header class="lain-helper__header">
+          <div class="lain-helper__title">
+            <img class="lain-helper__avatar" src="/assets/design-references/lain-image-6.png" alt="Lain avatar">
+            <strong>Lain AI</strong>
+            <p data-ai-context></p>
           </div>
-          <button type="button" class="btn btn--ghost btn--sm" data-ai-close>Закрыть</button>
+          <div class="lain-helper__header-actions">
+            <span class="lain-helper__status" data-ai-status>online</span>
+            <button type="button" class="lain-helper__icon-btn" data-ai-clear aria-label="Очистить историю">🧹</button>
+            <button type="button" class="lain-helper__close" data-ai-close aria-label="Закрыть Lain AI">×</button>
+          </div>
         </header>
-
-        <div class="lain-chat__quick-actions" data-ai-quick-actions>
-          <button type="button" class="btn btn--ghost btn--sm" data-ai-mode="explain_lesson">Объясни текущий урок</button>
-          <button type="button" class="btn btn--ghost btn--sm" data-ai-mode="help_start">Помоги начать</button>
-          <button type="button" class="btn btn--ghost btn--sm" data-ai-mode="stuck_help">Я застрял</button>
-          <button type="button" class="btn btn--ghost btn--sm" data-ai-mode="submission_hint">Проверь мой ответ</button>
+        <div class="lain-helper__quick-actions">
+          <button type="button" class="lain-helper__quick-btn" data-ai-quick="Коротко объясни, что сейчас важно сделать в этом контексте.">Что сейчас</button>
+          <button type="button" class="lain-helper__quick-btn" data-ai-quick="Я застрял. Предложи следующий маленький шаг и 1-2 команды для проверки.">Я застрял</button>
         </div>
-
-        <div class="lain-chat__messages" data-ai-messages aria-live="polite">
-          <p class="lain-chat__empty" data-ai-empty>Lain рядом. Выбери действие или задай вопрос по текущему уроку.</p>
-        </div>
-
-        <form class="lain-chat__form" data-ai-form>
-          <label class="lain-chat__sr-only" for="lain-helper-input">Сообщение для Lain</label>
-          <input id="lain-helper-input" name="message" type="text" autocomplete="off" placeholder="Вопрос по текущему шагу урока" data-ai-input>
-          <button type="submit" class="btn btn--primary" data-ai-send>Отправить</button>
+        <label class="lain-helper__toggle">
+          <input type="checkbox" data-ai-socratic>
+          <span>Сократический режим</span>
+        </label>
+        <div class="lain-helper__history" data-ai-history></div>
+        <form class="lain-helper__form" data-ai-form>
+          <textarea name="message" rows="3" maxlength="2000" placeholder="Вопрос только по текущему курсу/модулю/уроку..."></textarea>
+          <button type="submit" class="btn btn--primary btn--sm">Отправить</button>
         </form>
       </section>
-    </div>
+    </section>
     {% endif %}
+    {% endif %}
+
   </body>
 </html>

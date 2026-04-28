@@ -419,10 +419,65 @@ class CheckpointSchema(_SchemaBase):
 
 
 class SourceRegistryEntrySchema(_SchemaBase):
+    class RetrievalSchema(_SchemaBase):
+        mode: str
+        priority: str
+        direct_access: bool = True
+        preferred_sections: list[str] = Field(default_factory=list)
+
+        @field_validator("mode")
+        @classmethod
+        def validate_mode(cls, value: str) -> str:
+            allowed = {"web", "mcp", "manual", "disabled"}
+            if value not in allowed:
+                raise ValueError(f"должен быть одним из: {', '.join(sorted(allowed))}")
+            return value
+
+        @field_validator("priority")
+        @classmethod
+        def validate_priority(cls, value: str) -> str:
+            allowed = {"high", "medium", "low"}
+            if value not in allowed:
+                raise ValueError(f"должен быть одним из: {', '.join(sorted(allowed))}")
+            return value
+
+        @field_validator("preferred_sections")
+        @classmethod
+        def validate_preferred_sections(cls, value: list[str]) -> list[str]:
+            cleaned: list[str] = []
+            for item in value:
+                section_url = str(item).strip()
+                if not section_url:
+                    raise ValueError("список не должен содержать пустые элементы")
+                if not re.fullmatch(r"https?://\S+", section_url):
+                    raise ValueError(f"некорректный URL section: {section_url}")
+                cleaned.append(section_url)
+            return cleaned
+
+    class UsagePolicySchema(_SchemaBase):
+        summarize_only: bool = True
+        quote_limit: str | None = None
+        license: str | None = None
+
+        @field_validator("quote_limit")
+        @classmethod
+        def validate_quote_limit(cls, value: str | None) -> str | None:
+            if value is None:
+                return None
+            allowed = {"none", "short", "moderate"}
+            if value not in allowed:
+                raise ValueError(f"должен быть одним из: {', '.join(sorted(allowed))}")
+            return value
+
     id: str
+    title: str
     type: str
     language: str
     allowed_usage: str
+    canonical_url: str
+    retrieval: RetrievalSchema
+    notes: str
+    usage_policy: UsagePolicySchema | None = None
 
     @field_validator("id")
     @classmethod
@@ -431,11 +486,41 @@ class SourceRegistryEntrySchema(_SchemaBase):
             raise ValueError("должен быть slug в lower-kebab-case")
         return value
 
-    @field_validator("type", "language", "allowed_usage")
+    @field_validator("title", "notes")
     @classmethod
     def validate_text(cls, value: str) -> str:
         if not value:
             raise ValueError("не может быть пустым")
+        return value
+
+    @field_validator("type")
+    @classmethod
+    def validate_type(cls, value: str) -> str:
+        allowed = {"core", "support"}
+        if value not in allowed:
+            raise ValueError(f"должен быть одним из: {', '.join(sorted(allowed))}")
+        return value
+
+    @field_validator("allowed_usage")
+    @classmethod
+    def validate_allowed_usage(cls, value: str) -> str:
+        allowed = {"backbone", "supplement"}
+        if value not in allowed:
+            raise ValueError(f"должен быть одним из: {', '.join(sorted(allowed))}")
+        return value
+
+    @field_validator("language")
+    @classmethod
+    def validate_language(cls, value: str) -> str:
+        if not re.fullmatch(r"[a-z]{2}(?:-[a-z]{2})?", value):
+            raise ValueError("должен быть кодом языка (например en, ru, en-us)")
+        return value
+
+    @field_validator("canonical_url")
+    @classmethod
+    def validate_canonical_url(cls, value: str) -> str:
+        if not re.fullmatch(r"https?://\S+", value):
+            raise ValueError("должен быть валидным http(s) URL")
         return value
 
 @dataclass(frozen=True)

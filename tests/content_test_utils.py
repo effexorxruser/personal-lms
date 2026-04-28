@@ -147,9 +147,25 @@ def create_valid_content_tree(base_dir: Path) -> dict[str, Path]:
         [
             {
                 "id": "python-docs",
+                "title": "Python Official Documentation",
                 "type": "core",
                 "language": "en",
                 "allowed_usage": "backbone",
+                "canonical_url": "https://docs.python.org/3/",
+                "retrieval": {
+                    "mode": "web",
+                    "priority": "high",
+                    "direct_access": True,
+                    "preferred_sections": [
+                        "https://docs.python.org/3/tutorial/",
+                    ],
+                },
+                "usage_policy": {
+                    "summarize_only": True,
+                    "quote_limit": "short",
+                    "license": "PSF docs license; keep quotes short.",
+                },
+                "notes": "Canonical Python syntax and stdlib reference.",
             }
         ],
     )

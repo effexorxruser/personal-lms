@@ -1,0 +1,38 @@
+# Build Checkpoint Draft Prompt
+
+You are generating a checkpoint draft for personal-lms.
+
+## Context
+
+- Block: `1`
+- Module slug: `block-1-python-core`
+- Checkpoint slug target: `block-1-python-core-checkpoint`
+- Expected artifact: `CLI-утилиты на Python с базовой обработкой ошибок`
+
+## Rules
+
+- Russian-first learner-facing text.
+- Checkpoint must integrate practical skills from module lessons.
+- Keep scope realistic and MVP-friendly.
+- No runtime/UI/platform changes.
+- Avoid vague filler.
+
+## Output contract (`checkpoint.yml`)
+
+Return YAML only and follow CheckpointSchema fields:
+
+- `slug`
+- `title`
+- `summary`
+- `module_slug`
+- `description`
+- `project_description`
+- `requirements`
+- `deliverables`
+- `evaluation_criteria`
+- `definition_of_done`
+- `submission_type` (`text` | `link` | `repository_link` | `command_output`)
+- `portfolio_expectations`
+- `hints`
+
+`module_slug` must be `block-1-python-core`.

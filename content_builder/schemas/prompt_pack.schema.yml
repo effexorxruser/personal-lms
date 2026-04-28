@@ -1,0 +1,63 @@
+type: object
+required:
+  - version
+  - block
+  - module_slug
+  - generated_at
+  - inputs
+  - prompts
+  - output_contract
+properties:
+  version:
+    type: string
+  block:
+    type: integer
+  module_slug:
+    type: string
+  generated_at:
+    type: string
+  inputs:
+    type: object
+    required:
+      - blueprint_path
+      - source_registry_path
+    properties:
+      blueprint_path:
+        type: string
+      source_registry_path:
+        type: string
+      source_cache_manifest_path:
+        type: [string, "null"]
+      required_source_ids:
+        type: array
+        items:
+          type: string
+      expected_tasks:
+        type: array
+        items:
+          type: string
+      checkpoint_slug:
+        type: string
+      expected_artifact:
+        type: string
+  prompts:
+    type: object
+    required:
+      - build_module
+      - build_lesson
+      - build_task
+      - build_checkpoint
+      - validate_draft
+    properties:
+      build_module:
+        type: string
+      build_lesson:
+        type: string
+      build_task:
+        type: string
+      build_checkpoint:
+        type: string
+      validate_draft:
+        type: string
+  output_contract:
+    type: string

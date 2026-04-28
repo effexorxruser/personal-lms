@@ -13,13 +13,11 @@ from app.services.checkpoint_service import (
     get_checkpoint,
 )
 from app.services.content_service import (
-    get_active_course_first_lesson_key,
     get_course_or_404,
     get_lesson_or_404,
     lesson_neighbors,
 )
 from app.services.execution_service import can_complete_lesson, get_lesson_execution_context
-from app.services.ai_helper_view import build_ai_helper_view_context
 from app.services.progress_service import (
     ensure_progress_initialized,
     get_lesson_status,
@@ -64,7 +62,6 @@ def course_map(request: Request, course_slug: str):
         if snapshot.next_lesson_key
         else (f"/lessons/{first_lesson_key}" if first_lesson_key else "/dashboard")
     )
-    helper_lesson_key = snapshot.next_lesson_key or first_lesson_key or get_active_course_first_lesson_key()
     return templates.TemplateResponse(
         request=request,
         name="course_map.html",
@@ -79,7 +76,6 @@ def course_map(request: Request, course_slug: str):
             "nav_course_href": f"/courses/{course.slug}",
             "nav_lessons_href": first_lesson_href,
             "mobile_view": mobile_view,
-            **build_ai_helper_view_context(lesson_key=helper_lesson_key),
         },
     )
 
@@ -147,7 +143,6 @@ def lesson_page(request: Request, lesson_key: str):
             "nav_course_href": nav_course_href,
             "nav_lessons_href": nav_lessons_href,
             "mobile_view": mobile_view,
-            **build_ai_helper_view_context(lesson_key=lesson.key),
         },
     )
 

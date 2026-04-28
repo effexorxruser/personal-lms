@@ -13,7 +13,7 @@ def test_current_content_snapshot_is_valid() -> None:
     assert report.ok
 
 
-def test_active_block0_course_excludes_foundation_real_module() -> None:
+def test_active_course_includes_block0_and_block1_python_core_modules() -> None:
     from app.content_registry import get_content_registry
 
     get_content_registry.cache_clear()
@@ -22,6 +22,7 @@ def test_active_block0_course_excludes_foundation_real_module() -> None:
     assert [m.slug for m in course.modules] == [
         "block-0-onboarding-workspace",
         "block-0-learning-loop",
+        "block-1-python-core",
     ]
 
 
@@ -133,6 +134,43 @@ def test_invalid_task_terminal_config_fails_validation(tmp_path: Path) -> None:
 
     assert not report.ok
     assert any("allowed_commands" in issue.message for issue in report.errors)
+
+
+def test_invalid_source_retrieval_mode_fails_validation(tmp_path: Path) -> None:
+    tree = create_valid_content_tree(tmp_path)
+
+    source_registry_path = tree["source_root"] / "source_registry.yml"
+    payload = yaml.safe_load(source_registry_path.read_text(encoding="utf-8"))
+    payload[0]["retrieval"]["mode"] = "ftp"
+    write_yaml(source_registry_path, payload)
+
+    report = validate_content(
+        content_root=tree["content_root"],
+        task_root=tree["task_root"],
+        checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
+    )
+
+    assert not report.ok
+    assert any("retrieval.mode" in issue.message for issue in report.errors)
+
+
+def test_disabled_source_retrieval_mode_is_allowed(tmp_path: Path) -> None:
+    tree = create_valid_content_tree(tmp_path)
+
+    source_registry_path = tree["source_root"] / "source_registry.yml"
+    payload = yaml.safe_load(source_registry_path.read_text(encoding="utf-8"))
+    payload[0]["retrieval"]["mode"] = "disabled"
+    write_yaml(source_registry_path, payload)
+
+    report = validate_content(
+        content_root=tree["content_root"],
+        task_root=tree["task_root"],
+        checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
+    )
+
+    assert report.ok
 
 
 def test_loader_contract_uses_the_same_validated_bundle(tmp_path: Path) -> None:

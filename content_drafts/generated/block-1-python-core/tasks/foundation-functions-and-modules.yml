@@ -1,0 +1,29 @@
+slug: foundation-functions-and-modules
+title: Функции и модули в мини-проекте
+summary: Вынести текстовые операции в отдельный модуль и использовать их через импорт в CLI-скрипте.
+instructions: |
+  Создай два файла:
+  - `text_utils.py`
+  - `run_text_utils.py`
+
+  В `text_utils.py` реализуй функции:
+  - word_count(text: str) -> int
+  - char_count(text: str) -> int
+  - normalize_spaces(text: str) -> str
+
+  В `run_text_utils.py`:
+  - импортируй функции из `text_utils.py`;
+  - прочитай строку через input();
+  - выведи количество слов, символов и нормализованную строку.
+
+  Логику подсчета держи в функциях, а не в entrypoint-файле.
+submission_type: command_output
+definition_of_done:
+  - "Есть отдельный модуль text_utils.py с тремя функциями."
+  - Entry point использует импорт, а не дублирует логику.
+  - Скрипт корректно работает на пустом вводе и обычной строке.
+  - Функции возвращают значения и не зависят от print внутри себя.
+review_mode: deterministic
+hints:
+  - Для normalize_spaces удобно использовать split/join.
+  - Проверь кейс с множественными пробелами и табами.

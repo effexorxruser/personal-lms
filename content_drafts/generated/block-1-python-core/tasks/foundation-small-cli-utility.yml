@@ -1,0 +1,41 @@
+slug: foundation-small-cli-utility
+title: Маленькая CLI-утилита с обработкой ошибок
+summary: Собрать модульный CLI-инструмент для расчета итогов по числовым данным из файла.
+instructions: |
+  Собери мини-проект из двух файлов:
+  - `expenses_core.py` (бизнес-логика)
+  - `expenses_cli.py` (entrypoint)
+
+  Требования:
+  1) `expenses_cli.py` принимает путь к входному файлу.
+  2) `expenses_core.py` читает числа построчно, пропускает пустые строки.
+  3) Вычисляет count, sum, average.
+  4) Если встречается нечисловая строка, показывает понятную ошибку.
+  5) Сохраняет результат в `expenses_report.txt`.
+
+  Подготовь пример запуска и вывод в терминале.
+submission_type: command_output
+definition_of_done:
+  - "Логика вынесена в expenses_core.py, entrypoint остается тонким."
+  - "Для валидного входа создается корректный expenses_report.txt."
+  - Для невалидного входа есть контролируемая ошибка без traceback.
+  - Команда запуска и вывод результата зафиксированы.
+review_mode: deterministic
+hints:
+  - "Добавь функцию parse_values(lines: list[str]) для изоляции валидации."
+  - Для average учитывай защиту от деления на ноль.
+terminal:
+  enabled: true
+  presets:
+    - label: Запуск CLI утилиты
+      command: python expenses_cli.py sample_expenses.txt
+    - label: Запуск проверки
+      command: pytest -q
+  allow_manual_input: true
+  allowed_commands:
+    - help
+    - pwd
+    - tree
+    - python
+    - pytest
+    - show

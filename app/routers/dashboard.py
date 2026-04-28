@@ -8,14 +8,11 @@ from sqlmodel import Session
 from app.content_registry import get_content_registry
 from app.db import get_engine
 from app.services.content_service import get_active_course_first_lesson_key
-from app.services.ai_helper_view import build_ai_helper_view_context
-from app.services.dashboard_quote_service import get_dashboard_session_quote
 from app.services.execution_service import dashboard_execution_summary
 from app.services.progress_service import ensure_progress_initialized
 from app.services.recap_service import build_weekly_recap
 from app.services.stuck_service import reason_label
 from app.services.view_mode import is_mobile_view
-from app.config import get_settings
 
 TEMPLATES_DIR = Path(__file__).resolve().parents[1] / "templates"
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
@@ -128,10 +125,6 @@ def dashboard(request: Request):
             "link_label": None,
         },
     ]
-    session_quote = get_dashboard_session_quote(
-        settings=get_settings(),
-        next_step=next_step_body,
-    )
     return templates.TemplateResponse(
         request=request,
         name="dashboard.html",
@@ -149,11 +142,9 @@ def dashboard(request: Request):
             "checkpoint_href": checkpoint_href,
             "weekly_recap": weekly_recap,
             "reason_label": reason_label,
-            "dashboard_session_quote": session_quote,
             "nav_course_href": course_href,
             "nav_lessons_href": lesson_href,
             "mobile_view": mobile_view,
-            **build_ai_helper_view_context(lesson_key=next_lesson_key),
         },
     )
 
@@ -195,6 +186,5 @@ def recap(request: Request):
             "nav_course_href": f"/courses/{course.slug}",
             "nav_lessons_href": lesson_href,
             "mobile_view": mobile_view,
-            **build_ai_helper_view_context(lesson_key=snapshot.next_lesson_key),
         },
     )

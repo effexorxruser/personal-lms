@@ -13,7 +13,6 @@ from app.db import get_engine, init_db
 from app.main import create_app
 from app.content_registry import get_content_registry
 from app.models import (
-    LainHelperInteraction,
     CheckpointReview,
     CheckpointSubmission,
     CourseProgress,
@@ -43,7 +42,6 @@ def _prepare_db() -> None:
 
     init_db()
     with Session(get_engine()) as session:
-        session.exec(delete(LainHelperInteraction))
         session.exec(delete(TerminalRun))
         session.exec(delete(StuckEvent))
         session.exec(delete(CheckpointReview))
@@ -612,10 +610,7 @@ def test_checkpoint_submission_review_and_module_completion_semantics() -> None:
         assert "checkpoint ожидает отправки" in course_draft.text
         assert "Модуль:" in course_draft.text
         assert dashboard_without_checkpoint.status_code == 200
-        assert (
-            "Курс завершён" in dashboard_without_checkpoint.text
-            or "100%" in dashboard_without_checkpoint.text
-        )
+        assert "Курс завершён" not in dashboard_without_checkpoint.text
 
         bad_checkpoint = client.post(
             "/checkpoints/foundation-real-start-pack/submissions",
@@ -733,7 +728,7 @@ def test_clean_flow_keeps_dashboard_course_and_lesson_progress_consistent() -> N
         ).first()
 
     assert course_progress is not None
-    assert course_progress.progress_pct == 100
+    assert 0 < course_progress.progress_pct < 100
     assert draft_progress is not None
     assert draft_progress.progress_pct < 100
 

@@ -1,0 +1,15 @@
+slug: block-1-python-core
+title: Python Core для CLI и backend foundation
+description: Базовый модуль по Python-синтаксису, функциям, модулям, файлам и обработке ошибок через практические CLI-задачи.
+block: 1
+objectives:
+  - Писать короткие Python-скрипты с предсказуемым поведением.
+  - Использовать функции и модули для повторного использования кода.
+  - Читать и записывать файлы с базовой обработкой ошибок.
+  - Собрать маленькую CLI-утилиту с валидируемым результатом.
+lessons:
+  - 01-python-values-and-control-flow
+  - 02-functions-and-modules
+  - 03-files-errors-and-debugging
+  - 04-small-cli-utility
+checkpoint: block-1-python-core-checkpoint

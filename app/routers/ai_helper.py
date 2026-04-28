@@ -1,42 +1,30 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Query, Request
-from pydantic import BaseModel, field_validator
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel, Field
 from sqlmodel import Session
 
 from app.db import get_engine
-from app.services.ai_helper_modes import LainHelperMode
-from app.services.ai_helper_service import LainHelperError, assist_with_lain, list_lain_history
+from app.services.ai_helper_service import (
+    clear_history,
+    create_chat_turn,
+    get_history,
+    is_helper_online,
+    resolve_helper_context,
+    serialize_message,
+)
 
-router = APIRouter(prefix="/api/ai", tags=["ai-helper"])
-
-
-class AIHelperRequest(BaseModel):
-    lesson_key: str
-    mode: LainHelperMode
-    message: str = ""
-    submission_draft: str | None = None
-
-    @field_validator("mode", mode="before")
-    @classmethod
-    def normalize_mode(cls, value: object) -> object:
-        if isinstance(value, str):
-            return value.strip().lower()
-        return value
+router = APIRouter(prefix="/api/ai-helper", tags=["ai-helper"])
 
 
-class AIHelperHistoryItem(BaseModel):
-    id: int
-    lesson_key: str
-    mode: LainHelperMode
-    user_message: str
-    assistant_message: str
-    created_at: str
+class HelperChatRequest(BaseModel):
+    path: str = Field(default="/dashboard")
+    message: str = Field(min_length=1, max_length=2000)
+    socratic_mode: bool = False
 
 
-class AIHelperHistoryResponse(BaseModel):
-    lesson_key: str | None = None
-    items: list[AIHelperHistoryItem]
+class HelperContextRequest(BaseModel):
+    path: str = Field(default="/dashboard")
 
 
 def _require_user_id(request: Request) -> int:
@@ -46,62 +34,49 @@ def _require_user_id(request: Request) -> int:
     return int(user_id)
 
 
-@router.post("/helper")
-def ai_helper(request: Request, payload: AIHelperRequest) -> dict:
+@router.post("/history")
+def ai_helper_history(request: Request, payload: HelperContextRequest) -> dict:
     user_id = _require_user_id(request)
-
+    context = resolve_helper_context(payload.path)
     with Session(get_engine()) as session:
-        try:
-            result = assist_with_lain(
-                session=session,
-                user_id=user_id,
-                lesson_key=payload.lesson_key,
-                mode=payload.mode,
-                user_message=payload.message,
-                submission_draft=payload.submission_draft,
-            )
-        except LainHelperError as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-        session.commit()
-
+        rows = get_history(session, user_id, context.key)
     return {
-        "status": result.status,
-        "lesson_key": result.lesson_key,
-        "mode": result.mode.value,
-        "assistant_message": result.assistant_message,
-        "interaction_id": result.interaction_id,
+        "context_key": context.key,
+        "context_label": context.label,
+        "online": is_helper_online(),
+        "messages": [serialize_message(row) for row in rows],
     }
 
 
-@router.get("/helper/history", response_model=AIHelperHistoryResponse)
-def ai_helper_history(
-    request: Request,
-    lesson_key: str | None = None,
-    limit: int = Query(default=12, ge=1, le=40),
-) -> AIHelperHistoryResponse:
+@router.post("/chat")
+def ai_helper_chat(request: Request, payload: HelperChatRequest) -> dict:
     user_id = _require_user_id(request)
-    normalized_lesson_key = lesson_key.strip() if lesson_key and lesson_key.strip() else None
-
+    context = resolve_helper_context(payload.path)
     with Session(get_engine()) as session:
-        entries = list_lain_history(
-            session=session,
+        user_row, assistant_row = create_chat_turn(
+            session,
             user_id=user_id,
-            lesson_key=normalized_lesson_key,
-            limit=limit,
+            context=context,
+            user_message=payload.message,
+            socratic_mode=payload.socratic_mode,
         )
+        session.commit()
+        session.refresh(user_row)
+        session.refresh(assistant_row)
+        serialized_messages = [serialize_message(user_row), serialize_message(assistant_row)]
+    return {
+        "context_key": context.key,
+        "context_label": context.label,
+        "online": is_helper_online(),
+        "messages": serialized_messages,
+    }
 
-    return AIHelperHistoryResponse(
-        lesson_key=normalized_lesson_key,
-        items=[
-            AIHelperHistoryItem(
-                id=item.id,
-                lesson_key=item.lesson_key,
-                mode=item.mode,
-                user_message=item.user_message,
-                assistant_message=item.assistant_message,
-                created_at=item.created_at.isoformat(),
-            )
-            for item in entries
-        ],
-    )
+
+@router.post("/clear")
+def ai_helper_clear(request: Request, payload: HelperContextRequest) -> dict:
+    user_id = _require_user_id(request)
+    context = resolve_helper_context(payload.path)
+    with Session(get_engine()) as session:
+        clear_history(session, user_id, context.key)
+        session.commit()
+    return {"ok": True, "context_key": context.key, "context_label": context.label}

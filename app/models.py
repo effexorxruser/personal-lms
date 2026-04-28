@@ -116,11 +116,14 @@ class TerminalRun(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-class LainHelperInteraction(SQLModel, table=True):
+class AIHelperMessage(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(index=True, foreign_key="user.id")
-    lesson_key: str = Field(index=True)
-    mode: str = Field(index=True)
-    user_message: str = ""
-    assistant_message: str = ""
+    context_key: str = Field(index=True)
+    context_label: str
+    role: str = Field(index=True)
+    message_text: str
+    socratic_mode: bool = Field(default=False)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+

@@ -188,270 +188,6 @@
     });
   }
 
-  function setupAIHelper() {
-    var root = document.querySelector("[data-ai-helper]");
-    if (!root) return;
-
-    var launcher = root.querySelector("[data-ai-launcher]");
-    var panel = root.querySelector("[data-ai-panel]");
-    var closeButton = root.querySelector("[data-ai-close]");
-    var messages = root.querySelector("[data-ai-messages]");
-    var emptyState = root.querySelector("[data-ai-empty]");
-    var form = root.querySelector("[data-ai-form]");
-    var input = root.querySelector("[data-ai-input]");
-    var quickActions = root.querySelector("[data-ai-quick-actions]");
-    var endpoint = root.getAttribute("data-ai-endpoint") || "/api/ai/helper";
-    var historyEndpoint = root.getAttribute("data-ai-history-endpoint") || "";
-    var lessonKey = (root.getAttribute("data-ai-lesson") || "").trim();
-    if (!launcher || !panel || !messages || !form || !input) return;
-
-    var isBusy = false;
-    var isHistoryLoading = false;
-    var loadedHistoryForLesson = "";
-    var renderedInteractionIds = {};
-
-    var actionMessages = {
-      explain_lesson: "Объясни текущий урок: что важно понять перед практикой?",
-      help_start: "Помоги начать: какой первый маленький шаг сделать прямо сейчас?",
-      stuck_help: "Я застрял. Помоги выбрать следующий шаг, чтобы вернуться к выполнению.",
-      submission_hint: "Проверь мой ответ и подскажи, что улучшить перед отправкой."
-    };
-
-    function readSubmissionDraft() {
-      var textDraft = document.getElementById("content_text");
-      var linkDraft = document.getElementById("content_link");
-      if (textDraft && textDraft.value && textDraft.value.trim()) return textDraft.value.trim();
-      if (linkDraft && linkDraft.value && linkDraft.value.trim()) return linkDraft.value.trim();
-      return "";
-    }
-
-    function readStuckDraft() {
-      var stuckDraft = document.getElementById("stuck_note");
-      if (!stuckDraft || !stuckDraft.value) return "";
-      return stuckDraft.value.trim();
-    }
-
-    function normalizeInteractionId(value) {
-      var parsed = Number(value);
-      if (!parsed || parsed <= 0) return "";
-      return String(parsed);
-    }
-
-    function rememberInteraction(interactionId) {
-      var normalized = normalizeInteractionId(interactionId);
-      if (!normalized) return;
-      renderedInteractionIds[normalized] = true;
-    }
-
-    function hasInteraction(interactionId) {
-      var normalized = normalizeInteractionId(interactionId);
-      if (!normalized) return false;
-      return renderedInteractionIds[normalized] === true;
-    }
-
-    function setEmptyState(visible) {
-      if (!emptyState) return;
-      emptyState.hidden = !visible;
-    }
-
-    function refreshEmptyState() {
-      setEmptyState(messages.querySelectorAll(".lain-chat__message").length === 0);
-    }
-
-    function setBusy(nextBusy) {
-      isBusy = nextBusy;
-      root.classList.toggle("is-loading", nextBusy);
-      form.querySelectorAll("input, button").forEach(function (node) {
-        node.disabled = nextBusy;
-      });
-      if (quickActions) {
-        quickActions.querySelectorAll("button").forEach(function (node) {
-          node.disabled = nextBusy;
-        });
-      }
-    }
-
-    function appendMessage(role, text, className, interactionId) {
-      if (!text) return null;
-      var node = document.createElement("article");
-      node.className = "lain-chat__message lain-chat__message--" + role + (className ? " " + className : "");
-      node.textContent = text;
-      if (interactionId) {
-        node.setAttribute("data-ai-interaction-id", String(interactionId));
-      }
-      messages.appendChild(node);
-      refreshEmptyState();
-      messages.scrollTop = messages.scrollHeight;
-      return node;
-    }
-
-    function removeNode(node) {
-      if (!node || !node.parentNode) return;
-      node.parentNode.removeChild(node);
-      refreshEmptyState();
-    }
-
-    function openPanel() {
-      panel.hidden = false;
-      root.classList.add("is-open");
-      loadHistory();
-      window.setTimeout(function () {
-        input.focus({ preventScroll: true });
-      }, 20);
-    }
-
-    function closePanel() {
-      panel.hidden = true;
-      root.classList.remove("is-open");
-    }
-
-    function appendHistoryItem(item) {
-      if (!item || hasInteraction(item.id)) return;
-
-      var normalizedId = normalizeInteractionId(item.id);
-      var userMessage = item.user_message ? String(item.user_message).trim() : "";
-      var assistantMessage = item.assistant_message ? String(item.assistant_message).trim() : "";
-
-      if (userMessage) appendMessage("user", userMessage, "", normalizedId);
-      if (assistantMessage) appendMessage("assistant", assistantMessage, "", normalizedId);
-      rememberInteraction(normalizedId);
-    }
-
-    function loadHistory() {
-      if (!historyEndpoint || !lessonKey || isHistoryLoading || loadedHistoryForLesson === lessonKey) return;
-
-      isHistoryLoading = true;
-      var loading = appendMessage("assistant", "Загружаю недавнюю историю...", "lain-chat__message--loading");
-
-      fetch(
-        historyEndpoint + "?lesson_key=" + encodeURIComponent(lessonKey) + "&limit=12",
-        { headers: { "Accept": "application/json" } }
-      )
-        .then(function (response) {
-          if (!response.ok) throw new Error("History request failed");
-          return response.json();
-        })
-        .then(function (payload) {
-          removeNode(loading);
-          var items = payload && Array.isArray(payload.items) ? payload.items : [];
-          items.forEach(function (item) {
-            appendHistoryItem(item);
-          });
-          loadedHistoryForLesson = lessonKey;
-        })
-        .catch(function () {
-          removeNode(loading);
-          appendMessage("assistant", "Не удалось загрузить историю Lain. Можно продолжить без нее.");
-        })
-        .finally(function () {
-          isHistoryLoading = false;
-        });
-    }
-
-    function sendRequest(mode, messageText, submissionDraft) {
-      if (isBusy) return;
-
-      var trimmedMessage = (messageText || "").trim();
-      if (mode === "free_question" && !trimmedMessage) return;
-      if (!lessonKey) {
-        appendMessage("assistant", "Сначала открой урок, чтобы я могла помочь в контексте шага.");
-        return;
-      }
-
-      var userNode = trimmedMessage ? appendMessage("user", trimmedMessage) : null;
-      var loading = appendMessage("assistant", "Lain анализирует текущий шаг...", "lain-chat__message--loading");
-      setBusy(true);
-
-      fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify({
-          lesson_key: lessonKey,
-          mode: mode,
-          message: trimmedMessage,
-          submission_draft: (submissionDraft || "").trim() || null
-        })
-      })
-        .then(function (response) {
-          if (!response.ok) {
-            return response.json().then(function (payload) {
-              var detail = payload && payload.detail ? String(payload.detail) : "AI helper request failed";
-              throw new Error(detail);
-            });
-          }
-          return response.json();
-        })
-        .then(function (data) {
-          var assistantText = data.assistant_message || "Сейчас не смогла ответить по этому шагу.";
-          var interactionId = normalizeInteractionId(data.interaction_id);
-          if (loading) {
-            loading.textContent = assistantText;
-            loading.classList.remove("lain-chat__message--loading");
-            if (interactionId) loading.setAttribute("data-ai-interaction-id", interactionId);
-          } else {
-            appendMessage("assistant", assistantText, "", interactionId);
-          }
-          if (interactionId) {
-            rememberInteraction(interactionId);
-            if (userNode) userNode.setAttribute("data-ai-interaction-id", interactionId);
-          }
-        })
-        .catch(function () {
-          if (loading) {
-            loading.textContent = "Ошибка соединения с Lain. Попробуй еще раз через минуту.";
-            loading.classList.remove("lain-chat__message--loading");
-          } else {
-            appendMessage("assistant", "Ошибка соединения с Lain. Попробуй еще раз через минуту.");
-          }
-        })
-        .finally(function () {
-          setBusy(false);
-          input.focus({ preventScroll: true });
-        });
-    }
-
-    launcher.addEventListener("click", function () {
-      if (panel.hidden) {
-        openPanel();
-      } else {
-        closePanel();
-      }
-    });
-
-    if (closeButton) {
-      closeButton.addEventListener("click", function () {
-        closePanel();
-      });
-    }
-
-    form.addEventListener("submit", function (event) {
-      event.preventDefault();
-      var outgoing = input.value || "";
-      input.value = "";
-      sendRequest("free_question", outgoing, "");
-    });
-
-    if (quickActions) {
-      quickActions.querySelectorAll("[data-ai-mode]").forEach(function (button) {
-        button.addEventListener("click", function () {
-          openPanel();
-          var mode = button.getAttribute("data-ai-mode");
-          var message = actionMessages[mode] || "";
-          if (mode === "stuck_help") {
-            var stuckDraft = readStuckDraft();
-            if (stuckDraft) message = message + "\nКонтекст блокера: " + stuckDraft;
-          }
-          var draft = mode === "submission_hint" ? readSubmissionDraft() : "";
-          sendRequest(mode, message, draft);
-        });
-      });
-    }
-
-    document.addEventListener("keydown", function (event) {
-      if (event.key === "Escape" && !panel.hidden) closePanel();
-    });
-  }
-
   function prefersReducedMotion() {
     return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }
@@ -677,6 +413,137 @@
     });
   }
 
+  function setupAIHelper() {
+    var root = document.querySelector("[data-ai-helper]");
+    if (!root) return;
+    var launcher = root.querySelector("[data-ai-launcher]");
+    var panel = root.querySelector("[data-ai-panel]");
+    var closeButton = root.querySelector("[data-ai-close]");
+    var clearButton = root.querySelector("[data-ai-clear]");
+    var statusNode = root.querySelector("[data-ai-status]");
+    var dotNode = root.querySelector("[data-ai-dot]");
+    var contextNode = root.querySelector("[data-ai-context]");
+    var historyNode = root.querySelector("[data-ai-history]");
+    var form = root.querySelector("[data-ai-form]");
+    var textarea = form ? form.querySelector("textarea[name='message']") : null;
+    var socraticToggle = root.querySelector("[data-ai-socratic]");
+    var quickActions = root.querySelectorAll("[data-ai-quick]");
+    var path = root.getAttribute("data-ai-path") || window.location.pathname;
+
+    if (!launcher || !panel || !closeButton || !historyNode || !form || !textarea) return;
+    panel.hidden = true;
+    launcher.setAttribute("aria-expanded", "false");
+
+    function setStatus(value) {
+      if (!statusNode) return;
+      statusNode.textContent = value;
+      if (dotNode) dotNode.classList.toggle("is-thinking", value === "thinking");
+      launcher.classList.toggle("is-thinking", value === "thinking");
+    }
+
+    function renderMessages(messages) {
+      historyNode.innerHTML = "";
+      if (!messages || !messages.length) {
+        historyNode.innerHTML = "<p class='lain-helper__empty'>История пуста для этого контекста.</p>";
+        return;
+      }
+      messages.forEach(function (message) {
+        var node = document.createElement("article");
+        node.className = "lain-helper__msg lain-helper__msg--" + message.role;
+        node.textContent = message.text || "";
+        historyNode.appendChild(node);
+      });
+      historyNode.scrollTop = historyNode.scrollHeight;
+    }
+
+    function loadHistory() {
+      fetch("/api/ai-helper/history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ path: path })
+      })
+        .then(function (response) { return response.json(); })
+        .then(function (data) {
+          if (contextNode && data.context_label) contextNode.textContent = data.context_label;
+          setStatus(data.online ? "online" : "offline");
+          renderMessages(data.messages || []);
+        })
+        .catch(function () {
+          setStatus("offline");
+        });
+    }
+
+    var closeTimer = null;
+
+    function openPanel() {
+      if (closeTimer) {
+        window.clearTimeout(closeTimer);
+        closeTimer = null;
+      }
+      panel.hidden = false;
+      window.requestAnimationFrame(function () {
+        panel.classList.add("is-open");
+      });
+      launcher.setAttribute("aria-expanded", "true");
+      loadHistory();
+    }
+
+    function closePanel() {
+      panel.classList.remove("is-open");
+      closeTimer = window.setTimeout(function () {
+        panel.hidden = true;
+      }, 160);
+      launcher.setAttribute("aria-expanded", "false");
+    }
+
+    launcher.addEventListener("click", function () {
+      if (panel.hidden) openPanel();
+      else closePanel();
+    });
+    closeButton.addEventListener("click", closePanel);
+
+    clearButton.addEventListener("click", function () {
+      fetch("/api/ai-helper/clear", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ path: path })
+      }).then(function () {
+        renderMessages([]);
+      });
+    });
+
+    quickActions.forEach(function (button) {
+      button.addEventListener("click", function () {
+        textarea.value = button.getAttribute("data-ai-quick") || "";
+        textarea.focus();
+      });
+    });
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      var message = textarea.value.trim();
+      if (!message) return;
+      setStatus("thinking");
+      fetch("/api/ai-helper/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          path: path,
+          message: message,
+          socratic_mode: !!(socraticToggle && socraticToggle.checked)
+        })
+      })
+        .then(function (response) { return response.json(); })
+        .then(function () {
+          textarea.value = "";
+          loadHistory();
+        })
+        .catch(function () {
+          setStatus("offline");
+        });
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     document.documentElement.dataset.appReady = "true";
     updateWorldClocks();
@@ -684,10 +551,10 @@
     setupTabs();
     setupTerminalLaunchers();
     setupLessonTerminals();
-    setupAIHelper();
     setupMotionPolish();
     setupAmbientCanvas();
     setupThemeCustomizer();
+    setupAIHelper();
     window.setInterval(updateWorldClocks, 30000);
   });
 })();

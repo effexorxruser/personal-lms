@@ -20,6 +20,7 @@ venv/
 # Runtime data
 instance/*
 !instance/.gitkeep
+var/source_cache/
 
 # Editor/OS
 .DS_Store

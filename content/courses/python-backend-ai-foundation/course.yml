@@ -1,10 +1,11 @@
 slug: python-backend-ai-foundation
-title: Python Backend + AI — Block 0 (Onboarding & Learning Loop)
+title: Python Backend + AI — Blocks 0-1 (Onboarding + Python Core)
 description: >
-  Активный стартовый маршрут: два модуля Block 0 по blueprint (workspace + learning loop).
-  Расширенный pass foundation-real вынесен в отдельный draft-курс для будущего Block 1.
+  Активный маршрут включает Block 0 (workspace + learning loop) и Block 1 Python Core.
+  foundation-real остаётся отдельным draft-pass и не входит в обязательный active flow.
 version: 1.0.0
-estimated_weeks: 2
+estimated_weeks: 4
 modules:
   - block-0-onboarding-workspace
   - block-0-learning-loop
+  - block-1-python-core

@@ -1,0 +1,39 @@
+version: v1
+block: 1
+module_slug: block-1-python-core
+generated_at: '2026-04-28T07:32:43Z'
+inputs:
+  blueprint_path: /home/olegt/dev/repos/personal-lms/content/blueprints/backend_developer_6_months.yml
+  source_registry_path: /home/olegt/dev/repos/personal-lms/content/sources/source_registry.yml
+  source_cache_manifest_path: null
+  required_source_ids:
+  - python-mooc
+  - automate-boring-stuff
+  - python-docs
+  expected_tasks:
+  - foundation-python-types-and-flow
+  - foundation-functions-and-modules
+  - foundation-files-and-errors
+  checkpoint_slug: block-1-python-core-checkpoint
+  expected_artifact: CLI-утилиты на Python с базовой обработкой ошибок
+  required_lesson_sections:
+  - Why this matters (RU)
+  - What to read (EN source)
+  - What to skip
+  - Action
+  - Definition of Done
+  - Technical English
+  source_cache_latest: {}
+prompts:
+  build_module: prompts/build_module.md
+  build_lesson: prompts/build_lesson.md
+  build_task: prompts/build_task.md
+  build_checkpoint: prompts/build_checkpoint.md
+  validate_draft: prompts/validate_draft.md
+rules:
+- rules/russian_friendly.md
+- rules/technical_english.md
+- rules/isolated_platform.md
+- rules/student_friendly.md
+- rules/no_manual_source_hunting.md
+output_contract: schemas/draft_output_contract.yml

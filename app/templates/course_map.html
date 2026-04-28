@@ -32,12 +32,9 @@
     </section>
 
     <section class="module-list" data-accordion="single" aria-label="Список модулей">
-      {% set course_ns = namespace(opened=false) %}
       {% for module in course.modules %}
       {% set module_state = module_statuses.get(module.slug, 'доступен') %}
-      {% set should_open = (not course_ns.opened and module_state != 'завершён') or (loop.first and not course_ns.opened) %}
-      {% if should_open %}{% set course_ns.opened = true %}{% endif %}
-      <details class="ui-card module-card module-details" {% if should_open %}open{% endif %}>
+      <details class="ui-card module-card module-details">
         <summary class="module-head">
           <span class="module-head__index">{{ loop.index }}</span>
           <span class="module-head__body">

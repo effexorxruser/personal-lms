@@ -1,0 +1,46 @@
+slug: foundation-functions-and-modules
+title: Функции и модули в мини-проекте
+summary: Вынести текстовые операции в отдельный модуль и использовать их через импорт в CLI-скрипте.
+instructions: |
+  Создай два файла (в одной папке):
+  - `text_utils.py`
+  - `run_text_utils.py`
+
+  Шаг 1:
+  В `text_utils.py` сначала реализуй только `word_count(text)`.
+
+  Шаг 2:
+  Добавь `char_count(text)`.
+
+  Шаг 3:
+  Добавь `normalize_spaces(text)`.
+
+  Шаг 4:
+  В `run_text_utils.py` подключи функции через import и выведи результаты для строки из input().
+
+  Шаг 5:
+  Добавь явный блок запуска через `if __name__ == "__main__":`.
+
+  В `text_utils.py` реализуй функции:
+  - word_count(text: str) -> int
+  - char_count(text: str) -> int
+  - normalize_spaces(text: str) -> str
+
+  В `run_text_utils.py`:
+  - импортируй функции из `text_utils.py`;
+  - прочитай строку через input();
+  - выведи количество слов, символов и нормализованную строку.
+  - добавь явный блок запуска через `if __name__ == "__main__":` для практики entrypoint-паттерна.
+
+  Логику подсчета держи в функциях, а не в entrypoint-файле.
+submission_type: command_output
+definition_of_done:
+  - "Есть отдельный модуль text_utils.py с тремя функциями."
+  - Entry point использует импорт, а не дублирует логику.
+  - Скрипт корректно работает на пустом вводе и обычной строке.
+  - Функции возвращают значения и не зависят от print внутри себя.
+  - В выводе показан минимум один ожидаемый пример результата.
+review_mode: deterministic
+hints:
+  - Для normalize_spaces удобно использовать split/join.
+  - Проверь кейс с множественными пробелами и табами.

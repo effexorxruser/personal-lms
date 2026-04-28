@@ -1,0 +1,52 @@
+version: "1"
+applies_to:
+  - module.yml
+  - lesson.md
+  - task.yml
+  - checkpoint.yml
+
+lesson:
+  front_matter_required:
+    - key
+    - title
+    - summary
+    - objectives
+    - checklist
+    - task_slug
+    - source_ids
+  required_sections:
+    - Why this matters (RU)
+    - What to read (EN source)
+    - What to skip
+    - Action
+    - Definition of Done
+    - Technical English
+
+task:
+  required_fields:
+    - slug
+    - title
+    - summary
+    - instructions
+    - submission_type
+    - definition_of_done
+    - review_mode
+    - hints
+  optional_fields:
+    - terminal
+
+checkpoint:
+  required_fields:
+    - slug
+    - title
+    - summary
+    - module_slug
+    - description
+    - project_description
+    - requirements
+    - deliverables
+    - evaluation_criteria
+    - definition_of_done
+    - submission_type
+    - portfolio_expectations
+    - hints
