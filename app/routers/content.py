@@ -6,6 +6,7 @@ from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 
 from app.db import get_engine
+from app.services.catalog_service import list_learner_visible_course_cards
 from app.services.checkpoint_service import (
     checkpoint_course_slug,
     checkpoint_submission_type_label,
@@ -40,6 +41,26 @@ def _require_auth(request: Request) -> int | RedirectResponse:
     if not user_id:
         return RedirectResponse(url="/login", status_code=303)
     return int(user_id)
+
+
+@router.get("/courses")
+def course_catalog(request: Request):
+    auth_result = _require_auth(request)
+    if isinstance(auth_result, RedirectResponse):
+        return auth_result
+    mobile_view = is_mobile_view(request)
+
+    course_cards = list_learner_visible_course_cards()
+    return templates.TemplateResponse(
+        request=request,
+        name="courses/catalog.html",
+        context={
+            "course_cards": course_cards,
+            "nav_course_href": "/courses",
+            "nav_lessons_href": "/dashboard",
+            "mobile_view": mobile_view,
+        },
+    )
 
 
 @router.get("/courses/{course_slug}")

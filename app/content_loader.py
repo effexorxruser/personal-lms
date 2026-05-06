@@ -82,6 +82,11 @@ class CourseContent:
     description: str
     version: str
     estimated_weeks: int
+    status: str
+    level: str
+    duration_weeks: int | None
+    tags: list[str]
+    outcomes: list[str]
     prerequisites: list[str]
     module_order: list[str]
     modules: list[ModuleContent]
@@ -212,6 +217,11 @@ def load_content_index(
             description=course_schema.description,
             version=course_schema.version,
             estimated_weeks=course_schema.effective_duration_weeks,
+            status=course_schema.status,
+            level=course_schema.level,
+            duration_weeks=course_schema.duration_weeks,
+            tags=list(course_schema.tags),
+            outcomes=list(course_schema.outcomes),
             prerequisites=list(course_schema.prerequisites),
             module_order=module_order,
             modules=modules,

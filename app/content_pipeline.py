@@ -18,6 +18,7 @@ DEFAULT_TERMINAL_ALLOWED_COMMANDS = ["help", "pwd", "tree", "python", "pytest", 
 TASK_SUBMISSION_TYPES = {"text", "link", "command_output"}
 CHECKPOINT_SUBMISSION_TYPES = {"text", "link", "repository_link", "command_output"}
 TASK_REVIEW_MODES = {"deterministic", "manual"}
+COURSE_STATUSES = {"available", "draft", "archived"}
 SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 MIN_LESSONS_PER_MODULE = 2
 
@@ -67,6 +68,10 @@ class CourseSchema(_SchemaBase):
     version: str = "1.0.0"
     duration_weeks: int | None = None
     estimated_weeks: int | None = None
+    status: str = "available"
+    level: str = "unspecified"
+    tags: list[str] = Field(default_factory=list)
+    outcomes: list[str] = Field(default_factory=list)
     modules: list[str]
     prerequisites: list[str] = Field(default_factory=list)
 
@@ -82,6 +87,21 @@ class CourseSchema(_SchemaBase):
     def validate_required_text(cls, value: str) -> str:
         if not value:
             raise ValueError("не может быть пустым")
+        return value
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, value: str) -> str:
+        if value not in COURSE_STATUSES:
+            allowed = ", ".join(sorted(COURSE_STATUSES))
+            raise ValueError(f"должен быть одним из: {allowed}")
+        return value
+
+    @field_validator("level")
+    @classmethod
+    def validate_level(cls, value: str) -> str:
+        if not value:
+            return "unspecified"
         return value
 
     @field_validator("duration_weeks", "estimated_weeks")
@@ -105,9 +125,9 @@ class CourseSchema(_SchemaBase):
             normalized.append(slug)
         return normalized
 
-    @field_validator("prerequisites")
+    @field_validator("tags", "outcomes", "prerequisites")
     @classmethod
-    def validate_prerequisites(cls, value: list[str]) -> list[str]:
+    def validate_string_list(cls, value: list[str]) -> list[str]:
         cleaned: list[str] = []
         for item in value:
             text = str(item).strip()

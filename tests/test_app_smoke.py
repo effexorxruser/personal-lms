@@ -160,11 +160,14 @@ def test_protected_routes_redirect_to_login() -> None:
     _prepare_db()
     with TestClient(create_app()) as client:
         dashboard = client.get("/dashboard", follow_redirects=False)
+        catalog = client.get("/courses", follow_redirects=False)
         course = client.get("/courses/python-backend-ai-foundation", follow_redirects=False)
         lesson = client.get("/lessons/foundation-real-workspace", follow_redirects=False)
 
     assert dashboard.status_code == 303
     assert dashboard.headers["location"] == "/login"
+    assert catalog.status_code == 303
+    assert catalog.headers["location"] == "/login"
     assert course.status_code == 303
     assert course.headers["location"] == "/login"
     assert lesson.status_code == 303
@@ -238,6 +241,35 @@ def test_login_fail() -> None:
 
     assert response.status_code == 401
     assert "Неверный логин или пароль" in response.text
+
+
+def test_course_catalog_returns_200_and_lists_available_courses() -> None:
+    _prepare_db()
+    with TestClient(create_app()) as client:
+        _login(client)
+        response = client.get("/courses")
+
+    assert response.status_code == 200
+    assert "Доступные курсы" in response.text
+    assert "Python Backend + AI" in response.text
+    assert "python-backend-ai-foundation-block1-draft" not in response.text
+    assert "Course Factory Reference Fixtures" not in response.text
+
+
+def test_course_catalog_empty_state_does_not_500(monkeypatch) -> None:
+    from app.content_loader import ContentIndex
+    import app.services.catalog_service as catalog_service
+
+    _prepare_db()
+    empty_index = ContentIndex(courses={}, lessons={}, lesson_order=[], tasks={}, checkpoints={})
+    monkeypatch.setattr(catalog_service, "get_content_registry", lambda: empty_index)
+
+    with TestClient(create_app()) as client:
+        _login(client)
+        response = client.get("/courses")
+
+    assert response.status_code == 200
+    assert "Курсы пока не добавлены." in response.text
 
 
 def test_course_page_returns_200() -> None:

@@ -28,7 +28,7 @@
           </a>
           <nav class="topbar__nav" aria-label="Основная навигация">
             <a href="/dashboard" class="nav-link {% if request.url.path == '/dashboard' %}is-active{% endif %}">Главная</a>
-            <a href="{{ nav_course_href if nav_course_href is defined else '/courses/python-backend-ai-foundation' }}" class="nav-link {% if request.url.path.startswith('/courses/') %}is-active{% endif %}">Курс</a>
+            <a href="{{ nav_course_href if nav_course_href is defined else '/courses' }}" class="nav-link {% if request.url.path == '/courses' or request.url.path.startswith('/courses/') %}is-active{% endif %}">Курсы</a>
             <a href="{{ nav_lessons_href if nav_lessons_href is defined else '/lessons/foundation-real-workspace' }}" class="nav-link {% if request.url.path.startswith('/lessons/') %}is-active{% endif %}">Уроки</a>
             <a href="/recap" class="nav-link {% if request.url.path == '/recap' %}is-active{% endif %}">Итоги</a>
           </nav>
