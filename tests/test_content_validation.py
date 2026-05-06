@@ -45,6 +45,57 @@ def test_foundation_real_module_lives_in_draft_course() -> None:
     assert registry.lessons["foundation-real-workspace"].course_slug == "python-backend-ai-foundation-block1-draft"
 
 
+def test_course_metadata_fields_are_backward_compatible(tmp_path: Path) -> None:
+    tree = create_valid_content_tree(tmp_path)
+
+    course_path = tree["course_dir"] / "course.yml"
+    payload = yaml.safe_load(course_path.read_text(encoding="utf-8"))
+    payload.pop("duration_weeks")
+    payload["estimated_weeks"] = 3
+    write_yaml(course_path, payload)
+
+    bundle = load_content_bundle(
+        content_root=tree["content_root"],
+        task_root=tree["task_root"],
+        checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
+        raise_on_error=True,
+    )
+
+    course = bundle.courses[0].schema
+    assert course.status == "available"
+    assert course.level == "unspecified"
+    assert course.duration_weeks is None
+    assert course.tags == []
+    assert course.outcomes == []
+
+
+def test_course_metadata_fields_accept_catalog_values(tmp_path: Path) -> None:
+    tree = create_valid_content_tree(tmp_path)
+
+    course_path = tree["course_dir"] / "course.yml"
+    payload = yaml.safe_load(course_path.read_text(encoding="utf-8"))
+    payload.update(
+        {
+            "status": "draft",
+            "level": "junior",
+            "duration_weeks": 6,
+            "tags": ["python", "backend"],
+            "outcomes": ["Собрать backend-проект"],
+        }
+    )
+    write_yaml(course_path, payload)
+
+    report = validate_content(
+        content_root=tree["content_root"],
+        task_root=tree["task_root"],
+        checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
+    )
+
+    assert report.ok
+
+
 def test_missing_required_field_fails_validation(tmp_path: Path) -> None:
     tree = create_valid_content_tree(tmp_path)
 

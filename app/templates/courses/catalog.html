@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Каталог курсов | personal-lms{% endblock %}
+
+{% block content %}
+<section class="workspace-shell">
+  <main class="workspace-pane">
+    <section class="ui-card course-hero" aria-labelledby="catalog-title">
+      <div>
+        <p class="eyebrow">Каталог курсов</p>
+        {% if mobile_view %}
+        <p class="status-kicker">Мобильный режим · только просмотр</p>
+        {% endif %}
+        <h1 id="catalog-title">Доступные курсы</h1>
+        <p class="hero-copy">Выберите учебный маршрут из file-based каталога платформы.</p>
+      </div>
+    </section>
+
+    {% if course_cards %}
+    <section class="dashboard-lms-grid" aria-label="Список доступных курсов">
+      {% for course in course_cards %}
+      <article class="ui-card lms-summary-card">
+        <p class="status-kicker">{{ course.level }}</p>
+        <h2>{{ course.title }}</h2>
+        <p>{{ course.description }}</p>
+        <dl class="lms-lines">
+          <div>
+            <dt>Длительность</dt>
+            <dd>{% if course.duration_weeks %}{{ course.duration_weeks }} нед.{% else %}не указана{% endif %}</dd>
+          </div>
+          <div>
+            <dt>Статус</dt>
+            <dd>{{ course.status }}</dd>
+          </div>
+        </dl>
+        {% if course.tags %}
+        <div class="meta-row" aria-label="Теги курса">
+          {% for tag in course.tags %}
+          <span class="meta-pill">{{ tag }}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+        <a class="card-link" href="/courses/{{ course.slug }}">Открыть курс</a>
+      </article>
+      {% endfor %}
+    </section>
+    {% else %}
+    <section class="ui-card lms-summary-card" aria-label="Пустой каталог">
+      <h2>Курсы пока не добавлены.</h2>
+      <p class="rail-card__muted">Когда появится доступный course.yml со статусом available, он отобразится здесь.</p>
+    </section>
+    {% endif %}
+  </main>
+</section>
+{% endblock %}
