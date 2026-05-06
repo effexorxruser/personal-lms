@@ -5,8 +5,9 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 
+from app.content_loader import ContentIndex, CourseContent
 from app.content_registry import get_content_registry
-from app.services.catalog_service import list_learner_visible_course_cards
+from app.services.catalog_service import CourseCard, list_learner_visible_course_cards
 from app.db import get_engine
 from app.services.content_service import get_active_course_first_lesson_key
 from app.services.execution_service import dashboard_execution_summary
@@ -21,6 +22,48 @@ templates = Jinja2Templates(directory=TEMPLATES_DIR)
 router = APIRouter()
 
 
+def _select_dashboard_course(registry: ContentIndex, course_cards: list[CourseCard]) -> CourseContent | None:
+    preferred_course = registry.courses.get("python-backend-ai-foundation")
+    if preferred_course and preferred_course.status == "available":
+        return preferred_course
+    if not course_cards:
+        return None
+    return registry.courses.get(course_cards[0].slug)
+
+
+def _render_empty_dashboard(
+    *,
+    request: Request,
+    username: str,
+    mobile_view: bool,
+    course_cards: list[CourseCard],
+):
+    return templates.TemplateResponse(
+        request=request,
+        name="dashboard.html",
+        context={
+            "cards": [],
+            "username": username,
+            "dashboard_has_course": False,
+            "dashboard_course_title": "Курс пока не выбран",
+            "dashboard_module_title": "Модуль не определён",
+            "dashboard_progress_pct": 0,
+            "dashboard_checkpoint_label": "checkpoint не активен",
+            "dashboard_checkpoint_title": None,
+            "continue_href": "/courses",
+            "execution_summary": None,
+            "checkpoint_snapshot": None,
+            "checkpoint_href": "/courses",
+            "weekly_recap": None,
+            "reason_label": reason_label,
+            "nav_course_href": "/courses",
+            "nav_lessons_href": "/courses",
+            "mobile_view": mobile_view,
+            "course_cards": course_cards,
+        },
+    )
+
+
 @router.get("/dashboard")
 def dashboard(request: Request):
     user_id = request.session.get("user_id")
@@ -30,38 +73,15 @@ def dashboard(request: Request):
 
     registry = get_content_registry()
     course_cards = list_learner_visible_course_cards(registry)
-    preferred_course = registry.courses.get("python-backend-ai-foundation")
-    course = (
-        preferred_course
-        if preferred_course and preferred_course.status == "available"
-        else (registry.courses.get(course_cards[0].slug) if course_cards else None)
-    )
+    course = _select_dashboard_course(registry, course_cards)
     mobile_view = is_mobile_view(request)
 
     if course is None:
-        return templates.TemplateResponse(
+        return _render_empty_dashboard(
             request=request,
-            name="dashboard.html",
-            context={
-                "cards": [],
-                "username": username,
-                "dashboard_has_course": False,
-                "dashboard_course_title": "Курс пока не выбран",
-                "dashboard_module_title": "Модуль не определён",
-                "dashboard_progress_pct": 0,
-                "dashboard_checkpoint_label": "checkpoint не активен",
-                "dashboard_checkpoint_title": None,
-                "continue_href": "/courses",
-                "execution_summary": None,
-                "checkpoint_snapshot": None,
-                "checkpoint_href": "/courses",
-                "weekly_recap": None,
-                "reason_label": reason_label,
-                "nav_course_href": "/courses",
-                "nav_lessons_href": "/courses",
-                "mobile_view": mobile_view,
-                "course_cards": course_cards,
-            },
+            username=username,
+            mobile_view=mobile_view,
+            course_cards=course_cards,
         )
 
     with Session(get_engine()) as session:
@@ -191,38 +211,15 @@ def recap(request: Request):
 
     registry = get_content_registry()
     course_cards = list_learner_visible_course_cards(registry)
-    preferred_course = registry.courses.get("python-backend-ai-foundation")
-    course = (
-        preferred_course
-        if preferred_course and preferred_course.status == "available"
-        else (registry.courses.get(course_cards[0].slug) if course_cards else None)
-    )
+    course = _select_dashboard_course(registry, course_cards)
     mobile_view = is_mobile_view(request)
 
     if course is None:
-        return templates.TemplateResponse(
+        return _render_empty_dashboard(
             request=request,
-            name="dashboard.html",
-            context={
-                "cards": [],
-                "username": username,
-                "dashboard_has_course": False,
-                "dashboard_course_title": "Курс пока не выбран",
-                "dashboard_module_title": "Модуль не определён",
-                "dashboard_progress_pct": 0,
-                "dashboard_checkpoint_label": "checkpoint не активен",
-                "dashboard_checkpoint_title": None,
-                "continue_href": "/courses",
-                "execution_summary": None,
-                "checkpoint_snapshot": None,
-                "checkpoint_href": "/courses",
-                "weekly_recap": None,
-                "reason_label": reason_label,
-                "nav_course_href": "/courses",
-                "nav_lessons_href": "/courses",
-                "mobile_view": mobile_view,
-                "course_cards": course_cards,
-            },
+            username=username,
+            mobile_view=mobile_view,
+            course_cards=course_cards,
         )
 
     with Session(get_engine()) as session:
