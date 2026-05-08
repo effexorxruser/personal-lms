@@ -1,8 +1,5 @@
-from pathlib import Path
-
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import RedirectResponse
-from fastapi.templating import Jinja2Templates
 from sqlmodel import Session
 
 from app.db import get_engine
@@ -29,9 +26,7 @@ from app.services.submission_service import create_submission, submission_type_l
 from app.services.stuck_service import create_stuck_event, resolve_stuck_event, stuck_context_for_lesson
 from app.services.task_service import resolve_lesson_task
 from app.services.view_mode import is_mobile_view
-
-TEMPLATES_DIR = Path(__file__).resolve().parents[1] / "templates"
-templates = Jinja2Templates(directory=TEMPLATES_DIR)
+from app.web_templates import templates
 
 router = APIRouter()
 

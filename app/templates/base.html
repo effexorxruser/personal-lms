@@ -92,7 +92,7 @@
       </div>
     </section>
 
-    {% if request.session.get('user_id') %}
+    {% if feature_ai_helper and request.session.get('user_id') %}
     <section class="lain-helper" data-ai-helper data-ai-path="{{ request.url.path }}">
       <button type="button" class="lain-helper__launcher" data-ai-launcher aria-expanded="false" aria-controls="lain-helper-panel" aria-label="Открыть Lain AI">
         <img class="lain-helper__launcher-avatar" src="/assets/design-references/lain-image-6.png" alt="">

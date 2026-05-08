@@ -155,7 +155,7 @@ def _fallback_reply(context: HelperContext, message: str, socratic_mode: bool, t
 
 def is_helper_online() -> bool:
     settings = get_settings()
-    return settings.ai_helper_enabled and bool(settings.openai_api_key.strip())
+    return settings.enable_ai_helper and bool(settings.openai_api_key.strip())
 
 
 def _build_system_prompt(context: HelperContext, socratic_mode: bool, terminal_evidence: str) -> str:

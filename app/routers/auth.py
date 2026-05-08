@@ -1,16 +1,11 @@
-from pathlib import Path
-
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import RedirectResponse
-from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select
 
 from app.db import get_engine
 from app.models import User
 from app.security import verify_password
-
-TEMPLATES_DIR = Path(__file__).resolve().parents[1] / "templates"
-templates = Jinja2Templates(directory=TEMPLATES_DIR)
+from app.web_templates import templates
 
 router = APIRouter()
 

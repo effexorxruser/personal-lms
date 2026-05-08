@@ -2,17 +2,22 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlmodel import Session
 
+from app.deps.feature_gates import require_terminal_enabled
 from app.db import get_engine
 from app.models import TerminalRun
 from app.services.content_service import get_lesson_or_404
 from app.services.task_service import resolve_lesson_task
 from app.services.terminal_service import get_terminal_history, run_terminal_command
 
-router = APIRouter(prefix="/api/terminal", tags=["terminal"])
+router = APIRouter(
+    prefix="/api/terminal",
+    tags=["terminal"],
+    dependencies=[Depends(require_terminal_enabled)],
+)
 
 
 class TerminalRunRequest(BaseModel):

@@ -7,6 +7,7 @@ from sqlmodel import Session, delete, select
 
 os.environ["PERSONAL_LMS_DATABASE_URL"] = "sqlite:///./instance/test_auth.db"
 os.environ["PERSONAL_LMS_SESSION_SECRET_KEY"] = "test-session-secret"
+os.environ["PERSONAL_LMS_ENABLE_TERMINAL"] = "true"
 
 from app.config import get_settings
 from app.db import get_engine, init_db

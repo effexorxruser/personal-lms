@@ -98,7 +98,7 @@
           {% endif %}
         </article>
 
-        {% if not mobile_view and execution.task and execution.task.terminal and execution.task.terminal.enabled %}
+        {% if feature_terminal and not mobile_view and execution.task and execution.task.terminal and execution.task.terminal.enabled %}
         <div class="terminal-launch-row" data-terminal-launch="lesson-terminal">
           <button type="button" class="btn btn--primary" data-terminal-open="lesson-terminal">Открыть терминал</button>
           <span>Терминал откроется под задачей и останется в потоке страницы.</span>
@@ -201,7 +201,7 @@
           </ul>
         </details>
 
-        {% if not mobile_view and execution.task and execution.task.terminal and execution.task.terminal.enabled %}
+        {% if feature_terminal and not mobile_view and execution.task and execution.task.terminal and execution.task.terminal.enabled %}
         <details class="ui-card lesson-card compact-details lesson-side-panel terminal-help-panel">
           <summary>Терминал: команды</summary>
           <p class="terminal-commands-panel__hint">Разрешённые группы:</p>

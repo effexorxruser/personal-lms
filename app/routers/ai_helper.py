@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlmodel import Session
 
+from app.deps.feature_gates import require_ai_helper_enabled
 from app.db import get_engine
 from app.services.ai_helper_service import (
     clear_history,
@@ -14,7 +15,11 @@ from app.services.ai_helper_service import (
     serialize_message,
 )
 
-router = APIRouter(prefix="/api/ai-helper", tags=["ai-helper"])
+router = APIRouter(
+    prefix="/api/ai-helper",
+    tags=["ai-helper"],
+    dependencies=[Depends(require_ai_helper_enabled)],
+)
 
 
 class HelperChatRequest(BaseModel):

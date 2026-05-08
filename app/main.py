@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -6,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
 from app.middleware import configure_middleware
+from app.runtime_warnings import emit_runtime_warnings
 from app.routers.auth import router as auth_router
 from app.routers.ai_helper import router as ai_helper_router
 from app.routers.content import router as content_router
@@ -15,9 +17,19 @@ from app.routers.terminal import router as terminal_router
 BASE_DIR = Path(__file__).resolve().parent
 
 
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    emit_runtime_warnings()
+    yield
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
-    application = FastAPI(title=settings.app_name, debug=settings.debug)
+    application = FastAPI(
+        title=settings.app_name,
+        debug=settings.debug,
+        lifespan=lifespan,
+    )
 
     application.mount(
         "/static",
