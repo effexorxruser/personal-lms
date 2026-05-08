@@ -1,6 +1,6 @@
 # Course Pack Contract
 
-Стабильный file-based контракт для переносимого учебного пакета в `personal-lms`. Runtime не привязан к конкретному курсу: новый курс — это дерево файлов под `content/courses/<course-slug>/`, прошедшее `python scripts/validate_content.py`.
+Стабильный file-based контракт для переносимого учебного пакета в `personal-lms`. Runtime не привязан к конкретному курсу: новый курс — это дерево файлов под `content/courses/<course-slug>/`, прошедшее `python scripts/validate_content.py`. Допустим пустой набор курсов и пустые глобальные `content/tasks` / `content/checkpoints`: при отсутствии ошибок в графе валидатор завершается успешно.
 
 ## Версия схемы
 

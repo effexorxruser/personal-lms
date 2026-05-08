@@ -1,6 +1,6 @@
 # Project Decomposition Plan
 
-Дата аудита: 2026-05-06.
+Дата аудита: 2026-05-06. Дальше по тексту — срез на эту дату; foundation Course Pack Contract и расширенная валидация уже в `app/content_pipeline.py`, норматив — `docs/course_authoring/COURSE_PACK_CONTRACT.md`. Текущий инвентарь `content/courses|tasks|checkpoints` может быть пустым (см. [MVP_SCOPE.md](MVP_SCOPE.md)).
 
 ## Назначение
 
@@ -100,46 +100,22 @@ Missing for target epic:
 
 - `content/courses/{course_slug}/course.yml`
 - `content/courses/{course_slug}/modules/{module_slug}/module.yml`
-- `content/courses/{course_slug}/modules/{module_slug}/lessons/*.md`
+- уроки: преимущественно `lessons/<key>.md` (аудит 2026-05-06); канонический layout и вложенные pack-файлы — в [COURSE_PACK_CONTRACT.md](../course_authoring/COURSE_PACK_CONTRACT.md)
 - shared tasks: `content/tasks/*.yml`
 - shared checkpoints: `content/checkpoints/*.yml`
 - shared source registry: `content/sources/source_registry.yml`
 
-Текущее validation покрывает:
+Валидация (`app/content_pipeline.py`, `scripts/validate_content.py`): pydantic-манифесты, связность графа, дубликаты slug, baseline-секции урока, orphans; позже добавлены `schema_version`, предупреждения по русским секциям, pack tasks/checkpoints, см. контракт и код.
 
-- pydantic schemas для course/module/lesson/task/checkpoint/source registry;
-- duplicate course/module/lesson/task/checkpoint slugs;
-- ссылки course -> modules;
-- ссылки module -> lessons/checkpoint;
-- ссылки lesson -> task;
-- наличие `source_ids` в lesson;
-- существование `source_id` в shared source registry;
-- обязательные lesson sections в текущем англо-русском стандарте;
-- orphan tasks;
-- orphan checkpoints;
-- непустые markdown bodies.
+Разрыв с «идеальным» контрактом (аудит 2026-05-06; часть закрыта в коде):
 
-Разрыв с целевым Course Pack Contract:
-
-- `course.yml` еще не требует `schema_version`, `level`, `language`, `status`, `tags`, `audience`, `outcomes`, `final_artifact`.
-- `module.yml` еще использует `description` и `block`; целевой контракт ожидает `summary`, `order`, `objectives`, `lessons`, `checkpoint`.
-- `lesson.md` еще использует `key`, `summary`, `checklist`, `task_slug`; целевой контракт ожидает `schema_version`, `slug`, `order`, `estimated_minutes`, `level`, `task_slugs`, `checkpoint_slug`.
-- обязательные lesson sections сейчас: `Why this matters (RU)`, `What to read (EN source)`, `What to skip`, `Action`, `Definition of Done`, `Technical English`; целевые русские секции еще не включены как контракт.
-- tasks/checkpoints сейчас глобальные (`content/tasks`, `content/checkpoints`), а не вложенные внутрь course pack.
-- source registry сейчас глобальный (`content/sources/source_registry.yml`), а не course-local `sources.yml`.
-- course status `draft / available / archived` не валидируется и не влияет на learner-visible catalog.
+- остаётся глобальный `source_registry.yml`, нет course-local `sources.yml`;
+- расширенные поля вроде `audience` / `final_artifact` в `course.yml` не целевой обязательный набор;
+- каталог `/courses`, empty-state и снятие hardcoded slug — см. разделы ниже.
 
 ### Content inventory
 
-Проверено командой `python scripts/validate_content.py`.
-
-- Courses: 3
-- Modules: 5
-- Lessons: 15
-- Tasks: 8
-- Checkpoints: 5
-
-Validation status: OK, ошибок не найдено.
+На момент аудита 2026-05-06: Courses 3, Modules 5, Lessons 15, Tasks 8, Checkpoints 5, `validate_content` OK. Сейчас дерево курсов/tasks/checkpoints в репозитории может быть пустым между итерациями авторинга.
 
 ### Auth state
 

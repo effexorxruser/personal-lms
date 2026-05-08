@@ -17,6 +17,7 @@
 
 ## 4. Как устроено обучение
 
+- **Контракт course pack и авторинг файлов:** [course_authoring/COURSE_PACK_CONTRACT.md](course_authoring/COURSE_PACK_CONTRACT.md) · [COURSE_AUTHORING_GUIDE.md](course_authoring/COURSE_AUTHORING_GUIDE.md)
 - [LEARNING_MODEL.md](product/LEARNING_MODEL.md)
 - [CONTENT_STRATEGY.md](product/CONTENT_STRATEGY.md)
 - [SOURCE_STACK.md](product/SOURCE_STACK.md)

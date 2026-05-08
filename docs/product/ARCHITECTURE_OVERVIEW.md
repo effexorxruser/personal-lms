@@ -32,7 +32,8 @@
 ### Content layer
 
 - Markdown + YAML
-- file-based registry через `app/content_loader.py`
+- file-based registry через `app/content_loader.py` и валидацию графа в `app/content_pipeline.py` / `scripts/validate_content.py`
+- контракт pack: [course_authoring/COURSE_PACK_CONTRACT.md](../course_authoring/COURSE_PACK_CONTRACT.md)
 
 ### Важно про Tailwind/Alpine
 

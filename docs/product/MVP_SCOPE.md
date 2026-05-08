@@ -45,13 +45,16 @@ MVP должен быть small and sharp.
 - lesson-scoped terminal execution surface;
 - context-scoped AI helper (Lain Helper v1.0);
 - file-based authoring model: курс/модуль/урок/task/checkpoint.
+- **Course Pack Contract (foundation):** норматив и практика в `docs/course_authoring/`; в коде — `schema_version`, валидация в `app/content_pipeline.py`, мягкие предупреждения по русским секциям урока, вложенные pack `*.task.yml` / `*.checkpoint.yml`, канонический `lessons/<key>/lesson.md` рядом с legacy `*.md`.
 - клиентский UI customization: выбор 3 theme preset (`vanilla-dark/vanilla-light/lain`) и glass on/off (без изменения SSR-архитектуры).
 - default runtime theme: `lain` (можно переключить через UI settings).
 
 ## Что в MVP пока не реализовано
 
 - production-ready migration workflow (Alembic scaffold);
-- multi-course масштабирование beyond текущего content snapshot.
+- полностью универсальный learner flow: часть сервисов всё ещё ориентируется на slug `python-backend-ai-foundation` (dashboard/recap/AI helper и т.д.).
+
+Учебный контент в `content/courses/` может быть **пустым** (чистая база для нового pack); это не отменяет реализованный движок и валидацию.
 
 Эти пункты не должны реализовываться ad-hoc: только через отдельные решения с проверкой scope.
 
