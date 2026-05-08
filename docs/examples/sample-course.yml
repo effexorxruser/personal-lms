@@ -1,0 +1,10 @@
+# Минимальный пример course.yml (фрагмент пакета; не является полным деревом без модулей)
+schema_version: 1
+slug: sample-pack-demo
+title: Sample Pack Demo
+description: Иллюстративный курс для контракта (не входит в production catalog).
+version: 0.0.1
+status: draft
+estimated_weeks: 2
+modules:
+  - sample-pack-module

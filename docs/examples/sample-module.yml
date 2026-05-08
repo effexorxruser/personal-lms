@@ -1,0 +1,12 @@
+# Минимальный пример module.yml
+schema_version: 1
+slug: sample-pack-module
+title: Пример модуля
+description: Коротко о модуле.
+block: 1
+objectives:
+  - Зафиксировать цели модуля.
+lessons:
+  - sample-pack-intro
+  - sample-pack-followup
+checkpoint: sample-pack-checkpoint

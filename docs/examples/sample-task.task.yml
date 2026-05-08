@@ -1,0 +1,11 @@
+schema_version: 1
+slug: sample-pack-task
+title: Пример задачи
+summary: Проверяем контракт вложенной задачи.
+instructions: Укажите одну строку текста как подтверждение.
+submission_type: text
+definition_of_done:
+  - Ответ сохранён.
+review_mode: deterministic
+hints:
+  - Будьте кратки.

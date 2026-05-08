@@ -10,18 +10,38 @@ from tests.content_test_utils import create_valid_content_tree, write_lesson, wr
 
 def test_duplicate_lesson_key_fails_validation(tmp_path: Path) -> None:
     tree = create_valid_content_tree(tmp_path)
+    course_dir = tree["course_dir"]
     module_dir = tree["module_dir"]
 
-    write_lesson(
-        module_dir / "lessons" / "another-lesson.md",
-        key="demo-intro",
-        title="Duplicate Key",
-        summary="Дубликат ключа.",
-        body="# Duplicate\n\nBody",
+    course_payload = yaml.safe_load((course_dir / "course.yml").read_text(encoding="utf-8"))
+    course_payload["modules"] = ["foundation", "extra"]
+    write_yaml(course_dir / "course.yml", course_payload)
+
+    extra_dir = course_dir / "modules" / "extra"
+    write_yaml(
+        extra_dir / "module.yml",
+        {
+            "slug": "extra",
+            "title": "Extra",
+            "description": "Второй модуль для проверки глобальной уникальности lesson.key.",
+            "block": 1,
+            "objectives": ["Проверить duplicate lesson.key."],
+            "lessons": ["demo-intro", "extra-tail"],
+            "checkpoint": "demo-checkpoint",
+        },
     )
-    module_payload = yaml.safe_load((module_dir / "module.yml").read_text(encoding="utf-8"))
-    module_payload["lessons"].append("another-lesson")
-    write_yaml(module_dir / "module.yml", module_payload)
+
+    intro_src = (module_dir / "lessons" / "demo-intro.md").read_text(encoding="utf-8")
+    (extra_dir / "lessons").mkdir(parents=True, exist_ok=True)
+    (extra_dir / "lessons" / "demo-intro.md").write_text(intro_src, encoding="utf-8")
+
+    write_lesson(
+        extra_dir / "lessons" / "extra-tail.md",
+        key="extra-tail",
+        title="Хвост",
+        summary="Второй урок модуля extra.",
+        body="# Tail\n\n## Why this matters (RU)\nX\n## What to read (EN source)\n- https://docs.python.org/3/\n## What to skip\nX\n## Action\nX\n## Definition of Done\n- d\n## Technical English\n- t\n",
+    )
 
     report = validate_content(
         content_root=tree["content_root"],

@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 import re
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -21,6 +21,39 @@ TASK_REVIEW_MODES = {"deterministic", "manual"}
 COURSE_STATUSES = {"available", "draft", "archived"}
 SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 MIN_LESSONS_PER_MODULE = 2
+SUPPORTED_CONTENT_SCHEMA_VERSION = 1
+RUSSIAN_LESSON_SECTION_HEADINGS = (
+    "Зачем это нужно",
+    "Объяснение",
+    "Практика",
+    "Definition of Done",
+)
+
+
+def _validate_schema_version_value(value: int, *, ctx: str) -> int:
+    if value != SUPPORTED_CONTENT_SCHEMA_VERSION:
+        raise ValueError(
+            f"invalid schema_version {value}: поддерживается только {SUPPORTED_CONTENT_SCHEMA_VERSION} ({ctx})",
+        )
+    return value
+
+
+def _task_slug_from_pack_path(path: Path) -> str | None:
+    if not path.name.endswith(".task.yml"):
+        return None
+    stem = path.stem
+    if not stem.endswith(".task"):
+        return None
+    return stem[: -len(".task")] or None
+
+
+def _checkpoint_slug_from_pack_path(path: Path) -> str | None:
+    if not path.name.endswith(".checkpoint.yml"):
+        return None
+    stem = path.stem
+    if not stem.endswith(".checkpoint"):
+        return None
+    return stem[: -len(".checkpoint")] or None
 
 
 @dataclass(frozen=True)
@@ -42,6 +75,7 @@ class ContentStats:
 class ContentValidationReport:
     stats: ContentStats
     errors: list[ContentValidationIssue]
+    warnings: list[ContentValidationIssue] = field(default_factory=list)
 
     @property
     def ok(self) -> bool:
@@ -52,7 +86,7 @@ class ContentValidationException(ValueError):
     def __init__(self, report: ContentValidationReport):
         self.report = report
         lines = ["Content validation failed:"]
-        for issue in report.errors:
+        for issue in sorted(report.errors, key=lambda item: (item.location, item.message)):
             lines.append(f"- {issue.location}: {issue.message}")
         super().__init__("\n".join(lines))
 
@@ -62,6 +96,7 @@ class _SchemaBase(BaseModel):
 
 
 class CourseSchema(_SchemaBase):
+    schema_version: int = Field(default=SUPPORTED_CONTENT_SCHEMA_VERSION)
     slug: str
     title: str
     description: str
@@ -74,6 +109,21 @@ class CourseSchema(_SchemaBase):
     outcomes: list[str] = Field(default_factory=list)
     modules: list[str]
     prerequisites: list[str] = Field(default_factory=list)
+
+    @field_validator("schema_version")
+    @classmethod
+    def validate_schema_version(cls, value: int) -> int:
+        return _validate_schema_version_value(value, ctx="course.yml")
+
+    @model_validator(mode="after")
+    def validate_available_has_duration_weeks(self) -> CourseSchema:
+        if self.status == "available":
+            weeks = self.duration_weeks if self.duration_weeks is not None else self.estimated_weeks
+            if weeks is None or weeks < 1:
+                raise ValueError(
+                    "для status=available укажите duration_weeks или estimated_weeks (1..260)",
+                )
+        return self
 
     @field_validator("slug")
     @classmethod
@@ -142,6 +192,7 @@ class CourseSchema(_SchemaBase):
 
 
 class ModuleSchema(_SchemaBase):
+    schema_version: int = Field(default=SUPPORTED_CONTENT_SCHEMA_VERSION)
     slug: str
     title: str
     description: str
@@ -149,6 +200,11 @@ class ModuleSchema(_SchemaBase):
     objectives: list[str]
     lessons: list[str]
     checkpoint: str
+
+    @field_validator("schema_version")
+    @classmethod
+    def validate_schema_version(cls, value: int) -> int:
+        return _validate_schema_version_value(value, ctx="module.yml")
 
     @field_validator("slug")
     @classmethod
@@ -205,6 +261,7 @@ class ModuleSchema(_SchemaBase):
 
 
 class LessonFrontMatterSchema(_SchemaBase):
+    schema_version: int = Field(default=SUPPORTED_CONTENT_SCHEMA_VERSION)
     key: str
     title: str
     summary: str
@@ -212,6 +269,17 @@ class LessonFrontMatterSchema(_SchemaBase):
     checklist: list[str] = Field(default_factory=list)
     task_slug: str | None = None
     source_ids: list[str] = Field(default_factory=list)
+
+    @field_validator("schema_version")
+    @classmethod
+    def validate_schema_version(cls, value: int) -> int:
+        return _validate_schema_version_value(value, ctx="lesson front matter")
+
+    @model_validator(mode="after")
+    def validate_objectives_nonempty(self) -> LessonFrontMatterSchema:
+        if not self.objectives:
+            raise ValueError("objectives должен содержать хотя бы один пункт")
+        return self
 
     @field_validator("key")
     @classmethod
@@ -302,6 +370,7 @@ class TerminalConfigSchema(_SchemaBase):
 
 
 class TaskSchema(_SchemaBase):
+    schema_version: int = Field(default=SUPPORTED_CONTENT_SCHEMA_VERSION)
     slug: str
     title: str
     summary: str
@@ -311,6 +380,11 @@ class TaskSchema(_SchemaBase):
     review_mode: str = "deterministic"
     hints: list[str] = Field(default_factory=list)
     terminal: TerminalConfigSchema | None = None
+
+    @field_validator("schema_version")
+    @classmethod
+    def validate_schema_version(cls, value: int) -> int:
+        return _validate_schema_version_value(value, ctx="task manifest")
 
     @field_validator("slug")
     @classmethod
@@ -368,6 +442,7 @@ class TaskSchema(_SchemaBase):
 
 
 class CheckpointSchema(_SchemaBase):
+    schema_version: int = Field(default=SUPPORTED_CONTENT_SCHEMA_VERSION)
     slug: str
     title: str
     summary: str
@@ -381,6 +456,11 @@ class CheckpointSchema(_SchemaBase):
     submission_type: str
     portfolio_expectations: list[str] = Field(default_factory=list)
     hints: list[str] = Field(default_factory=list)
+
+    @field_validator("schema_version")
+    @classmethod
+    def validate_schema_version(cls, value: int) -> int:
+        return _validate_schema_version_value(value, ctx="checkpoint manifest")
 
     @field_validator("slug", "module_slug")
     @classmethod
@@ -592,9 +672,13 @@ class ContentBundle:
 @dataclass
 class _BuildState:
     errors: list[ContentValidationIssue] = field(default_factory=list)
+    warnings: list[ContentValidationIssue] = field(default_factory=list)
 
     def add_error(self, location: str, message: str) -> None:
         self.errors.append(ContentValidationIssue(location=location, message=message))
+
+    def add_warning(self, location: str, message: str) -> None:
+        self.warnings.append(ContentValidationIssue(location=location, message=message))
 
 
 def _path_label(path: Path) -> str:
@@ -711,6 +795,37 @@ def _has_markdown_section(body_markdown: str, heading: str) -> bool:
     return re.search(pattern, body_markdown) is not None
 
 
+def _discover_lesson_files(*, lessons_dir: Path, state: _BuildState) -> dict[str, Path]:
+    by_key: dict[str, Path] = {}
+    if not lessons_dir.is_dir():
+        return by_key
+
+    for nested_path in sorted(lessons_dir.glob("*/lesson.md")):
+        key = nested_path.parent.name
+        flat_conflict = lessons_dir / f"{key}.md"
+        if flat_conflict.exists():
+            state.add_error(
+                _path_label(nested_path),
+                f"одновременно существуют {_path_label(flat_conflict)} и {_path_label(nested_path)}",
+            )
+            continue
+        if key in by_key:
+            state.add_error(_path_label(nested_path), f"duplicate lesson path for key: {key}")
+            continue
+        by_key[key] = nested_path
+
+    for flat_path in sorted(lessons_dir.glob("*.md")):
+        key = flat_path.stem
+        if (lessons_dir / key / "lesson.md").exists():
+            continue
+        if key in by_key:
+            state.add_error(_path_label(flat_path), f"duplicate lesson path for key: {key}")
+            continue
+        by_key[key] = flat_path
+
+    return by_key
+
+
 def _read_source_registry(source_root: Path, state: _BuildState) -> dict[str, SourceRegistryEntrySchema]:
     registry_path = source_root / "source_registry.yml"
     try:
@@ -810,6 +925,7 @@ def load_content_bundle(
 
     parsed_courses: list[ParsedCourse] = []
     course_slug_registry: dict[str, Path] = {}
+    embedded_slugs_by_lesson_key: dict[str, set[str]] = {}
 
     for manifest_path in sorted(content_root.glob("*/course.yml")):
         raw_course_payload = _read_yaml_dict(manifest_path, state)
@@ -832,6 +948,13 @@ def load_content_bundle(
                 continue
             course_slug_registry[course_schema.slug] = manifest_path
 
+            folder_slug = manifest_path.parent.name
+            if folder_slug != course_schema.slug:
+                state.add_error(
+                    _path_label(manifest_path),
+                    f"имя каталога курса ({folder_slug}) должно совпадать со slug ({course_schema.slug})",
+                )
+
         course_dir = manifest_path.parent
         modules_dir = course_dir / "modules"
         module_manifest_paths = sorted(modules_dir.glob("*/module.yml"))
@@ -851,8 +974,9 @@ def load_content_bundle(
                 )
 
             lessons_dir = module_manifest_path.parent / "lessons"
+            lesson_paths_by_key = _discover_lesson_files(lessons_dir=lessons_dir, state=state)
             parsed_lessons_by_stem: dict[str, ParsedLesson] = {}
-            for lesson_path in sorted(lessons_dir.glob("*.md")):
+            for lesson_key, lesson_path in sorted(lesson_paths_by_key.items(), key=lambda item: item[0]):
                 lesson_doc = _parse_markdown_lesson(
                     path=lesson_path,
                     course_slug=course_slug_for_children,
@@ -861,7 +985,99 @@ def load_content_bundle(
                 )
                 if lesson_doc is None:
                     continue
-                parsed_lessons_by_stem[lesson_path.stem] = lesson_doc
+                parsed_lessons_by_stem[lesson_key] = lesson_doc
+
+            checkpoints_pack_dir = module_manifest_path.parent / "checkpoints"
+            if checkpoints_pack_dir.is_dir():
+                for checkpoint_path in sorted(checkpoints_pack_dir.glob("*.checkpoint.yml")):
+                    expected_slug = _checkpoint_slug_from_pack_path(checkpoint_path)
+                    if expected_slug is None:
+                        state.add_error(
+                            _path_label(checkpoint_path),
+                            "имя файла checkpoint должно быть <slug>.checkpoint.yml",
+                        )
+                        continue
+                    checkpoint_schema = _parse_model(checkpoint_path, CheckpointSchema, state)
+                    if checkpoint_schema is None:
+                        continue
+                    assert isinstance(checkpoint_schema, CheckpointSchema)
+                    if checkpoint_schema.slug != expected_slug:
+                        state.add_error(
+                            _path_label(checkpoint_path),
+                            f"checkpoint.slug ({checkpoint_schema.slug}) должно совпадать с именем файла ({expected_slug})",
+                        )
+                    if checkpoint_schema.module_slug != module_schema.slug:
+                        state.add_error(
+                            _path_label(checkpoint_path),
+                            (
+                                "checkpoint.module_slug должен совпадать с модулем пакета: "
+                                f"ожидался {module_schema.slug}, найден {checkpoint_schema.module_slug}"
+                            ),
+                        )
+                    if checkpoint_path.stem != f"{checkpoint_schema.slug}.checkpoint":
+                        state.add_error(
+                            _path_label(checkpoint_path),
+                            (
+                                "имя файла должно совпадать с checkpoint.slug: "
+                                f"ожидалось {checkpoint_schema.slug}.checkpoint.yml"
+                            ),
+                        )
+                    if checkpoint_schema.slug in parsed_checkpoints:
+                        original = parsed_checkpoints[checkpoint_schema.slug].path
+                        state.add_error(
+                            _path_label(checkpoint_path),
+                            (
+                                "duplicate checkpoint.slug: "
+                                f"{checkpoint_schema.slug} (уже есть в {_path_label(original)})"
+                            ),
+                        )
+                        continue
+                    parsed_checkpoints[checkpoint_schema.slug] = ParsedCheckpoint(
+                        path=checkpoint_path,
+                        schema=checkpoint_schema,
+                    )
+
+            for lesson_folder_key in parsed_lessons_by_stem.keys():
+                tasks_dir = lessons_dir / lesson_folder_key / "tasks"
+                if not tasks_dir.is_dir():
+                    continue
+                for task_path in sorted(tasks_dir.glob("*.task.yml")):
+                    expected_slug = _task_slug_from_pack_path(task_path)
+                    if expected_slug is None:
+                        state.add_error(
+                            _path_label(task_path),
+                            "имя файла задачи должно быть <slug>.task.yml",
+                        )
+                        continue
+                    task_schema = _parse_model(task_path, TaskSchema, state)
+                    if task_schema is None:
+                        continue
+                    assert isinstance(task_schema, TaskSchema)
+                    if task_schema.slug != expected_slug:
+                        state.add_error(
+                            _path_label(task_path),
+                            f"task.slug ({task_schema.slug}) должно совпадать с именем файла ({expected_slug})",
+                        )
+                    if task_path.stem != f"{task_schema.slug}.task":
+                        state.add_error(
+                            _path_label(task_path),
+                            (
+                                "имя файла должно совпадать с task.slug: "
+                                f"ожидалось {task_schema.slug}.task.yml"
+                            ),
+                        )
+                    if task_schema.slug in parsed_tasks:
+                        original = parsed_tasks[task_schema.slug].path
+                        state.add_error(
+                            _path_label(task_path),
+                            (
+                                "duplicate task.slug: "
+                                f"{task_schema.slug} (уже есть в {_path_label(original)})"
+                            ),
+                        )
+                        continue
+                    parsed_tasks[task_schema.slug] = ParsedTask(path=task_path, schema=task_schema)
+                    embedded_slugs_by_lesson_key.setdefault(lesson_folder_key, set()).add(task_schema.slug)
 
             listed_lesson_keys = list(module_schema.lessons)
             duplicate_lesson_keys = _find_duplicates(listed_lesson_keys)
@@ -881,15 +1097,19 @@ def load_content_bundle(
             actual_stems = set(parsed_lessons_by_stem.keys())
 
             for lesson_key in listed_lesson_keys:
-                expected_path = lessons_dir / f"{lesson_key}.md"
                 if lesson_key not in actual_stems:
+                    expected_flat = lessons_dir / f"{lesson_key}.md"
+                    expected_nested = lessons_dir / lesson_key / "lesson.md"
                     state.add_error(
                         _path_label(module_manifest_path),
-                        f"урок {lesson_key} указан в module.lessons, но файл {_path_label(expected_path)} не найден",
+                        (
+                            f"урок {lesson_key} указан в module.lessons, но не найден файл "
+                            f"{_path_label(expected_flat)} или {_path_label(expected_nested)}"
+                        ),
                     )
 
             for orphan_stem in sorted(actual_stems - listed_set):
-                orphan_path = lessons_dir / f"{orphan_stem}.md"
+                orphan_path = lesson_paths_by_key[orphan_stem]
                 state.add_error(
                     _path_label(orphan_path),
                     f"orphan lesson file: {orphan_stem} не указан в module.lessons",
@@ -1014,6 +1234,13 @@ def load_content_bundle(
         if "## Action" not in lesson_doc.body_markdown:
             state.add_error(_path_label(lesson_doc.path), "anti-tutorial hell: lesson должен содержать действие (Action)")
 
+        for heading in RUSSIAN_LESSON_SECTION_HEADINGS:
+            if not _has_markdown_section(lesson_doc.body_markdown, heading):
+                state.add_warning(
+                    _path_label(lesson_doc.path),
+                    f'missing section "{heading}"',
+                )
+
     for checkpoint in parsed_checkpoints.values():
         module_slug = checkpoint.schema.module_slug
         if module_slug not in all_module_slugs:
@@ -1037,7 +1264,11 @@ def load_content_bundle(
                 "checkpoint должен содержать evaluation_criteria",
             )
 
-    referenced_task_slugs = {lesson.schema.task_slug for lesson in parsed_lessons_by_key.values() if lesson.schema.task_slug}
+    referenced_task_slugs: set[str] = set()
+    for lesson in parsed_lessons_by_key.values():
+        if lesson.schema.task_slug:
+            referenced_task_slugs.add(lesson.schema.task_slug)
+        referenced_task_slugs.update(embedded_slugs_by_lesson_key.get(lesson.schema.key, set()))
     for task_slug, task in parsed_tasks.items():
         if task_slug not in referenced_task_slugs:
             state.add_error(_path_label(task.path), f"orphan task: {task_slug} не используется ни в одном lesson")
@@ -1062,7 +1293,8 @@ def load_content_bundle(
             tasks=len(parsed_tasks),
             checkpoints=len(parsed_checkpoints),
         ),
-        errors=list(state.errors),
+        errors=sorted(state.errors, key=lambda item: (item.location, item.message)),
+        warnings=sorted(state.warnings, key=lambda item: (item.location, item.message)),
     )
 
     bundle = ContentBundle(

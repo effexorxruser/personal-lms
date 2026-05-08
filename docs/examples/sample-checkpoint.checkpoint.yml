@@ -1,0 +1,20 @@
+schema_version: 1
+slug: sample-pack-checkpoint
+title: Пример контрольной точки
+summary: Короткая сводка checkpoint.
+module_slug: sample-pack-module
+description: Описание ожиданий перед зачётом модуля.
+project_description: Мини-проект для примера.
+requirements:
+  - Подготовлен артефакт.
+deliverables:
+  - README.md с инструкцией.
+evaluation_criteria:
+  - По инструкции можно воспроизвести результат.
+definition_of_done:
+  - Критерии закрыты.
+submission_type: repository_link
+portfolio_expectations:
+  - Можно показать в портфолио (пример).
+hints:
+  - Scope минимальный.

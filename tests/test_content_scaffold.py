@@ -130,4 +130,49 @@ def test_scaffold_scripts_create_valid_skeleton(tmp_path: Path) -> None:
         ]
     )
 
-    assert "OK: ошибок не найдено" in result.stdout
+    assert "[OK] course demo-platform" in result.stdout
+    assert "Summary: warnings=" in result.stdout
+    assert "errors=0" in result.stdout
+
+
+def test_scaffold_course_embed_pack_passes_validation(tmp_path: Path) -> None:
+    content_root = tmp_path / "courses"
+    task_root = tmp_path / "tasks"
+    checkpoint_root = tmp_path / "checkpoints"
+
+    _run(
+        [
+            sys.executable,
+            "scripts/scaffold_course.py",
+            "--slug",
+            "demo-pack-only",
+            "--title",
+            "Demo Pack",
+            "--description",
+            "Курс только с pack-артефактами.",
+            "--starter-module-slug",
+            "foundation",
+            "--starter-lesson-key",
+            "intro",
+            "--content-root",
+            str(content_root),
+            "--embed-pack-assets",
+        ]
+    )
+
+    result = _run(
+        [
+            sys.executable,
+            "scripts/validate_content.py",
+            "--content-root",
+            str(content_root),
+            "--task-root",
+            str(task_root),
+            "--checkpoint-root",
+            str(checkpoint_root),
+        ]
+    )
+
+    assert result.returncode == 0
+    assert "[OK] course demo-pack-only" in result.stdout
+    assert "errors=0" in result.stdout

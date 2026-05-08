@@ -1,0 +1,34 @@
+# Промпт для Codex / Cursor: импорт Course Pack
+
+Скопируйте и адаптируйте под конкретный MR/ветку.
+
+---
+
+Ты в репозитории `personal-lms`. Нужно **встроить готовый course pack** в file-based контент, не меняя архитектуру runtime (FastAPI, роутеры, dashboard).
+
+## Жёсткие правила
+
+1. **Не** генерируй целый новый курс с нуля, если пользователь уже передал структуру или файлы — работай от артефактов.
+2. **Не** рефакторь `app/routers/*`, `content_loader` и бизнес-логику обучения без явного запроса.
+3. Сверяйся с [COURSE_PACK_CONTRACT.md](COURSE_PACK_CONTRACT.md): пути, slug, `schema_version`, обязательные поля.
+4. После изменений контента запусти (или эквивалент в CI): `python scripts/validate_content.py`, `ruff check .`, `python -m pytest`.
+5. Исправляй **ошибки** валидации в контенте или, если сломан контракт схемы, в `app/content_pipeline.py` / тестах валидации — минимальным диффом.
+6. Предупреждения `[WARN]` (например русскоязычные секции урока) допустимы для legacy-уроков; для нового контента лучше устранить.
+
+## Что считать «готово»
+
+- `validate_content` без `[ERROR]`.
+- Нет дубликатов `slug` у курсов, модулей, уроков, задач, чекпоинтов.
+- Все ссылки `task_slug`, `checkpoint`, `source_ids`, `module_slug` разрешаются.
+- Существующие курсы в репозитории не сломаны.
+
+## Полезные пути
+
+- Контракт: `docs/course_authoring/COURSE_PACK_CONTRACT.md`
+- Примеры: `docs/examples/`
+- Валидация и схемы: `app/content_pipeline.py`
+- Каркас: `scripts/scaffold_course.py`, `app/content_scaffold.py`
+
+---
+
+Конец промпта.

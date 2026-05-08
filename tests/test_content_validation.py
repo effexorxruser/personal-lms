@@ -238,3 +238,231 @@ def test_loader_contract_uses_the_same_validated_bundle(tmp_path: Path) -> None:
     assert bundle.report.ok
     assert bundle.report.stats.courses == 1
     assert bundle.report.stats.lessons == 2
+
+
+def test_course_slug_must_match_course_directory(tmp_path: Path) -> None:
+    tree = create_valid_content_tree(tmp_path)
+    content_root = tree["content_root"]
+    misnamed_dir = content_root / "misnamed-course-slug"
+    tree["course_dir"].rename(misnamed_dir)
+
+    report = validate_content(
+        content_root=content_root,
+        task_root=tree["task_root"],
+        checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
+    )
+
+    assert not report.ok
+    assert any("каталога курса" in issue.message for issue in report.errors)
+
+
+def test_available_course_must_declare_positive_week_estimate(tmp_path: Path) -> None:
+    tree = create_valid_content_tree(tmp_path)
+
+    course_path = tree["course_dir"] / "course.yml"
+    payload = yaml.safe_load(course_path.read_text(encoding="utf-8"))
+    payload["status"] = "available"
+    payload.pop("duration_weeks", None)
+    payload.pop("estimated_weeks", None)
+    write_yaml(course_path, payload)
+
+    report = validate_content(
+        content_root=tree["content_root"],
+        task_root=tree["task_root"],
+        checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
+    )
+
+    assert not report.ok
+    msgs = [issue.message for issue in report.errors]
+    assert any("available" in m and ("estimated_weeks" in m or "duration_weeks" in m) for m in msgs)
+
+
+def test_duplicate_module_slug_in_course_modules_list_fails(tmp_path: Path) -> None:
+    tree = create_valid_content_tree(tmp_path)
+
+    course_path = tree["course_dir"] / "course.yml"
+    payload = yaml.safe_load(course_path.read_text(encoding="utf-8"))
+    module_slug = payload["modules"][0]
+    payload["modules"] = [module_slug, module_slug]
+    write_yaml(course_path, payload)
+
+    report = validate_content(
+        content_root=tree["content_root"],
+        task_root=tree["task_root"],
+        checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
+    )
+
+    assert not report.ok
+    assert any("duplicate module.slug" in issue.message for issue in report.errors)
+
+
+def test_duplicate_pack_task_slug_conflicts_with_global_task(tmp_path: Path) -> None:
+    tree = create_valid_content_tree(tmp_path)
+    pack_tasks_dir = tree["module_dir"] / "lessons" / "demo-intro" / "tasks"
+    pack_tasks_dir.mkdir(parents=True, exist_ok=True)
+    write_yaml(
+        pack_tasks_dir / "demo-task.task.yml",
+        {
+            "slug": "demo-task",
+            "title": "Конфликт имени с глобальным слоем задач.",
+            "summary": "Dup",
+            "instructions": "Проверить дубли между pack tasks и TASK_ROOT.",
+            "submission_type": "text",
+            "definition_of_done": ["Пункт есть."],
+            "review_mode": "deterministic",
+        },
+    )
+
+    report = validate_content(
+        content_root=tree["content_root"],
+        task_root=tree["task_root"],
+        checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
+    )
+
+    assert not report.ok
+    assert any("duplicate task.slug: demo-task" in issue.message for issue in report.errors)
+
+
+def test_invalid_course_schema_version_fails_validation(tmp_path: Path) -> None:
+    tree = create_valid_content_tree(tmp_path)
+
+    course_path = tree["course_dir"] / "course.yml"
+    payload = yaml.safe_load(course_path.read_text(encoding="utf-8"))
+    payload["schema_version"] = 99
+    write_yaml(course_path, payload)
+
+    report = validate_content(
+        content_root=tree["content_root"],
+        task_root=tree["task_root"],
+        checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
+    )
+
+    assert not report.ok
+    assert any("invalid schema_version" in issue.message for issue in report.errors)
+
+
+def test_empty_lesson_objectives_fail_validation(tmp_path: Path) -> None:
+    tree = create_valid_content_tree(tmp_path)
+    lesson_path = tree["module_dir"] / "lessons" / "demo-intro.md"
+    body = """# Demo
+
+## Why this matters (RU)
+Почему это важно.
+
+## What to read (EN source)
+- https://docs.python.org/3/
+
+## What to skip
+Лишние детали.
+
+## Action
+Сделай шаг.
+
+## Definition of Done
+- Шаг выполнен.
+
+## Technical English
+- interpreter
+"""
+    lesson_path.write_text(
+        "---\n"
+        "key: demo-intro\n"
+        'title: "Demo Intro"\n'
+        "summary: Стартовый урок.\n"
+        "objectives: []\n"
+        "checklist:\n"
+        "  - Проверить\n"
+        "source_ids:\n"
+        "  - python-docs\n"
+        "task_slug: demo-task\n"
+        "---\n" + body,
+        encoding="utf-8",
+    )
+
+    report = validate_content(
+        content_root=tree["content_root"],
+        task_root=tree["task_root"],
+        checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
+    )
+
+    assert not report.ok
+    assert any("objectives" in issue.message for issue in report.errors)
+
+
+def test_lesson_without_russian_sections_emits_warnings_not_errors(tmp_path: Path) -> None:
+    tree = create_valid_content_tree(tmp_path)
+    report = validate_content(
+        content_root=tree["content_root"],
+        task_root=tree["task_root"],
+        checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
+    )
+
+    assert report.ok
+    assert any(
+        ('missing section "Зачем это нужно"' in w.message or "Зачем это нужно" in w.message)
+        for w in report.warnings
+    )
+
+
+def test_module_lesson_duplicate_list_entries_fail(tmp_path: Path) -> None:
+    tree = create_valid_content_tree(tmp_path)
+
+    mp = tree["module_dir"] / "module.yml"
+    payload = yaml.safe_load(mp.read_text(encoding="utf-8"))
+    key = payload["lessons"][0]
+    payload["lessons"] = [key, key, payload["lessons"][1]]
+    write_yaml(mp, payload)
+
+    report = validate_content(
+        content_root=tree["content_root"],
+        task_root=tree["task_root"],
+        checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
+    )
+
+    assert not report.ok
+    assert any("duplicate lesson key" in issue.message for issue in report.errors)
+
+
+def test_empty_task_instructions_fail_validation(tmp_path: Path) -> None:
+    tree = create_valid_content_tree(tmp_path)
+    tp = tree["task_root"] / "demo-task.yml"
+    payload = yaml.safe_load(tp.read_text(encoding="utf-8"))
+    payload["instructions"] = ""
+    write_yaml(tp, payload)
+
+    report = validate_content(
+        content_root=tree["content_root"],
+        task_root=tree["task_root"],
+        checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
+    )
+
+    assert not report.ok
+    assert any("instructions" in issue.message for issue in report.errors)
+
+
+def test_invalid_task_review_mode_fails_validation(tmp_path: Path) -> None:
+    tree = create_valid_content_tree(tmp_path)
+
+    tp = tree["task_root"] / "demo-task.yml"
+    payload = yaml.safe_load(tp.read_text(encoding="utf-8"))
+    payload["review_mode"] = "automatic"
+    write_yaml(tp, payload)
+
+    report = validate_content(
+        content_root=tree["content_root"],
+        task_root=tree["task_root"],
+        checkpoint_root=tree["checkpoint_root"],
+        source_root=tree["source_root"],
+    )
+
+    assert not report.ok
+    assert any("review_mode" in issue.message for issue in report.errors)

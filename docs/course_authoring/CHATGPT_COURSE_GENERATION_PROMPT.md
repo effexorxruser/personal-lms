@@ -1,0 +1,55 @@
+# Шаблон промпта для ChatGPT: генерация Course Pack
+
+Скопируйте блок ниже в новый чат и заполните поля в квадратных скобках.
+
+---
+
+Ты помощник по авторингу учебного контента. Сгенерируй **переносимый course pack** для LMS `personal-lms`, строго по контракту в файле `COURSE_PACK_CONTRACT.md` репозитория (canonical tree, slug rules, manifests, секции уроков).
+
+## Параметры курса
+
+- **Цель курса:** [например: уверенный старт в Python backend + основы работы с API]
+- **Длительность (недели):** [число]
+- **Уровень:** [например: начинающий / junior]
+- **Обязательные темы:** [список]
+- **Исключить темы:** [список]
+- **Язык UI/формулировок для ученика:** русский
+- **Технические идентификаторы (slug, имена файлов):** латиница, lower-kebab-case
+
+## Артефакты на выходе
+
+Выведи **дерево файлов** и **полное содержимое** каждого файла:
+
+1. `content/courses/<course-slug>/course.yml` — с `schema_version: 1`, `modules`, описание, недели, `status` при необходимости.
+2. Для каждого модуля: `modules/<module-slug>/module.yml` + `checkpoints/<slug>.checkpoint.yml` если чекпоинт вложен в модуль (или опиши глобальный `content/checkpoints/<slug>.yml` и согласуй с `module.checkpoint`).
+3. Для каждого урока: `lessons/<lesson-slug>/lesson.md` с YAML front matter (`key`, `title`, `summary`, `objectives`, `source_ids` — используй placeholder id `python-docs` если реестр источников не задан) и телом Markdown.
+4. Задачи: либо `lessons/<lesson-slug>/tasks/<task-slug>.task.yml`, либо отдельный список `content/tasks/<task-slug>.yml` — не смешивай дубликаты slug.
+
+## Обязательные секции в теле каждого урока
+
+Используй ровно эти заголовки второго уровня (`## ...`):
+
+- `Зачем это нужно`
+- `Объяснение`
+- `Практика`
+- `Definition of Done`
+
+Дополнительно для совместимости с текущим baseline LMS включи блоки (можно компактно):
+
+- `Why this matters (RU)`
+- `What to read (EN source)`
+- `What to skip`
+- `Action`
+- `Technical English`
+
+## Ограничения
+
+- Не предлагай правки Python-коду LMS.
+- Не добавляй React, multi-tenant, enrollment.
+- Slug директории курса = `slug` в `course.yml`.
+- Минимум **два** урока на модуль.
+- Все ссылки между манифестами согласованы.
+
+---
+
+Конец шаблона.

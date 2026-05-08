@@ -7,7 +7,28 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.content_pipeline import CHECKPOINT_ROOT, CONTENT_ROOT, SOURCE_ROOT, TASK_ROOT, validate_content
+from app.content_pipeline import (
+    CHECKPOINT_ROOT,
+    CONTENT_ROOT,
+    SOURCE_ROOT,
+    TASK_ROOT,
+    ContentValidationIssue,
+    validate_content,
+)
+
+
+def _issue_under_course_slug(location: str, *, content_root: Path) -> str | None:
+    try:
+        rel = Path(location).resolve().relative_to(content_root.resolve())
+    except ValueError:
+        return None
+    if rel.parts:
+        return rel.parts[0]
+    return None
+
+
+def _sort_issues(items):
+    return sorted(items, key=lambda item: (item.location, item.message))
 
 
 def main() -> int:
@@ -25,6 +46,17 @@ def main() -> int:
         source_root=args.source_root,
     )
 
+    known_courses = sorted({p.resolve().parent.name for p in args.content_root.glob("*/course.yml")})
+    course_errors: dict[str, list[ContentValidationIssue]] = {slug: [] for slug in known_courses}
+    global_errors: list[ContentValidationIssue] = []
+
+    for issue in report.errors:
+        slug = _issue_under_course_slug(issue.location, content_root=args.content_root)
+        if slug is not None and slug in course_errors:
+            course_errors[slug].append(issue)
+        else:
+            global_errors.append(issue)
+
     print("Content preflight")
     print("=================")
     print(f"Courses: {report.stats.courses}")
@@ -32,16 +64,27 @@ def main() -> int:
     print(f"Lessons: {report.stats.lessons}")
     print(f"Tasks: {report.stats.tasks}")
     print(f"Checkpoints: {report.stats.checkpoints}")
+    print("")
+
+    for slug in sorted(known_courses):
+        if not course_errors.get(slug):
+            print(f"[OK] course {slug}")
+
+    for issue in _sort_issues(report.warnings):
+        print(f"[WARN] {issue.location} — {issue.message}")
+
+    for issue in _sort_issues(global_errors):
+        print(f"[ERROR] {issue.location} — {issue.message}")
+
+    for slug in sorted(known_courses):
+        for issue in _sort_issues(course_errors[slug]):
+            print(f"[ERROR] {issue.location} — {issue.message}")
+
+    print("")
+    print(f"Summary: warnings={len(report.warnings)}, errors={len(report.errors)}")
 
     if report.ok:
-        print("\nOK: ошибок не найдено.")
         return 0
-
-    print(f"\nНайдено ошибок: {len(report.errors)}")
-    for index, issue in enumerate(report.errors, start=1):
-        print(f"{index}. {issue.location}")
-        print(f"   - {issue.message}")
-
     return 1
 
 

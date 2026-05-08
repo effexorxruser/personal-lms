@@ -21,6 +21,11 @@ def main() -> int:
     parser.add_argument("--first-lesson-title", required=True, help="Заголовок первого урока")
     parser.add_argument("--first-lesson-summary", required=True, help="Summary первого урока")
     parser.add_argument("--content-root", type=Path, default=CONTENT_ROOT, help="Путь к content/courses")
+    parser.add_argument(
+        "--embed-pack-assets",
+        action="store_true",
+        help="Встроить pack task/checkpoint в модуль (канонический layout).",
+    )
     args = parser.parse_args()
 
     created = scaffold_module(
@@ -32,6 +37,7 @@ def main() -> int:
         first_lesson_title=args.first_lesson_title,
         first_lesson_summary=args.first_lesson_summary,
         content_root=args.content_root,
+        embed_pack_assets=args.embed_pack_assets,
     )
 
     print("Создан каркас модуля:")
