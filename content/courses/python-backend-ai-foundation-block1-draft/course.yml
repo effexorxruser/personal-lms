@@ -4,6 +4,7 @@ description: >
   Снимок модуля foundation-real для выравнивания с backend_developer_6_months.yml (будущий Block 1).
   Не отображается на dashboard как текущий курс; уроки доступны по прямым ссылкам /lessons/{key}.
 version: 1.0.0
+status: draft
 estimated_weeks: 1
 modules:
   - foundation-real

@@ -13,7 +13,16 @@
 <section class="workspace-shell dashboard-workspace dashboard-workspace--resume">
   <div class="workspace-grid dashboard-resume-layout">
     <main class="workspace-pane dashboard-main dashboard-main--resume">
-      {% if mobile_view %}
+      {% if not dashboard_has_course %}
+      <section class="ui-card mobile-dashboard" aria-label="Пустой каталог курсов">
+        <p class="status-kicker">Каталог курсов</p>
+        <h1>Курсы пока не добавлены.</h1>
+        <p class="rail-card__muted">Доступные курсы появятся здесь после добавления file-based course.yml со статусом available.</p>
+        <div class="dashboard-action-row">
+          <a class="btn btn--primary" href="/courses">Открыть каталог</a>
+        </div>
+      </section>
+      {% elif mobile_view %}
       <section class="ui-card mobile-dashboard" aria-label="Мобильная сводка обучения">
         <p class="status-kicker">Мобильный режим · только просмотр</p>
         <h1>Мобильный режим: контроль прогресса</h1>
@@ -54,6 +63,7 @@
 
         <div class="dashboard-action-row">
           <a class="btn btn--primary" href="{{ continue_href }}?mobile=1">Текущий урок</a>
+          <a class="btn btn--ghost" href="/courses?mobile=1">Каталог</a>
           <a class="btn btn--ghost" href="{{ nav_course_href }}?mobile=1">Курс</a>
         </div>
       </section>
@@ -76,6 +86,15 @@
 
 
       <section class="dashboard-lms-grid" aria-label="Краткая учебная сводка">
+        <article class="ui-card lms-summary-card" aria-label="Доступные курсы">
+          <p class="status-kicker">Доступные курсы</p>
+          {% if course_cards %}
+          <p>{{ course_cards|length }} курс(ов) доступно в каталоге.</p>
+          <a class="card-link" href="/courses">Открыть каталог</a>
+          {% else %}
+          <p>Курсы пока не добавлены.</p>
+          {% endif %}
+        </article>
         <article class="ui-card lms-summary-card" aria-label="Прогресс">
           <p class="status-kicker">Прогресс</p>
           <dl class="lms-lines">
@@ -93,6 +112,7 @@
           <p class="rail-card__muted">{{ execution_summary.review_label }}</p>
           <div class="dashboard-action-row">
             <a class="btn btn--primary" href="{{ continue_href }}">Продолжить обучение</a>
+            <a class="btn btn--ghost" href="/courses">Каталог курсов</a>
             <a class="btn btn--ghost" href="{{ nav_course_href }}">Карта курса</a>
           </div>
           {% if execution_summary.href %}
