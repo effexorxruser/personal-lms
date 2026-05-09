@@ -4,7 +4,7 @@
 
 {% block content %}
 <section class="workspace-shell">
-  <main class="workspace-pane">
+  <main class="workspace-pane workspace-pane--narrow">
     <section class="ui-card course-hero" aria-labelledby="catalog-title">
       <div>
         <p class="eyebrow">Каталог курсов</p>
@@ -45,7 +45,7 @@
       {% endfor %}
     </section>
     {% else %}
-    <section class="ui-card lms-summary-card" aria-label="Пустой каталог">
+    <section class="ui-card lms-summary-card ui-card--soft-empty" aria-label="Пустой каталог">
       <h2>Курсы пока не добавлены.</h2>
       <p class="rail-card__muted">Когда появится доступный course.yml со статусом available, он отобразится здесь.</p>
     </section>

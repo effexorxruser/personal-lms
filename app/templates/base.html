@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}personal-lms{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}?v=20260428-11">
-    <script src="{{ url_for('static', path='/js/app.js') }}?v=20260428-11" defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}?v=20260509-comp3">
+    <script src="{{ url_for('static', path='/js/app.js') }}?v=20260509-comp3" defer></script>
   </head>
   <body>
     <div class="page-bg bg-shell" aria-hidden="true">
@@ -31,6 +31,12 @@
             <a href="{{ nav_course_href if nav_course_href is defined else '/courses' }}" class="nav-link {% if request.url.path == '/courses' or request.url.path.startswith('/courses/') %}is-active{% endif %}">Курсы</a>
             <a href="{{ nav_lessons_href if nav_lessons_href is defined else '/lessons/foundation-real-workspace' }}" class="nav-link {% if request.url.path.startswith('/lessons/') %}is-active{% endif %}">Уроки</a>
             <a href="/recap" class="nav-link {% if request.url.path == '/recap' %}is-active{% endif %}">Итоги</a>
+            {% if request.session.get('user_id') %}
+            <a href="/course-requests" class="nav-link {% if request.url.path.startswith('/course-requests') %}is-active{% endif %}">Заявки</a>
+            {% endif %}
+            {% if viewer_is_admin is defined and viewer_is_admin %}
+            <a href="/admin/course-requests" class="nav-link {% if request.url.path.startswith('/admin/course-requests') %}is-active{% endif %}">Админ‑заявки</a>
+            {% endif %}
           </nav>
         </div>
         <div class="topbar__center">

@@ -127,3 +127,22 @@ class AIHelperMessage(SQLModel, table=True):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+class CourseRequest(SQLModel, table=True):
+    """Запрос пользователя на новый курс (human-in-the-loop pipeline)."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(index=True, foreign_key="user.id")
+    title: str
+    goal: str
+    current_level: str
+    duration_weeks: int = Field(ge=1, le=520)
+    preferred_format: str
+    required_topics_json: str = Field(default="[]")
+    excluded_topics_json: str = Field(default="[]")
+    expected_artifacts_json: str = Field(default="[]")
+    status: str = Field(default="submitted", index=True)
+    admin_notes: str = Field(default="")
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+

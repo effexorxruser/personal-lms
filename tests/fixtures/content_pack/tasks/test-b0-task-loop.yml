@@ -1,0 +1,10 @@
+schema_version: 1
+slug: test-b0-task-loop
+title: Loop task
+summary: Текст.
+instructions: Опиши loop.
+submission_type: text
+definition_of_done:
+  - Текст достаточен.
+review_mode: deterministic
+hints: []

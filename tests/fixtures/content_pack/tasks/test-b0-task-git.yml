@@ -1,0 +1,10 @@
+schema_version: 1
+slug: test-b0-task-git
+title: Git link task
+summary: Ссылка на репозиторий.
+instructions: Приложи ссылку PR или репозитория.
+submission_type: link
+definition_of_done:
+  - Ссылка рабочая.
+review_mode: deterministic
+hints: []

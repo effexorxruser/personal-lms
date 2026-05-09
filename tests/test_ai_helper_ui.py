@@ -1,19 +1,30 @@
 import os
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, delete
 
 os.environ["PERSONAL_LMS_DATABASE_URL"] = "sqlite:///./instance/test_ai_helper_ui.db"
 os.environ["PERSONAL_LMS_SESSION_SECRET_KEY"] = "test-session-secret"
+os.environ.setdefault("PERSONAL_LMS_ACTIVE_COURSE_SLUG", "test-python-course")
 
 from app.config import get_settings
 from app.db import get_engine, init_db
 from app.main import create_app
 from app.models import AIHelperMessage, User
 from app.security import hash_password
+from tests.content_runtime_utils import use_fixture_content_pack
+from tests.fixture_metadata import ACTIVE_COURSE_SLUG
 
 DB_PATH = Path("instance/test_ai_helper_ui.db")
+
+
+@pytest.fixture(autouse=True)
+def _use_fixture_content_pack(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("PERSONAL_LMS_ACTIVE_COURSE_SLUG", ACTIVE_COURSE_SLUG)
+    get_settings.cache_clear()
+    use_fixture_content_pack(monkeypatch)
 
 
 def _prepare_db() -> None:

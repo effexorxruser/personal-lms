@@ -1,0 +1,13 @@
+schema_version: 1
+slug: test-draft-module-course
+title: Draft Hidden From Catalog
+description: Draft курс для сценариев foundation без показа в learner catalog.
+version: "0.1.0"
+status: draft
+level: beginner
+duration_weeks: 12
+tags: []
+outcomes: []
+prerequisites: []
+modules:
+  - foundation-module

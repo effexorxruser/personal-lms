@@ -2,6 +2,8 @@
 
 Стабильный file-based контракт для переносимого учебного пакета в `personal-lms`. Runtime не привязан к конкретному курсу: новый курс — это дерево файлов под `content/courses/<course-slug>/`, прошедшее `python scripts/validate_content.py`. Допустим пустой набор курсов и пустые глобальные `content/tasks` / `content/checkpoints`: при отсутствии ошибок в графе валидатор завершается успешно.
 
+Операционный слой экспорта, preflight и ручного review переносимого пака (включая опциональный `pack.manifest.yml` у корня пака, который runtime не читает) описан в [`COURSE_PACK_OPERATIONS.md`](COURSE_PACK_OPERATIONS.md) и в чеклисте [`COURSE_PACK_REVIEW_GUIDE.md`](COURSE_PACK_REVIEW_GUIDE.md).
+
 ## Версия схемы
 
 - Поле `schema_version: 1` допускается во всех манифестах (см. ниже). Если поле отсутствует, считается `1`.

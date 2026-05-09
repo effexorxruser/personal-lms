@@ -1,0 +1,20 @@
+schema_version: 1
+slug: test-b0-workspace-checkpoint
+title: Workspace checkpoint
+summary: Проверка workspace.
+module_slug: test-b0-mod-ws
+description: Промежуточный артефакт workspace.
+project_description: Mini workspace
+requirements:
+  - Артефакт есть.
+deliverables:
+  - README.md
+evaluation_criteria:
+  - Понятные шаги.
+definition_of_done:
+  - Артефакт загружен.
+submission_type: repository_link
+portfolio_expectations:
+  - Можно показать ревьюеру.
+hints:
+  - Без лишнего.

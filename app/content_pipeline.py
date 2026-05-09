@@ -765,7 +765,14 @@ def _parse_markdown_lesson(
         _add_pydantic_errors(path, exc, state)
         return None
 
-    if path.stem != lesson_schema.key:
+    if path.name == "lesson.md":
+        folder_slug = path.parent.name
+        if folder_slug != lesson_schema.key:
+            state.add_error(
+                _path_label(path),
+                f"каталог урока ({folder_slug}) должен совпадать с front matter key ({lesson_schema.key})",
+            )
+    elif path.stem != lesson_schema.key:
         state.add_error(
             _path_label(path),
             f"имя файла ({path.stem}.md) должно совпадать с front matter key ({lesson_schema.key})",
@@ -865,12 +872,20 @@ def _read_source_registry(source_root: Path, state: _BuildState) -> dict[str, So
 
 def load_content_bundle(
     *,
-    content_root: Path = CONTENT_ROOT,
-    task_root: Path = TASK_ROOT,
-    checkpoint_root: Path = CHECKPOINT_ROOT,
-    source_root: Path = SOURCE_ROOT,
+    content_root: Path | None = None,
+    task_root: Path | None = None,
+    checkpoint_root: Path | None = None,
+    source_root: Path | None = None,
     raise_on_error: bool = True,
 ) -> ContentBundle:
+    resolved_content_root = CONTENT_ROOT if content_root is None else content_root
+    resolved_task_root = TASK_ROOT if task_root is None else task_root
+    resolved_checkpoint_root = CHECKPOINT_ROOT if checkpoint_root is None else checkpoint_root
+    resolved_source_root = SOURCE_ROOT if source_root is None else source_root
+    content_root = resolved_content_root
+    task_root = resolved_task_root
+    checkpoint_root = resolved_checkpoint_root
+    source_root = resolved_source_root
     state = _BuildState()
     source_registry = _read_source_registry(source_root, state)
     blueprint_path = BLUEPRINT_ROOT / "backend_developer_6_months.yml"

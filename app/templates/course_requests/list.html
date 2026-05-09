@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Мои заявки на курсы | personal-lms{% endblock %}
+
+{% block content %}
+<section class="workspace-shell">
+  <main class="workspace-pane workspace-pane--narrow">
+    <nav class="breadcrumbs" aria-label="Навигация">
+      <a href="/dashboard">Главная</a>
+      <span>/</span>
+      <span aria-current="page">Заявки</span>
+    </nav>
+
+    <article class="ui-card" aria-labelledby="cr-list-title">
+      <p class="eyebrow">Заявки</p>
+      <h1 id="cr-list-title">Мои заявки на курсы</h1>
+      <div class="dashboard-action-row">
+        <a class="btn btn--primary" href="/course-requests/new">Новый запрос</a>
+      </div>
+
+      {% if not course_requests_items %}
+      <div class="cr-placeholder" role="status">
+        <p>Пока нет сохранённых заявок.</p>
+      </div>
+      {% else %}
+      <div class="cr-table-scroll" role="region" aria-label="Таблица заявок">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Заголовок</th>
+              <th>Статус</th>
+              <th>Создана</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for req in course_requests_items %}
+            <tr>
+              <td><a class="inline-link" href="/course-requests/{{ req.id }}">{{ req.id }}</a></td>
+              <td>{{ req.title }}</td>
+              <td>{{ status_labels.get(req.status, req.status) }}</td>
+              <td>{{ req.created_at }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </article>
+  </main>
+</section>
+{% endblock %}

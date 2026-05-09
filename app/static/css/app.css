@@ -326,6 +326,8 @@ dl { margin-top: 0; }
   gap: var(--space-3);
   min-width: 0;
   justify-self: start;
+  flex-wrap: wrap;
+  row-gap: 8px;
 }
 
 .topbar__center {
@@ -427,8 +429,11 @@ html[data-theme="vanilla-light"] .brand__subtitle {
 
 .topbar__nav {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 2px;
+  justify-content: flex-start;
+  gap: 4px;
+  max-width: min(38rem, 100%);
   padding: 3px;
   border: 1px solid rgba(246, 251, 255, 0.22);
   border-radius: 999px;
@@ -577,6 +582,114 @@ html[data-theme="vanilla-light"] .topbar .btn--sm:hover {
 }
 
 .breadcrumbs a:hover { color: var(--accent-primary); }
+
+/* Одноколоночные страницы (каталог, заявки): ограничение ширины и вертикальный ритм */
+.workspace-pane--narrow {
+  max-width: min(54rem, 100%);
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: clamp(var(--space-2), 2.5vw, var(--space-4));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  align-items: stretch;
+}
+
+.ui-card--soft-empty {
+  text-align: center;
+  padding-block: clamp(var(--space-5), 8vh, var(--space-6));
+  padding-inline: var(--space-4);
+}
+
+.ui-card--soft-empty h2,
+.ui-card--soft-empty .rail-card__muted {
+  max-width: 32rem;
+  margin-inline: auto;
+}
+
+.dashboard-empty-sheet {
+  max-width: min(40rem, 100%);
+  margin-inline: auto;
+}
+
+.dashboard-empty-sheet__meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-soft);
+}
+
+.dashboard-empty-sheet__meta .meta-sep {
+  opacity: 0.45;
+  user-select: none;
+}
+
+.cr-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-4);
+  margin-block: var(--space-2) var(--space-4);
+}
+
+.cr-filter-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.cr-filter-group label {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.cr-filter-row select,
+.cr-filter-group select {
+  min-width: min(18rem, 100%);
+}
+
+.cr-placeholder {
+  margin-top: var(--space-3);
+  padding: clamp(var(--space-5), 7vh, var(--space-6)) var(--space-4);
+  text-align: center;
+  color: var(--text-muted);
+  border: 1px dashed rgba(246, 251, 255, 0.18);
+  border-radius: var(--radius-shell);
+  background: rgba(8, 12, 18, 0.35);
+}
+
+.cr-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: var(--space-2);
+}
+
+.cr-table-scroll table {
+  width: 100%;
+  min-width: 28rem;
+  border-collapse: collapse;
+}
+
+.cr-table-scroll th,
+.cr-table-scroll td {
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(246, 251, 255, 0.1);
+}
+
+.cr-table-scroll th {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
 
 .hero {
   position: relative;

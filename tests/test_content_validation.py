@@ -8,43 +8,6 @@ from app.content_pipeline import load_content_bundle, validate_content
 from tests.content_test_utils import create_valid_content_tree, write_yaml
 
 
-def test_current_content_snapshot_is_valid() -> None:
-    report = validate_content()
-    assert report.ok
-
-
-def test_active_course_includes_block0_and_block1_python_core_modules() -> None:
-    from app.content_registry import get_content_registry
-
-    get_content_registry.cache_clear()
-    registry = get_content_registry()
-    course = registry.courses["python-backend-ai-foundation"]
-    assert [m.slug for m in course.modules] == [
-        "block-0-onboarding-workspace",
-        "block-0-learning-loop",
-        "block-1-python-core",
-    ]
-
-
-def test_block0_cli_lesson_uses_blueprint_canonical_task_slug() -> None:
-    from app.content_registry import get_content_registry
-
-    get_content_registry.cache_clear()
-    registry = get_content_registry()
-    lesson = registry.lessons["block-0-python-cli-smoke"]
-    assert lesson.task_slug == "foundation-python-cli-smoke"
-
-
-def test_foundation_real_module_lives_in_draft_course() -> None:
-    from app.content_registry import get_content_registry
-
-    get_content_registry.cache_clear()
-    registry = get_content_registry()
-    draft = registry.courses["python-backend-ai-foundation-block1-draft"]
-    assert [m.slug for m in draft.modules] == ["foundation-real"]
-    assert registry.lessons["foundation-real-workspace"].course_slug == "python-backend-ai-foundation-block1-draft"
-
-
 def test_course_metadata_fields_are_backward_compatible(tmp_path: Path) -> None:
     tree = create_valid_content_tree(tmp_path)
 

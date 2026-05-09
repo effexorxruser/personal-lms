@@ -1,0 +1,14 @@
+schema_version: 1
+slug: test-python-course
+title: Catalog Test Course
+description: Изолированный доступный курс для pytest smoke.
+version: "1.0.0"
+status: available
+level: beginner
+duration_weeks: 8
+tags: []
+outcomes: []
+prerequisites: []
+modules:
+  - test-b0-mod-ws
+  - test-b0-mod-loop

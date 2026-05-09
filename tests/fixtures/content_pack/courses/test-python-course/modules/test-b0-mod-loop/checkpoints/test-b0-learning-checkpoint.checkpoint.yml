@@ -1,0 +1,17 @@
+schema_version: 1
+slug: test-b0-learning-checkpoint
+title: Learning checkpoint
+summary: Проверка learning loop.
+module_slug: test-b0-mod-loop
+description: Текстовый checkpoint.
+project_description: Короткий learning отчёт
+requirements: []
+deliverables:
+  - NOTES.md
+evaluation_criteria:
+  - Короткий отчёт.
+definition_of_done:
+  - Отчёт принят.
+submission_type: text
+portfolio_expectations: []
+hints: []

@@ -120,7 +120,7 @@ def test_terminal_api_forbidden_when_disabled(monkeypatch) -> None:
             follow_redirects=False,
         )
         response = client.post(
-            "/api/terminal/lessons/foundation-real-cli-python/run",
+            "/api/terminal/lessons/__feature_gate_only__/run",
             json={"command": "echo test"},
             follow_redirects=False,
         )

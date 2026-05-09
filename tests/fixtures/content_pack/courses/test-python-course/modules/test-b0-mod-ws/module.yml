@@ -1,0 +1,12 @@
+schema_version: 1
+slug: test-b0-mod-ws
+title: Блок 0 — onboarding
+description: Первые три урока блока 0.
+block: 0
+objectives:
+  - Пройти три урока.
+lessons:
+  - test-b0-workspace-baseline
+  - test-b0-python-cli-smoke
+  - test-b0-git-github-cycle
+checkpoint: test-b0-workspace-checkpoint

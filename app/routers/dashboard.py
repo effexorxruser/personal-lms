@@ -6,7 +6,8 @@ from app.content_loader import ContentIndex, CourseContent
 from app.content_registry import get_content_registry
 from app.services.catalog_service import CourseCard, list_learner_visible_course_cards
 from app.db import get_engine
-from app.services.content_service import get_active_course_first_lesson_key
+from app.config import get_settings
+from app.services.content_service import first_lesson_key_for_course
 from app.services.execution_service import dashboard_execution_summary
 from app.services.progress_service import ensure_progress_initialized
 from app.services.recap_service import build_weekly_recap
@@ -18,7 +19,7 @@ router = APIRouter()
 
 
 def _select_dashboard_course(registry: ContentIndex, course_cards: list[CourseCard]) -> CourseContent | None:
-    preferred_course = registry.courses.get("python-backend-ai-foundation")
+    preferred_course = registry.courses.get(get_settings().active_course_slug)
     if preferred_course and preferred_course.status == "available":
         return preferred_course
     if not course_cards:
@@ -90,8 +91,8 @@ def dashboard(request: Request):
         weekly_recap = build_weekly_recap(session, int(user_id), course.slug, snapshot)
 
     next_lesson_key = snapshot.next_lesson_key
-    first_lesson_key = get_active_course_first_lesson_key()
-    course_href = f"/courses/{course.slug}" if course else "/courses/python-backend-ai-foundation"
+    first_lesson_key = first_lesson_key_for_course(course.slug)
+    course_href = f"/courses/{course.slug}" if course else "/courses"
     lesson_href = (
         f"/lessons/{next_lesson_key}"
         if next_lesson_key
@@ -225,7 +226,7 @@ def recap(request: Request):
     with Session(get_engine()) as session:
         weekly_recap = build_weekly_recap(session, int(user_id), course.slug, snapshot)
 
-    first_lesson_key = get_active_course_first_lesson_key()
+    first_lesson_key = first_lesson_key_for_course(course.slug)
     lesson_href = (
         f"/lessons/{snapshot.next_lesson_key}"
         if snapshot.next_lesson_key

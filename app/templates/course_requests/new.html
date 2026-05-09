@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Новый запрос на курс | personal-lms{% endblock %}
+
+{% block content %}
+<section class="workspace-shell">
+  <main class="workspace-pane workspace-pane--narrow">
+    <nav class="breadcrumbs" aria-label="Навигация">
+      <a href="/dashboard">Главная</a>
+      <span>/</span>
+      <a href="/course-requests">Заявки</a>
+      <span>/</span>
+      <span aria-current="page">Новая</span>
+    </nav>
+
+    <article class="ui-card" aria-labelledby="cr-new-title">
+      <p class="eyebrow">Заявка на новый курс</p>
+      <h1 id="cr-new-title">Запросить новый курс</h1>
+      <p class="rail-card__muted">
+        Вы описываете потребность; платформа сохранит заявку. Генерация материала и импорт в репозиторий выполняются вручную администратором (ChatGPT / Codex/Cursor вне LMS).
+      </p>
+
+      {% if error_message %}
+      <p class="auth-error" role="alert">{{ error_message }}</p>
+      {% endif %}
+
+      {% set f = form if form is defined else None %}
+
+      <form method="post" action="/course-requests" class="auth-form dashboard-form-stack">
+        <label for="title">Краткий заголовок курса</label>
+        <input id="title" name="title" type="text" required maxlength="200" value="{{ f.title if f else '' }}"
+          placeholder="Например: «Продакшен FastAPI без docker-compose»">
+
+        <label for="goal">Цель обучения</label>
+        <textarea id="goal" name="goal" rows="4" required maxlength="4000" placeholder="Что студент должен уметь после курса?">{{ f.goal if f else '' }}</textarea>
+
+        <label for="current_level">Текущий уровень аудитории</label>
+        <input id="current_level" name="current_level" type="text" required maxlength="500" value="{{ f.current_level if f else '' }}"
+          placeholder="Например: «уверенный Python, впервые с FastAPI»">
+
+        <label for="duration_weeks">Желаемая длительность (недель)</label>
+        <input id="duration_weeks" name="duration_weeks" type="number" min="1" max="520" required value="{{ f.duration_weeks if f else '' }}"
+          placeholder="8">
+
+        <label for="preferred_format">Желаемый формат</label>
+        <input id="preferred_format" name="preferred_format" type="text" maxlength="500" value="{{ f.preferred_format if f else '' }}"
+          placeholder="Видео+текст, только текст, микродемо каждую неделю и т.д.">
+
+        <label for="required_topics">Темы которые обязательно включить</label>
+        <p class="rail-card__muted field-hint">По одной теме на строку.</p>
+        <textarea id="required_topics" name="required_topics" rows="5" maxlength="8000">{{ f.required_topics if f else '' }}</textarea>
+
+        <label for="excluded_topics">Темы исключить или минимизировать</label>
+        <p class="rail-card__muted field-hint">По одной теме на строку.</p>
+        <textarea id="excluded_topics" name="excluded_topics" rows="4" maxlength="8000">{{ f.excluded_topics if f else '' }}</textarea>
+
+        <label for="expected_artifacts">Ожидаемые результаты / артефакты после прохождения</label>
+        <p class="rail-card__muted field-hint">Например: «репозиторий с CI», «openapi spec», по одному на строку.</p>
+        <textarea id="expected_artifacts" name="expected_artifacts" rows="5" maxlength="8000">{{ f.expected_artifacts if f else '' }}</textarea>
+
+        <div class="dashboard-action-row">
+          <button type="submit" class="btn btn--primary">Отправить заявку</button>
+          <a class="btn btn--ghost" href="/course-requests">Мои заявки</a>
+        </div>
+      </form>
+    </article>
+  </main>
+</section>
+{% endblock %}

@@ -1,0 +1,20 @@
+schema_version: 1
+slug: test-fnd-start-pack
+title: Foundation start pack
+summary: Стартовый пакет foundation.
+module_slug: foundation-module
+description: Артефакт с run scenario.
+project_description: Start pack repo
+requirements:
+  - README с запуском
+deliverables:
+  - README.md
+evaluation_criteria:
+  - Проверяемый запуск.
+definition_of_done:
+  - README описывает запуск и проверяемый сценарий.
+submission_type: repository_link
+portfolio_expectations:
+  - Портфолио.
+hints:
+  - Ссылка https.

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Админ: заявки на курсы | personal-lms{% endblock %}
+
+{% block content %}
+<section class="workspace-shell">
+  <main class="workspace-pane workspace-pane--narrow">
+    <nav class="breadcrumbs" aria-label="Навигация">
+      <a href="/dashboard">Главная</a>
+      <span>/</span>
+      <span aria-current="page">Админ · заявки</span>
+    </nav>
+
+    <article class="ui-card">
+      <h1>Все заявки на новые курсы</h1>
+      <p class="rail-card__muted">
+        Выбор статуса — только список. Для смены статуса перейдите в карточку заявки.
+      </p>
+
+      <form method="get" action="/admin/course-requests" class="cr-filter-row">
+        <div class="cr-filter-group">
+          <label for="f-status">Фильтр по статусу</label>
+          <select id="f-status" name="status" onchange="this.form.submit()">
+          <option value="">Все</option>
+          {% for s in status_enum %}
+          <option value="{{ s }}" {% if current_filter == s %}selected{% endif %}>{{ status_labels.get(s, s) }}</option>
+          {% endfor %}
+        </select>
+        </div>
+      </form>
+
+      {% if not admin_course_request_rows %}
+      <div class="cr-placeholder" role="status">
+        <p>Нет заявок для отображения.</p>
+      </div>
+      {% else %}
+      <div class="cr-table-scroll" role="region" aria-label="Таблица всех заявок">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Логин</th>
+            <th>Заголовок</th>
+            <th>Статус</th>
+            <th>Создана</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for req in admin_course_request_rows %}
+          <tr>
+            <td><a class="inline-link" href="/admin/course-requests/{{ req.id }}">{{ req.id }}</a></td>
+            <td>{{ username_by_user_id.get(req.user_id, req.user_id) }}</td>
+            <td>{{ req.title }}</td>
+            <td>{{ status_labels.get(req.status, req.status) }}</td>
+            <td>{{ req.created_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% endif %}
+    </article>
+  </main>
+</section>
+{% endblock %}

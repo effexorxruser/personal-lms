@@ -82,6 +82,11 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("ENABLE_PUBLIC_MODE", "PERSONAL_LMS_ENABLE_PUBLIC_MODE"),
     )
 
+    active_course_slug: str = Field(
+        default="python-backend-ai-foundation",
+        description="Preferred course slug для dashboard/recap и активного learning path.",
+    )
+
     openai_api_key: str = ""
     ai_helper_model: str = "gpt-4o-mini"
     ai_helper_timeout_seconds: int = 12

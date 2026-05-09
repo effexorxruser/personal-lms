@@ -1,0 +1,11 @@
+schema_version: 1
+slug: test-b0-mod-loop
+title: Блок 0 — учебный цикл
+description: Уроки журнала и loop.
+block: 0
+objectives:
+  - Зафиксировать ритм учёбы.
+lessons:
+  - test-b0-learning-loop-setup
+  - test-b0-study-log-baseline
+checkpoint: test-b0-learning-checkpoint

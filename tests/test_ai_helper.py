@@ -1,20 +1,31 @@
 import os
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, delete, select
 
 os.environ["PERSONAL_LMS_DATABASE_URL"] = "sqlite:///./instance/test_ai_helper.db"
 os.environ["PERSONAL_LMS_SESSION_SECRET_KEY"] = "test-session-secret"
 os.environ["PERSONAL_LMS_OPENAI_API_KEY"] = ""
+os.environ.setdefault("PERSONAL_LMS_ACTIVE_COURSE_SLUG", "test-python-course")
 
 from app.config import get_settings
 from app.db import get_engine, init_db
 from app.main import create_app
 from app.models import AIHelperMessage, User
 from app.security import hash_password
+from tests.content_runtime_utils import use_fixture_content_pack
+from tests.fixture_metadata import ACTIVE_COURSE_SLUG
 
 DB_PATH = Path("instance/test_ai_helper.db")
+
+
+@pytest.fixture(autouse=True)
+def _use_fixture_content_pack(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("PERSONAL_LMS_ACTIVE_COURSE_SLUG", ACTIVE_COURSE_SLUG)
+    get_settings.cache_clear()
+    use_fixture_content_pack(monkeypatch)
 
 
 def _prepare_db() -> None:
@@ -51,7 +62,7 @@ def test_helper_chat_history_is_scoped_by_context() -> None:
         lesson_response = client.post(
             "/api/ai-helper/chat",
             json={
-                "path": "/lessons/foundation-real-cli-python",
+                "path": "/lessons/test-fnd-cli-python",
                 "message": "Подскажи, что делать дальше",
                 "socratic_mode": False,
             },
@@ -61,7 +72,7 @@ def test_helper_chat_history_is_scoped_by_context() -> None:
         course_response = client.post(
             "/api/ai-helper/chat",
             json={
-                "path": "/courses/python-backend-ai-foundation",
+                "path": "/courses/test-python-course",
                 "message": "Какой следующий модуль?",
                 "socratic_mode": False,
             },
@@ -70,11 +81,11 @@ def test_helper_chat_history_is_scoped_by_context() -> None:
 
         lesson_history = client.post(
             "/api/ai-helper/history",
-            json={"path": "/lessons/foundation-real-cli-python"},
+            json={"path": "/lessons/test-fnd-cli-python"},
         )
         course_history = client.post(
             "/api/ai-helper/history",
-            json={"path": "/courses/python-backend-ai-foundation"},
+            json={"path": "/courses/test-python-course"},
         )
 
     assert lesson_history.status_code == 200
@@ -96,7 +107,7 @@ def test_helper_clear_removes_only_current_context_history() -> None:
         client.post(
             "/api/ai-helper/chat",
             json={
-                "path": "/lessons/foundation-real-cli-python",
+                "path": "/lessons/test-fnd-cli-python",
                 "message": "Я застрял",
                 "socratic_mode": True,
             },
@@ -105,7 +116,7 @@ def test_helper_clear_removes_only_current_context_history() -> None:
         assert clear_response.status_code == 200
 
         dashboard_history = client.post("/api/ai-helper/history", json={"path": "/dashboard"})
-        lesson_history = client.post("/api/ai-helper/history", json={"path": "/lessons/foundation-real-cli-python"})
+        lesson_history = client.post("/api/ai-helper/history", json={"path": "/lessons/test-fnd-cli-python"})
 
     assert dashboard_history.status_code == 200
     assert lesson_history.status_code == 200

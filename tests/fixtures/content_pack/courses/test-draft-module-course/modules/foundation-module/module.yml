@@ -1,0 +1,12 @@
+schema_version: 1
+slug: foundation-module
+title: Foundation real
+description: Модуль как в draft-курсе для checkpoint и execution state.
+block: 1
+objectives:
+  - Smoke foundation track.
+lessons:
+  - test-fnd-workspace
+  - test-fnd-cli-python
+  - test-fnd-git-loop
+checkpoint: test-fnd-start-pack

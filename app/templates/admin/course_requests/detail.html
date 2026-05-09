@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Админ: заявка #{{ course_request.id }} | personal-lms{% endblock %}
+
+{% block content %}
+<section class="workspace-shell">
+  <main class="workspace-pane workspace-pane--narrow">
+    <nav class="breadcrumbs" aria-label="Навигация">
+      <a href="/dashboard">Главная</a>
+      <span>/</span>
+      <a href="/admin/course-requests">Админ‑заявки</a>
+      <span>/</span>
+      <span aria-current="page">#{{ course_request.id }}</span>
+    </nav>
+
+    <article class="ui-card">
+      <p class="eyebrow">{{ requester_username }}</p>
+      <h1>{{ course_request.title }}</h1>
+      <p class="status-kicker">{{ status_labels.get(course_request.status, course_request.status) }}</p>
+
+      <h2>Сводка</h2>
+      <p>{{ course_request.goal }}</p>
+
+      <h2>Статус</h2>
+      <form method="post" action="/admin/course-requests/{{ course_request.id }}/status" class="auth-form-inline">
+        <select name="status" required>
+          {% for s in status_enum %}
+          <option value="{{ s }}" {% if course_request.status == s %}selected{% endif %}>{{ status_labels.get(s, s) }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn--primary btn--sm">Сохранить статус</button>
+      </form>
+
+      <h2>Комментарий пользователю</h2>
+      <form method="post" action="/admin/course-requests/{{ course_request.id }}/notes" class="dashboard-form-stack">
+        <textarea name="admin_notes" rows="4" maxlength="8000">{{ course_request.admin_notes }}</textarea>
+        <button type="submit" class="btn btn--ghost btn--sm">Сохранить комментарий</button>
+      </form>
+
+      <h2>Детали заявки</h2>
+      <dl class="task-meta">
+        <div><dt>Уровень</dt><dd>{{ course_request.current_level }}</dd></div>
+        <div><dt>Недели</dt><dd>{{ course_request.duration_weeks }}</dd></div>
+        <div><dt>Формат</dt><dd>{{ course_request.preferred_format }}</dd></div>
+      </dl>
+      <h3>Темы вкл.</h3>
+      <ul>{% for t in topics_required %}<li>{{ t }}</li>{% else %}<li class="rail-card__muted">—</li>{% endfor %}</ul>
+      <h3>Темы искл.</h3>
+      <ul>{% for t in topics_excluded %}<li>{{ t }}</li>{% else %}<li class="rail-card__muted">—</li>{% endfor %}</ul>
+      <h3>Артефакты</h3>
+      <ul>{% for t in artifacts %}<li>{{ t }}</li>{% else %}<li class="rail-card__muted">—</li>{% endfor %}</ul>
+    </article>
+
+    <article class="ui-card admin-prompt-block">
+      <h2>Промпт для ChatGPT / Deep Research</h2>
+      <p class="rail-card__muted">Текст ниже можно скопировать вручную в внешний чат. LMS не отправляет его в модель.</p>
+      <textarea id="prompt-chatgpt" readonly rows="16" style="width:100%;">{{ chatgpt_prompt }}</textarea>
+      <button type="button" class="btn btn--ghost btn--sm" onclick="copyTa('prompt-chatgpt')">Копировать промпт ChatGPT</button>
+    </article>
+
+    <article class="ui-card admin-prompt-block">
+      <h2>Промпт для Codex/Cursor</h2>
+      <p class="rail-card__muted">Для локального Codex или Cursor после того, как course pack уже подготовлен вне платформы.</p>
+      <textarea id="prompt-codex" readonly rows="14" style="width:100%;">{{ codex_prompt }}</textarea>
+      <button type="button" class="btn btn--ghost btn--sm" onclick="copyTa('prompt-codex')">Копировать промпт Codex/Cursor</button>
+    </article>
+
+<script>
+async function copyTa(id){
+  var el=document.getElementById(id);
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){ await navigator.clipboard.writeText(el.value); }
+    else{ el.focus(); el.select(); document.execCommand('copy'); }
+  }catch(e){ el.focus(); el.select(); document.execCommand('copy'); }
+}
+</script>
+  </main>
+</section>
+{% endblock %}

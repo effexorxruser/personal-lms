@@ -6,6 +6,7 @@ import sys
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+FIXTURE_SOURCES = REPO_ROOT / "tests" / "fixtures" / "content_pack" / "sources"
 
 
 def _run(command: list[str]) -> subprocess.CompletedProcess[str]:
@@ -127,6 +128,8 @@ def test_scaffold_scripts_create_valid_skeleton(tmp_path: Path) -> None:
             str(task_root),
             "--checkpoint-root",
             str(checkpoint_root),
+            "--source-root",
+            str(FIXTURE_SOURCES),
         ]
     )
 
@@ -170,6 +173,8 @@ def test_scaffold_course_embed_pack_passes_validation(tmp_path: Path) -> None:
             str(task_root),
             "--checkpoint-root",
             str(checkpoint_root),
+            "--source-root",
+            str(FIXTURE_SOURCES),
         ]
     )
 

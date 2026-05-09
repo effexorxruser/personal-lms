@@ -1,8 +1,11 @@
 from fastapi import HTTPException
 
+from app.config import get_settings
 from app.content_registry import get_content_registry, get_next_lesson_key, get_prev_lesson_key
 
-ACTIVE_COURSE_SLUG = "python-backend-ai-foundation"
+
+def get_active_course_slug() -> str:
+    return get_settings().active_course_slug
 
 
 def get_course_or_404(course_slug: str):
@@ -13,17 +16,21 @@ def get_course_or_404(course_slug: str):
 
 
 def get_active_course_or_404():
-    return get_course_or_404(ACTIVE_COURSE_SLUG)
+    return get_course_or_404(get_active_course_slug())
 
 
-def get_active_course_first_lesson_key() -> str | None:
-    course = get_content_registry().courses.get(ACTIVE_COURSE_SLUG)
+def first_lesson_key_for_course(course_slug: str) -> str | None:
+    course = get_content_registry().courses.get(course_slug)
     if not course:
         return None
     for module in course.modules:
         if module.lessons:
             return module.lessons[0].key
     return None
+
+
+def get_active_course_first_lesson_key() -> str | None:
+    return first_lesson_key_for_course(get_active_course_slug())
 
 
 def get_lesson_or_404(lesson_key: str):

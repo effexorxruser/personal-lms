@@ -5,7 +5,7 @@ from pathlib import Path
 
 import markdown
 
-from app.content_pipeline import CONTENT_ROOT, CHECKPOINT_ROOT, TASK_ROOT, load_content_bundle
+from app.content_pipeline import load_content_bundle
 
 
 @dataclass
@@ -118,14 +118,15 @@ def _to_terminal_config(raw_terminal) -> TerminalConfig | None:
 
 def load_content_index(
     *,
-    content_root: Path = CONTENT_ROOT,
-    task_root: Path = TASK_ROOT,
-    checkpoint_root: Path = CHECKPOINT_ROOT,
+    content_root: Path | None = None,
+    task_root: Path | None = None,
+    checkpoint_root: Path | None = None,
 ) -> ContentIndex:
     bundle = load_content_bundle(
         content_root=content_root,
         task_root=task_root,
         checkpoint_root=checkpoint_root,
+        source_root=None,
         raise_on_error=True,
     )
 

@@ -1,0 +1,26 @@
+schema_version: 1
+slug: test-fnd-task-cli-smoke
+title: Собрать и прогнать hello CLI script
+summary: Hello argparse CLI.
+instructions: Собери скрипт с argparse и приложи вывод.
+submission_type: command_output
+definition_of_done:
+  - Виден вывод интерпретатора и аргументы CLI.
+review_mode: deterministic
+hints:
+  - Проверь --help.
+terminal:
+  enabled: true
+  allow_manual_input: true
+  presets:
+    - label: Проверить Python
+      command: python --version
+    - label: Show task
+      command: show task
+  allowed_commands:
+    - help
+    - pwd
+    - tree
+    - python
+    - pytest
+    - show

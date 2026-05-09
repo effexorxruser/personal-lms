@@ -14,12 +14,17 @@
   <div class="workspace-grid dashboard-resume-layout">
     <main class="workspace-pane dashboard-main dashboard-main--resume">
       {% if not dashboard_has_course %}
-      <section class="ui-card mobile-dashboard" aria-label="Пустой каталог курсов">
+      <section class="ui-card mobile-dashboard dashboard-empty-sheet" aria-label="Пустой каталог курсов">
         <p class="status-kicker">Каталог курсов</p>
         <h1>Курсы пока не добавлены.</h1>
         <p class="rail-card__muted">Доступные курсы появятся здесь после добавления file-based course.yml со статусом available.</p>
         <div class="dashboard-action-row">
           <a class="btn btn--primary" href="/courses">Открыть каталог</a>
+        </div>
+        <div class="dashboard-empty-sheet__meta" aria-label="Заявки на курсы">
+          <a class="inline-link" href="/course-requests/new">Запросить новый курс</a>
+          <span class="meta-sep" aria-hidden="true">·</span>
+          <a class="inline-link" href="/course-requests">Мои заявки</a>
         </div>
       </section>
       {% elif mobile_view %}
@@ -65,6 +70,11 @@
           <a class="btn btn--primary" href="{{ continue_href }}?mobile=1">Текущий урок</a>
           <a class="btn btn--ghost" href="/courses?mobile=1">Каталог</a>
           <a class="btn btn--ghost" href="{{ nav_course_href }}?mobile=1">Курс</a>
+        </div>
+        <div class="dashboard-empty-sheet__meta">
+          <a class="inline-link" href="/course-requests/new">Запросить новый курс</a>
+          <span class="meta-sep" aria-hidden="true">·</span>
+          <a class="inline-link" href="/course-requests">Мои заявки</a>
         </div>
       </section>
       {% else %}
@@ -114,6 +124,11 @@
             <a class="btn btn--primary" href="{{ continue_href }}">Продолжить обучение</a>
             <a class="btn btn--ghost" href="/courses">Каталог курсов</a>
             <a class="btn btn--ghost" href="{{ nav_course_href }}">Карта курса</a>
+          </div>
+          <div class="dashboard-empty-sheet__meta">
+            <a class="inline-link" href="/course-requests/new">Запросить новый курс</a>
+            <span class="meta-sep" aria-hidden="true">·</span>
+            <a class="inline-link" href="/course-requests">Мои заявки</a>
           </div>
           {% if execution_summary.href %}
           <a class="card-link" href="{{ execution_summary.href }}">Открыть задачу</a>

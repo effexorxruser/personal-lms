@@ -17,6 +17,9 @@ venv/
 .codex
 .cursor/
 
+# Course pack export artifacts
+exports/
+
 # Runtime data
 instance/*
 !instance/.gitkeep

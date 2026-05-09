@@ -65,7 +65,7 @@ def resolve_helper_context(path: str) -> HelperContext:
 
     if normalized == "/dashboard":
         registry = get_content_registry()
-        active_course = registry.courses.get("python-backend-ai-foundation")
+        active_course = registry.courses.get(get_settings().active_course_slug)
         title = active_course.title if active_course else "Текущий курс"
         return HelperContext(
             key="page:dashboard",

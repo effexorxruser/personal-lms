@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Заявка #{{ course_request.id }} | personal-lms{% endblock %}
+
+{% block content %}
+<section class="workspace-shell">
+  <main class="workspace-pane workspace-pane--narrow">
+    <nav class="breadcrumbs" aria-label="Навигация">
+      <a href="/dashboard">Главная</a>
+      <span>/</span>
+      <a href="/course-requests">Заявки</a>
+      <span>/</span>
+      <span aria-current="page">#{{ course_request.id }}</span>
+    </nav>
+
+    <article class="ui-card" aria-labelledby="cr-detail-title">
+      <p class="eyebrow">Заявка</p>
+      <h1 id="cr-detail-title">{{ course_request.title }}</h1>
+
+      <p class="status-kicker">
+        Статус: {{ status_labels.get(course_request.status, course_request.status) }}
+        <span class="rail-card__muted">· обновлено {{ course_request.updated_at }}</span>
+      </p>
+
+      <h2 class="lesson-nav-title">Цель</h2>
+      <p>{{ course_request.goal }}</p>
+
+      <dl class="task-meta">
+        <div><dt>Входной уровень</dt><dd>{{ course_request.current_level }}</dd></div>
+        <div><dt>Длительность</dt><dd>{{ course_request.duration_weeks }} нед.</dd></div>
+        <div><dt>Формат</dt><dd>{{ course_request.preferred_format }}</dd></div>
+      </dl>
+
+      <h3>Обязательные темы</h3>
+      <ul>{% for t in topics_required %}<li>{{ t }}</li>{% else %}<li class="rail-card__muted">(не указано)</li>{% endfor %}</ul>
+
+      <h3>Исключить темы</h3>
+      <ul>{% for t in topics_excluded %}<li>{{ t }}</li>{% else %}<li class="rail-card__muted">(не указано)</li>{% endfor %}</ul>
+
+      <h3>Ожидаемые артефакты</h3>
+      <ul>{% for t in artifacts %}<li>{{ t }}</li>{% else %}<li class="rail-card__muted">(не указано)</li>{% endfor %}</ul>
+
+      {% if course_request.admin_notes %}
+      <section class="ui-card nested-card">
+        <h3>Комментарий администратора</h3>
+        <p>{{ course_request.admin_notes }}</p>
+      </section>
+      {% endif %}
+
+      <div class="dashboard-action-row">
+        <a class="btn btn--ghost" href="/course-requests">К списку</a>
+        <a class="btn btn--ghost" href="/course-requests/new">Новая заявка</a>
+      </div>
+    </article>
+  </main>
+</section>
+{% endblock %}
