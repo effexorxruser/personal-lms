@@ -30,9 +30,13 @@ var/source_cache/
 .idea/
 .vscode/
 *.egg-info/
-# Node / Storybook
+# Node / Storybook / Next.js
 node_modules/
 storybook-static/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
 
 #markdown
 AGENTS.md

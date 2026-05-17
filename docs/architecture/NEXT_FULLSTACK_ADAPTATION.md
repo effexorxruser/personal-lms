@@ -300,14 +300,14 @@ Untrusted code **не** запускается внутри Next.js process.
 
 ---
 
-## Pending product decisions (не Phase 0)
+## Guardrails (синхронизировано с target)
 
-Перед Phase 1 implementation нужно явно обновить:
+Обновлено для Phase 1:
 
-- [AGENTS.md](../../AGENTS.md) — стек и ограничения (сейчас запрещает Next.js);
-- [docs/product/PROJECT_GUARDRAILS.md](../product/PROJECT_GUARDRAILS.md) — multi-user и split stack.
+- [AGENTS.md](../../AGENTS.md) — target stack (Next.js 15 full-stack), legacy FastAPI, ограничения runner/AI/payments;
+- [docs/product/PROJECT_GUARDRAILS.md](../product/PROJECT_GUARDRAILS.md) — архитектурный pivot, enrollment вместо payments, runner/AI deny list.
 
-Phase 0 **не меняет** эти guardrails; только фиксирует целевую архитектуру.
+Phase 0 зафиксировал целевую архитектуру; guardrails приведены в соответствие перед cutover.
 
 ---
 

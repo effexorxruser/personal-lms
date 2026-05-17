@@ -59,7 +59,7 @@ flowchart LR
 
 ## Phase 1 — Foundation
 
-**Предусловие:** product decision — обновить AGENTS.md / guardrails.
+**Предусловие:** [AGENTS.md](../../AGENTS.md) и [PROJECT_GUARDRAILS.md](../product/PROJECT_GUARDRAILS.md) синхронизированы с target architecture (выполнено).
 
 **Задачи:**
 
@@ -245,5 +245,4 @@ flowchart LR
 ## Next step после Phase 0
 
 1. Approve architecture docs.
-2. Task: update AGENTS.md + PROJECT_GUARDRAILS.
-3. Start Phase 1: legacy move + Next scaffold.
+2. Start Phase 1: legacy move + Next scaffold.
