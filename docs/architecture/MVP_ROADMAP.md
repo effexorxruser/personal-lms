@@ -15,7 +15,8 @@ Master doc: [NEXT_FULLSTACK_ADAPTATION.md](NEXT_FULLSTACK_ADAPTATION.md).
 | 0 | Architecture | **текущая** — docs only |
 | 1 | Foundation | Next, Prisma, Auth, layouts |
 | 2 | Course Core | catalog, reader, enrollment, progress |
-| 3 | Admin Course Builder | CRUD, markdown, publish |
+| 2b | Knowledge Graph | learner read-only graph, React Flow |
+| 3 | Admin Course Builder | CRUD, markdown, publish, graph editor |
 | 4 | Access Control | users, access modes, audit |
 | 5 | AI Layer | external + log (+ api optional) |
 | 6 | Import / Export | JSON/ZIP |
@@ -25,7 +26,8 @@ Master doc: [NEXT_FULLSTACK_ADAPTATION.md](NEXT_FULLSTACK_ADAPTATION.md).
 flowchart LR
   P0[Phase0_Docs] --> P1[Phase1_Foundation]
   P1 --> P2[Phase2_CourseCore]
-  P2 --> P3[Phase3_Builder]
+  P2 --> P2b[Phase2b_Graph]
+  P2b --> P3[Phase3_Builder]
   P3 --> P4[Phase4_Access]
   P2 --> P5[Phase5_AI]
   P3 --> P6[Phase6_ImportExport]
@@ -47,6 +49,7 @@ flowchart LR
 - [x] [AI_LAYER.md](AI_LAYER.md)
 - [x] [DEPLOYMENT_MODEL.md](DEPLOYMENT_MODEL.md)
 - [x] [MVP_ROADMAP.md](MVP_ROADMAP.md)
+- [x] [COURSE_KNOWLEDGE_GRAPH.md](COURSE_KNOWLEDGE_GRAPH.md)
 - [x] Баннеры previous architecture
 
 **Acceptance:**
@@ -104,6 +107,31 @@ flowchart LR
 
 ---
 
+## Phase 2b — Knowledge Graph (learner)
+
+**Предусловие:** Phase 2 (курс, уроки, enrollment в БД).
+
+**Задачи:**
+
+1. Prisma: `Concept`, `ContentRelation`, enums `GraphNodeType`, `ContentRelationType`.
+2. `lib/graph/sync-structural.ts` — auto `contains` edges при publish.
+3. API: `GET /api/courses/[courseId]/graph`, `GET .../graph/local`.
+4. `@xyflow/react` — `components/graph/*`.
+5. `/courses/[courseId]/graph` — read-only canvas, фильтры по типу узла.
+6. Local graph widget на lesson page (depth 1/2/3).
+7. Клик по узлу → navigate (lesson/task/concept/resource).
+
+**Acceptance:**
+
+- Learner видит граф опубликованного курса; не может редактировать связи.
+- Structural `contains` отображаются; ручные `prerequisite`/`related_to` — если заданы в seed/demo.
+- Граф доступен с course detail; lesson reader остаётся основным путём.
+- Obsidian не в зависимостях.
+
+**Не в Phase 2b:** admin graph editor, markdown auto-link, Sigma.js.
+
+---
+
 ## Phase 3 — Admin Course Builder
 
 **Задачи:**
@@ -113,11 +141,13 @@ flowchart LR
 3. Markdown editor + preview.
 4. Publish/unpublish course и lesson.
 5. Checkpoint editor на module.
+6. `/admin/courses/[courseId]/graph` — create/delete relation, CRUD concept.
 
 **Acceptance:**
 
 - Author создаёт курс с нуля через UI;
-- Publish делает курс видимым в catalog (по accessMode).
+- Publish делает курс видимым в catalog (по accessMode);
+- Author добавляет `prerequisite` / `concept` через graph editor.
 
 ---
 
@@ -197,7 +227,7 @@ flowchart LR
 ### Включить
 
 - Auth (admin-seeded users), роли admin/author/learner
-- Course catalog, enrollment, lesson reader, mark complete
+- Course catalog, enrollment, lesson reader, mark complete, course graph (read-only)
 - Admin CRUD + markdown preview + publish
 - Access modes: private, platform_users, assigned_users
 - AI external mode (explain, hint, stuck, weekly recap)
@@ -213,6 +243,8 @@ flowchart LR
 - Kubernetes
 - Video DRM
 - Rich-text WYSIWYG editor
+- Sigma.js graph renderer (React Flow достаточно для MVP)
+- Obsidian integration
 - Code runner sandbox (кроме MVP-safe tasks)
 - Full `CourseVersion` snapshot history
 

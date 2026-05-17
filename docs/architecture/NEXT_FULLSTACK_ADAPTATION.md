@@ -12,6 +12,7 @@ Master-документ целевой full-stack архитектуры. Опи
 - [AI_LAYER.md](AI_LAYER.md)
 - [DEPLOYMENT_MODEL.md](DEPLOYMENT_MODEL.md)
 - [MVP_ROADMAP.md](MVP_ROADMAP.md)
+- [COURSE_KNOWLEDGE_GRAPH.md](COURSE_KNOWLEDGE_GRAPH.md)
 
 Предыдущая runtime-архитектура (FastAPI + file-based content): [docs/product/ARCHITECTURE_OVERVIEW.md](../product/ARCHITECTURE_OVERVIEW.md).
 
@@ -216,16 +217,17 @@ Landing page — вторична. Главные экраны:
 5. Lesson editor (Markdown)
 6. Progress
 7. Weekly review
+8. Course knowledge graph (дополнительная навигация, не замена reader)
 
-Admin: users, courses, access, import, uploads.
+Admin: users, courses, access, import, uploads, graph editor.
 
 Маршруты (target):
 
 | Группа | Пути |
 |--------|------|
 | Public/Auth | `/login` |
-| Learner | `/dashboard`, `/courses`, `/courses/[courseId]`, `/learn/[courseId]/[lessonId]`, `/weekly-review` |
-| Admin | `/admin`, `/admin/users`, `/admin/courses`, `/admin/courses/new`, `/admin/courses/[courseId]/edit`, `/admin/courses/[courseId]/modules`, `/admin/courses/[courseId]/lessons/[lessonId]`, `/admin/courses/[courseId]/access`, `/admin/import`, `/admin/uploads` |
+| Learner | `/dashboard`, `/courses`, `/courses/[courseId]`, `/courses/[courseId]/graph`, `/learn/[courseId]/[lessonId]`, `/weekly-review` |
+| Admin | `/admin`, `/admin/users`, `/admin/courses`, `/admin/courses/new`, `/admin/courses/[courseId]/edit`, `/admin/courses/[courseId]/modules`, `/admin/courses/[courseId]/lessons/[lessonId]`, `/admin/courses/[courseId]/graph`, `/admin/courses/[courseId]/access`, `/admin/import`, `/admin/uploads` |
 
 ---
 

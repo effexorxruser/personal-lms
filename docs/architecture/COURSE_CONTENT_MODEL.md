@@ -4,7 +4,7 @@
 
 Описывает, как хранится учебный контент в target-архитектуре: **Postgres — source of truth**, файлы — import/export. Включает экраны Course Builder и педагогический контракт урока.
 
-Связанные документы: [DATABASE_MODEL.md](DATABASE_MODEL.md), [NEXT_FULLSTACK_ADAPTATION.md](NEXT_FULLSTACK_ADAPTATION.md), [MVP_ROADMAP.md](MVP_ROADMAP.md).
+Связанные документы: [DATABASE_MODEL.md](DATABASE_MODEL.md), [NEXT_FULLSTACK_ADAPTATION.md](NEXT_FULLSTACK_ADAPTATION.md), [MVP_ROADMAP.md](MVP_ROADMAP.md), [COURSE_KNOWLEDGE_GRAPH.md](COURSE_KNOWLEDGE_GRAPH.md).
 
 Previous file-based contract (authoring guidelines): [docs/course_authoring/COURSE_PACK_CONTRACT.md](../course_authoring/COURSE_PACK_CONTRACT.md).
 
@@ -19,6 +19,7 @@ Previous file-based contract (authoring guidelines): [docs/course_authoring/COUR
 | Задачи, checkpoint | `Task`, `Checkpoint` |
 | Вложения | `Upload` + `Resource` |
 | Прогресс, submissions | Postgres (runtime) |
+| Concepts, связи между сущностями | `Concept`, `ContentRelation` |
 | Переносимый пакет | JSON / ZIP (export only) |
 
 Директория `content/` после cutover — **archive/reference**, не читается runtime.
@@ -78,6 +79,10 @@ Source registry: на MVP — таблица `Source` или JSON config в `lib
 ### Checkpoint
 
 Один `Checkpoint` на модуль — итоговый project с `CheckpointSubmission` + review.
+
+### Knowledge Graph (дополнение, не замена reader)
+
+Параллельно иерархии course → module → lesson существует **граф связей** (`Concept`, `ContentRelation`): prerequisites, related concepts, applies theory→task. Learner открывает `/courses/[courseId]/graph` для обзора; основной путь обучения — catalog и lesson reader. Детали: [COURSE_KNOWLEDGE_GRAPH.md](COURSE_KNOWLEDGE_GRAPH.md).
 
 ---
 
