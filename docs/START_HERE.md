@@ -28,7 +28,8 @@
 
 ## 5. Архитектура и runtime
 
-- [ARCHITECTURE_OVERVIEW.md](product/ARCHITECTURE_OVERVIEW.md)
+- **Целевая full-stack архитектура (Next.js 15):** [architecture/NEXT_FULLSTACK_ADAPTATION.md](architecture/NEXT_FULLSTACK_ADAPTATION.md)
+- **Текущая runtime (FastAPI, previous):** [ARCHITECTURE_OVERVIEW.md](product/ARCHITECTURE_OVERVIEW.md)
 
 ## 6. Ограничения
 

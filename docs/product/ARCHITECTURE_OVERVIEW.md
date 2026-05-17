@@ -1,5 +1,7 @@
 # Architecture Overview
 
+> **Previous runtime architecture.** Этот документ описывает текущую реализацию FastAPI + Jinja2 + SQLite + file-based content. Целевая full-stack архитектура (Next.js 15 + PostgreSQL + Prisma): [docs/architecture/NEXT_FULLSTACK_ADAPTATION.md](../architecture/NEXT_FULLSTACK_ADAPTATION.md).
+
 ## Назначение документа
 
 Документ фиксирует фактическую архитектуру MVP в текущем репозитории и объясняет, почему она выбрана для execution-first обучения.
