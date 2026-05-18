@@ -3,10 +3,18 @@ import { redirect } from "next/navigation";
 
 import { auth, type Session, type User } from "@/lib/auth";
 
+function isActiveUser(user: Session["user"]): boolean {
+  return user.isActive !== false;
+}
+
 export async function getSession(): Promise<Session | null> {
-  return auth.api.getSession({
+  const session = await auth.api.getSession({
     headers: await headers(),
   });
+  if (!session || !isActiveUser(session.user)) {
+    return null;
+  }
+  return session;
 }
 
 export async function requireSession(): Promise<Session> {

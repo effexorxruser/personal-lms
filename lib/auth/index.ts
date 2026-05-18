@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 
 import { prisma } from "@/lib/db/prisma";
 
@@ -39,6 +40,29 @@ export const auth = betterAuth({
   },
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL,
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/sign-in/email") {
+        return;
+      }
+
+      const email = ctx.body?.email;
+      if (typeof email !== "string") {
+        return;
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { email },
+        select: { isActive: true },
+      });
+
+      if (user && !user.isActive) {
+        throw new APIError("FORBIDDEN", {
+          message: "Аккаунт деактивирован. Обратитесь к администратору.",
+        });
+      }
+    }),
+  },
 });
 
 export type Session = typeof auth.$Infer.Session;
