@@ -25,6 +25,7 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
+where = ["legacy/fastapi-app"]
 include = ["app*"]
 exclude = ["content*", "instance*", "scripts*", "tests*"]
 
@@ -32,5 +33,5 @@ exclude = ["content*", "instance*", "scripts*", "tests*"]
 app = ["templates/*.html", "templates/**/*.html", "static/css/*.css", "static/js/*.js"]
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
+pythonpath = ["legacy/fastapi-app", "."]
 testpaths = ["tests"]

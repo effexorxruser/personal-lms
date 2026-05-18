@@ -7,7 +7,9 @@ import re
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 import yaml
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+from app.repo_paths import REPO_ROOT
+
+PROJECT_ROOT = REPO_ROOT
 CONTENT_ROOT = PROJECT_ROOT / "content" / "courses"
 TASK_ROOT = PROJECT_ROOT / "content" / "tasks"
 CHECKPOINT_ROOT = PROJECT_ROOT / "content" / "checkpoints"

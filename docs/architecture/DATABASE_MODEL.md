@@ -4,7 +4,7 @@
 
 Описывает целевую схему БД для Next.js full-stack версии `personal-lms`. Postgres — **source of truth** для структуры курсов, контента уроков и runtime state обучения.
 
-Связанные документы: [NEXT_FULLSTACK_ADAPTATION.md](NEXT_FULLSTACK_ADAPTATION.md), [COURSE_CONTENT_MODEL.md](COURSE_CONTENT_MODEL.md), [AUTH_AND_ROLES.md](AUTH_AND_ROLES.md).
+Связанные документы: [NEXT_FULLSTACK_ADAPTATION.md](NEXT_FULLSTACK_ADAPTATION.md), [COURSE_CONTENT_MODEL.md](COURSE_CONTENT_MODEL.md), [AUTH_AND_ROLES.md](AUTH_AND_ROLES.md), [COURSE_KNOWLEDGE_GRAPH.md](COURSE_KNOWLEDGE_GRAPH.md).
 
 ---
 
@@ -34,6 +34,8 @@ erDiagram
   Course ||--o{ Module : contains
   Course ||--o{ Enrollment : enrolls
   Course ||--o{ CourseAccess : grants
+  Course ||--o{ Concept : has
+  Course ||--o{ ContentRelation : scopes
 
   Module ||--o{ Lesson : contains
   Module ||--o| Checkpoint : closes
@@ -161,6 +163,35 @@ enum UploadKind {
 }
 ```
 
+### GraphNodeType
+
+```prisma
+enum GraphNodeType {
+  course
+  module
+  lesson
+  concept
+  task
+  project
+  resource
+}
+```
+
+### ContentRelationType
+
+```prisma
+enum ContentRelationType {
+  contains
+  prerequisite
+  related_to
+  continues
+  applies
+  unlocks
+  blocks
+  references
+}
+```
+
 ---
 
 ## Prisma schema draft
@@ -213,10 +244,12 @@ model Course {
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 
-  modules      Module[]
-  versions     CourseVersion[]
-  enrollments  Enrollment[]
-  courseAccess CourseAccess[]
+  modules           Module[]
+  versions          CourseVersion[]
+  enrollments       Enrollment[]
+  courseAccess      CourseAccess[]
+  concepts          Concept[]
+  contentRelations  ContentRelation[]
 
   @@index([status])
   @@index([accessMode])
@@ -495,6 +528,38 @@ model AuditLog {
   @@index([actorId, createdAt])
   @@index([entityType, entityId])
 }
+
+model Concept {
+  id          String   @id @default(cuid())
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title       String
+  description String?  @db.Text
+  slug        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([courseId, slug])
+  @@index([courseId])
+}
+
+model ContentRelation {
+  id           String               @id @default(cuid())
+  courseId     String
+  course       Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  sourceType   GraphNodeType
+  sourceId     String
+  targetType   GraphNodeType
+  targetId     String
+  relationType ContentRelationType
+  weight       Float                @default(1)
+  createdAt    DateTime             @default(now())
+
+  @@unique([courseId, sourceType, sourceId, targetType, targetId, relationType])
+  @@index([courseId])
+  @@index([courseId, sourceType, sourceId])
+  @@index([courseId, targetType, targetId])
+}
 ```
 
 Better-Auth создаёт дополнительные таблицы (`session`, `account`, …) — не дублировать вручную; интеграция через adapter Prisma.
@@ -519,6 +584,8 @@ Better-Auth создаёт дополнительные таблицы (`session
 | `@@unique([moduleId, slug])` на Lesson | slug уникален в модуле |
 | `Course.slug` @unique | URL-stable идентификатор |
 | `User.email` @unique | login |
+| `@@unique([courseId, slug])` на Concept | concept slug в курсе |
+| `@@unique([...])` на ContentRelation | нет дублирующих рёбер одного типа |
 
 ---
 
@@ -544,4 +611,4 @@ progressPct = round(completedPublishedLessons / totalPublishedLessons * 100)
 
 ## Связь с import/export
 
-Export сериализует дерево `Course → Module → Lesson → Task → Checkpoint` в JSON/ZIP. Import делает upsert по `slug` в рамках курса. Детали: [COURSE_CONTENT_MODEL.md](COURSE_CONTENT_MODEL.md).
+Export сериализует дерево `Course → Module → Lesson → Task → Checkpoint` в JSON/ZIP, плюс `concepts` и `relations` (Phase 6+). Import делает upsert по `slug` в рамках курса. Детали: [COURSE_CONTENT_MODEL.md](COURSE_CONTENT_MODEL.md), [COURSE_KNOWLEDGE_GRAPH.md](COURSE_KNOWLEDGE_GRAPH.md).

@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: personal-lms-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: personal_lms
+      POSTGRES_PASSWORD: personal_lms
+      POSTGRES_DB: personal_lms
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U personal_lms -d personal_lms"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.dev
+    container_name: personal-lms-migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - ../.env
+    environment:
+      DATABASE_URL: postgresql://personal_lms:personal_lms@postgres:5432/personal_lms
+    volumes:
+      - ..:/app
+      - /app/node_modules
+    command: sh -c "npx prisma migrate deploy && npm run db:seed"
+    restart: "no"
+
+  next-app:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.dev
+    container_name: personal-lms-next
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    env_file:
+      - ../.env
+    environment:
+      DATABASE_URL: postgresql://personal_lms:personal_lms@postgres:5432/personal_lms
+      BETTER_AUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_BETTER_AUTH_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ..:/app
+      - /app/node_modules
+      - /app/.next
+
+volumes:
+  postgres_data:

@@ -12,6 +12,7 @@ Master-документ целевой full-stack архитектуры. Опи
 - [AI_LAYER.md](AI_LAYER.md)
 - [DEPLOYMENT_MODEL.md](DEPLOYMENT_MODEL.md)
 - [MVP_ROADMAP.md](MVP_ROADMAP.md)
+- [COURSE_KNOWLEDGE_GRAPH.md](COURSE_KNOWLEDGE_GRAPH.md)
 
 Предыдущая runtime-архитектура (FastAPI + file-based content): [docs/product/ARCHITECTURE_OVERVIEW.md](../product/ARCHITECTURE_OVERVIEW.md).
 
@@ -216,16 +217,17 @@ Landing page — вторична. Главные экраны:
 5. Lesson editor (Markdown)
 6. Progress
 7. Weekly review
+8. Course knowledge graph (дополнительная навигация, не замена reader)
 
-Admin: users, courses, access, import, uploads.
+Admin: users, courses, access, import, uploads, graph editor.
 
 Маршруты (target):
 
 | Группа | Пути |
 |--------|------|
 | Public/Auth | `/login` |
-| Learner | `/dashboard`, `/courses`, `/courses/[courseId]`, `/learn/[courseId]/[lessonId]`, `/weekly-review` |
-| Admin | `/admin`, `/admin/users`, `/admin/courses`, `/admin/courses/new`, `/admin/courses/[courseId]/edit`, `/admin/courses/[courseId]/modules`, `/admin/courses/[courseId]/lessons/[lessonId]`, `/admin/courses/[courseId]/access`, `/admin/import`, `/admin/uploads` |
+| Learner | `/dashboard`, `/courses`, `/courses/[courseId]`, `/courses/[courseId]/graph`, `/learn/[courseId]/[lessonId]`, `/weekly-review` |
+| Admin | `/admin`, `/admin/users`, `/admin/courses`, `/admin/courses/new`, `/admin/courses/[courseId]/edit`, `/admin/courses/[courseId]/modules`, `/admin/courses/[courseId]/lessons/[lessonId]`, `/admin/courses/[courseId]/graph`, `/admin/courses/[courseId]/access`, `/admin/import`, `/admin/uploads` |
 
 ---
 
@@ -300,14 +302,14 @@ Untrusted code **не** запускается внутри Next.js process.
 
 ---
 
-## Pending product decisions (не Phase 0)
+## Guardrails (синхронизировано с target)
 
-Перед Phase 1 implementation нужно явно обновить:
+Обновлено для Phase 1:
 
-- [AGENTS.md](../../AGENTS.md) — стек и ограничения (сейчас запрещает Next.js);
-- [docs/product/PROJECT_GUARDRAILS.md](../product/PROJECT_GUARDRAILS.md) — multi-user и split stack.
+- [AGENTS.md](../../AGENTS.md) — target stack (Next.js 15 full-stack), legacy FastAPI, ограничения runner/AI/payments;
+- [docs/product/PROJECT_GUARDRAILS.md](../product/PROJECT_GUARDRAILS.md) — архитектурный pivot, enrollment вместо payments, runner/AI deny list.
 
-Phase 0 **не меняет** эти guardrails; только фиксирует целевую архитектуру.
+Phase 0 зафиксировал целевую архитектуру; guardrails приведены в соответствие перед cutover.
 
 ---
 

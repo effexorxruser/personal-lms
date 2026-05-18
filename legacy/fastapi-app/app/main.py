@@ -6,6 +6,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
+from app.repo_paths import REPO_ROOT
 from app.middleware import configure_middleware
 from app.runtime_warnings import emit_runtime_warnings
 from app.routers.admin_course_requests import router as admin_course_requests_router
@@ -40,7 +41,7 @@ def create_app() -> FastAPI:
     )
     application.mount(
         "/assets",
-        StaticFiles(directory=BASE_DIR.parent / "assets"),
+        StaticFiles(directory=REPO_ROOT / "assets"),
         name="assets",
     )
     configure_middleware(application)

@@ -12,8 +12,9 @@ from sqlmodel import Session, select
 from app.content_loader import LessonContent, TaskContent
 from app.models import TerminalRun
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-INSTANCE_ROOT = PROJECT_ROOT / "instance" / "terminal"
+from app.repo_paths import REPO_ROOT
+
+INSTANCE_ROOT = REPO_ROOT / "instance" / "terminal"
 MAX_OUTPUT_CHARS = 12_000
 DEFAULT_TIMEOUT_SECONDS = 5
 
