@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 
 import { authClient } from "@/lib/auth/client";
+import { sanitizePostLoginPath } from "@/lib/auth/safe-redirect";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -47,7 +48,7 @@ export function LoginForm() {
       return;
     }
 
-    const next = searchParams.get("next") ?? "/dashboard";
+    const next = sanitizePostLoginPath(searchParams.get("next"));
     router.push(next);
     router.refresh();
   }
